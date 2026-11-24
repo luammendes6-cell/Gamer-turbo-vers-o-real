@@ -1,0 +1,13 @@
+AUDITORIA ESTÁTICA — GAMER TURBO 2.3.2
+
+CORREÇÕES
+- Removida a exigência de igualdade literal entre a versão da ponte e a versão esperada pelo HTML. O HTML aceita a ponte nativa e verifica recursos individuais.
+- Atualização dos estados nativos isolada por recurso: a ausência de um método opcional não bloqueia os demais.
+- Adicionado diagnóstico nativo com versão, Android, fabricante, estado do Shizuku e permissões de sobreposição, escrita de configurações e Não Perturbe.
+- O indicador do topo abre o diagnóstico ao toque. Erros globais de JavaScript também atualizam o indicador.
+
+LIMITES
+- Esta é uma auditoria de código-fonte. Não foi possível compilar neste ambiente porque não há Android SDK, Gradle instalado nem gradle-wrapper.jar disponível.
+- Não houve teste em aparelho físico. O funcionamento de permissões, Shizuku, Game Mode, taxa de atualização e interfaces CPU/GPU ainda precisa ser confirmado no Redmi 13C.
+- Selecionar um modo apenas escolhe o perfil; a tentativa de aplicar o perfil acontece quando um jogo é aberto pela biblioteca.
+- CPU/GPU só podem ser modificadas quando o kernel oferece interfaces graváveis e o Shizuku tem autorização.

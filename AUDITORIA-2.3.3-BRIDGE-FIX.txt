@@ -1,0 +1,17 @@
+AUDITORIA 2.3.3 - WEBVIEW / BRIDGE
+
+CAUSA PRINCIPAL OBSERVADA:
+O HTML classificava a ponte como inexistente (bridge() retornava null) caso um conjunto rígido de quatro métodos marcadores não fosse encontrado. Isso fazia os guard clauses das funções JS dispararem mensagens como “exige APK Android”, mesmo quando a interface nativa podia estar presente mas parcialmente incompatível. O HTML não diferencia ponte ausente de função específica ausente.
+
+CORREÇÕES:
+1. bridge() agora considera a interface GamerTurboAndroid existente como conexão; as funções verificam capacidades individuais.
+2. RAM passa a retornar ramAvailableMB, lowMemory e ramDataSource além dos campos anteriores.
+3. ProGuard preserva explicitamente a classe interna GamerTurboBridge e seus métodos públicos JS.
+4. WebView: JS, DOM Storage e addJavascriptInterface estavam configurados; carregamento local file:///android_asset/index.html e interface GamerTurboAndroid coincidem.
+
+PONTOS QUE NÃO SÃO CAUSA CONFIRMADA:
+- Manifest tem Activity e serviços overlay / media projection declarados.
+- R8 só está habilitado em Release. Regras existentes preservam MainActivity, serviços, UserService, AIDL e métodos @JavascriptInterface; regra adicional para bridge interna foi incluída.
+- Guard clauses no HTML ainda corretamente impedem funções que dependem de APIs nativas quando a interface realmente não está disponível.
+
+LIMITAÇÃO: Não foi possível compilar/testar o APK neste ambiente. Validação runtime é necessária.

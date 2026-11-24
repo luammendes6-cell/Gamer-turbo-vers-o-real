@@ -1,0 +1,25 @@
+AUDITORIA ESTÁTICA — GAMER TURBO 2.3.1
+
+PONTES CONFIRMADAS NO CÓDIGO-FONTE
+- MainActivity cria WebView e registra GamerTurboBridge como “GamerTurboAndroid”.
+- HTML usa a ponte por bridge(), agora condicionada à versão exata 2.3.1.
+- Métodos HTML encontrados e declarados com @JavascriptInterface: canDrawOverlays, canWriteSettings,
+  cleanRam, getDeviceStats, getInstalledApps, getLastProfileReport, getMode, getScanDiagnostics,
+  getShizukuState, getSystemBrightness, hasNotificationPolicyAccess, inspectKernel, isGameDndEnabled,
+  isImmersiveModeEnabled, isOverlayEnabled, isScreenRecording, launchGame, openAppSettings,
+  openWifiSettings, requestInstalledAppsPermission, requestNotificationPolicyAccess,
+  requestOverlayPermission, requestScreenRecording, requestShizukuPermission, requestWriteSettings,
+  setGameDnd, setImmersiveMode, setOverlayEnabled, setSystemBrightness e stopScreenRecording.
+- setMode e vibrate também existem na ponte nativa.
+- Shizuku tem AIDL, UserService, bindUserService e execução /system/bin/sh.
+- MainActivity e AndroidManifest definem landscape.
+
+VALIDAÇÕES EXECUTADAS
+- Sintaxe JavaScript: aprovada pelo node --check.
+- XML do AndroidManifest: validação estrutural executada separadamente.
+- Consistência de nomes da ponte: sem métodos chamados pelo HTML ausentes no Java (fora APIs do próprio DOM).
+
+NÃO VALIDADO
+- Compilação Gradle/Android: não foi possível executar sem Android SDK e dependências baixáveis.
+- Execução em dispositivo físico: não realizada.
+- Compatibilidade com CPU/GPU, Game Mode, taxa de atualização, gravação e overlay varia conforme aparelho/ROM.

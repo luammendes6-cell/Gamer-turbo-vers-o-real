@@ -1,0 +1,22 @@
+AUDITORIA 2.3.4 — PERMISSÕES, RAM E DETECÇÃO DE JOGOS
+
+ALTERAÇÕES:
+1. O carregamento do painel e a atualização dos dados nativos foram coordenados pelo onPageFinished da WebView.
+2. A solicitação de permissões runtime ocorre após a página carregar; permissões específicas de recurso continuam
+   sendo solicitadas quando o usuário ativa cada recurso.
+3. getDeviceStats() agora retorna informações parciais mesmo quando um sensor falha e inclui ramAvailable/ramError.
+4. A interface atualiza RAM com valores validados e exibe estado de falha em vez de manter valores fictícios.
+5. getPermissionStatus() informa a visibilidade de pacotes e os acessos especiais disponíveis.
+6. A descoberta de apps adicionou a API LauncherApps e consulta de pacotes com MATCH_ALL, além das fontes anteriores.
+7. A heurística de jogos recebeu pacotes e termos adicionais; a inclusão manual continua disponível.
+8. O diagnóstico agora possui atalhos para ajustes do app, lista de apps e notificações.
+9. versionCode 12 / versionName 2.3.4 / bridge 2.3.4.
+
+NOTAS DE PLATAFORMA:
+- ActivityManager.MemoryInfo não exige autorização runtime para leitura de RAM.
+- QUERY_ALL_PACKAGES é uma permissão declarada no Manifest para ampliar visibilidade de pacotes; não é
+  normalmente exibida como caixa de permissão runtime.
+- Algumas ROMs podem impor um controle extra de fabricante. A permissão GET_INSTALLED_APPS só é requisitada
+  se estiver registrada no sistema.
+- O APK não foi compilado nem executado num dispositivo físico nesta sessão; portanto a correção foi submetida
+  à inspeção estática e às verificações automatizadas disponíveis, não a um teste de runtime no Redmi.

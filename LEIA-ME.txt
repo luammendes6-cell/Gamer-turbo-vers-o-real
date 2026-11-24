@@ -1,0 +1,18 @@
+GAMER TURBO ANDROID — VERSÃO 2.3.4
+
+Correção de permissões, estatísticas de RAM e detecção de jogos.
+
+O que mudou:
+- A leitura de RAM é feita pela API pública ActivityManager.MemoryInfo e não depende de permissão runtime.
+- O painel de diagnóstico agora mostra estatísticas reais e o estado dos acessos do Android.
+- A solicitação de permissões executáveis é feita após a WebView carregar.
+- A lista de apps tem fontes adicionais via LauncherApps e uma heurística ampliada para classificar jogos.
+- Apps não reconhecidos automaticamente continuam disponíveis para inclusão manual.
+
+Atenção:
+- QUERY_ALL_PACKAGES é declarado no Manifest; não é uma caixa de permissão runtime tradicional.
+- Sobreposição, brilho e Não Perturbe exigem acessos especiais concedidos nas configurações do Android.
+- CPU/GPU dependem do Shizuku, do kernel e das interfaces disponíveis; nada promete overclock.
+
+Abra a pasta GamerTurbo-Android no Android Studio/AndroidIDE e gere um APK debug.
+Este ZIP é código-fonte e não um APK pronto. A validação física deve ser feita no aparelho de destino.

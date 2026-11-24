@@ -1,0 +1,8 @@
+GAMER TURBO 2.3.5 — AJUSTE DO FLUXO
+
+- Removida tentativa de solicitar GET_INSTALLED_APPS como permissão runtime OEM não padronizada.
+- O fluxo inicial solicita diretamente POST_NOTIFICATIONS quando aplicável (Android 13+).
+- QUERY_ALL_PACKAGES permanece declarada no Manifest; é acesso declarativo, sem diálogo runtime comum.
+- A leitura de RAM usa ActivityManager.MemoryInfo e não depende de permissões runtime.
+- Detecção de jogos continua consultando Launcher, LauncherApps e pacotes visíveis conforme Manifest.
+- Não foi compilado nem testado em aparelho físico nesta sessão.

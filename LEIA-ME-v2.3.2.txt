@@ -1,0 +1,24 @@
+GAMER TURBO ANDROID — VERSÃO 2.3.2
+
+Este pacote contém projeto Android nativo + interface WebView local. A ponte JavaScript/Android está em
+MainActivity.GamerTurboBridge e é registrada em MainActivity por addJavascriptInterface.
+
+A versão 2.3.2 deixa a classe de ponte pública e adiciona um identificador de versão. A barra superior
+mostra se a ponte Android foi reconhecida. Se aparecer “PRÉVIA HTML • SEM PONTE ANDROID”, você abriu
+o arquivo HTML em um navegador ou está usando um APK antigo/incompatível.
+
+Funções com código Android nativo: detectar e abrir aplicativos, ler bateria/RAM/temperatura, controlar
+o brilho com autorização, Não Perturbe com autorização, HUD flutuante com permissão de sobreposição,
+tela imersiva, vibração, gravação MediaProjection e Shizuku UserService/AIDL para comandos de sistema.
+
+Os perfis Gamer/Extremo tentam aplicar Game Mode, taxa de atualização e governor em interfaces CPU/GPU
+que realmente estejam graváveis. Isso depende do aparelho, da ROM, do kernel e do próprio jogo. Não há
+overclock, alteração de tensão ou promessa de FPS. “ANALISAR RAM” lê a memória; não encerra processos.
+
+O ZIP é código-fonte, não APK. Consulte README.md e AUDITORIA-2.3.2.txt para detalhes e limitações.
+
+
+NOVO NA 2.3.2
+- A ponte não é mais desligada por uma diferença estrita entre versões do HTML e do APK.
+- Toque no indicador de conexão do topo para abrir o diagnóstico nativo e conferir permissões, Shizuku e leitura de apps.
+- A atualização de estados trata cada recurso separadamente para que uma função ausente não impeça as demais de atualizar.
