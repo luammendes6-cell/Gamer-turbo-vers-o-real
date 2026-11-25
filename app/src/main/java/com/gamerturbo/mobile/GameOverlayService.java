@@ -139,7 +139,7 @@ public class GameOverlayService extends Service {
         try { windowManager.addView(bubbleView,bubbleParams); } catch(Exception e) { bubbleView=null; stopSelf(); }
     }
 
-    private TextView metricCard(String label, TextView[] output) {
+    private LinearLayout metricCard(String label, TextView[] output) {
         LinearLayout card=column(); card.setPadding(dp(9),dp(8),dp(7),dp(7)); card.setBackground(background(0xFF191D25,0xFF2D333E,9));
         TextView l=text(label,7,0xFF9BA4B2,true); TextView value=text("--",14,Color.WHITE,true);
         card.addView(l); LinearLayout.LayoutParams v=new LinearLayout.LayoutParams(-1,-2); v.topMargin=dp(5); card.addView(value,v);
