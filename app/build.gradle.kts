@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.gamerturbo.mobile"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 35
         versionCode = 13
         versionName = "2.3.5"
