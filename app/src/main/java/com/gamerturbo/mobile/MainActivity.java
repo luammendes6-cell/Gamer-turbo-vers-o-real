@@ -677,6 +677,48 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public boolean killBackgroundProcesses() {
+            try {
+                ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+                if (am == null) return false;
+                int killed = 0;
+                java.util.List<ActivityManager.RunningAppProcessInfo> procs = am.getRunningAppProcesses();
+                if (procs != null) {
+                    for (ActivityManager.RunningAppProcessInfo p : procs) {
+                        if (p == null || p.pkgList == null || p.pkgList.length == 0) continue;
+                        String pkg = p.pkgList[0];
+                        if (pkg == null || pkg.equals(getPackageName())) continue;
+                        if (p.importance >= ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
+                            try { am.killBackgroundProcesses(pkg); killed++; } catch (Throwable ignored) { }
+                        }
+                    }
+                }
+                final int k = killed;
+                runOnUiThread(() -> Toast.makeText(MainActivity.this,
+                        "RAM liberada: " + k + " processo(s) de fundo encerrado(s).", Toast.LENGTH_LONG).show());
+                return true;
+            } catch (Throwable error) {
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String boostGame() {
+            if (!ShizukuShell.isAuthorized()) return "SHIZUKU_NEEDED";
+            String pkg = getSharedPreferences(PREFS, MODE_PRIVATE).getString("gt_profile_package", "");
+            if (!pkg.matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)+")) pkg = "";
+            final String target = pkg;
+            StringBuilder cmd = new StringBuilder();
+            if (!target.isEmpty()) {
+                cmd.append("renice -n -10 -p $(pidof ").append(target).append(") 2>/dev/null; ");
+            }
+            cmd.append("for p in $(cmd package list packages -e 2>/dev/null | sed 's/package://'); do [ \"$p\" = \"")
+                    .append(getPackageName()).append("\" ] && continue; am kill --user 0 \"$p\" 2>/dev/null; done");
+            ShizukuShell.Result r = ShizukuShell.execute(MainActivity.this, cmd.toString());
+            return r.success ? "OK" : r.output;
+        }
+
+        @JavascriptInterface
         public String getDeviceStats() {
             JSONObject result = new JSONObject();
             try {

@@ -123,9 +123,23 @@ public class GameOverlayService extends Service {
 
     private void showBubble() {
         if (windowManager == null || bubbleView != null || panelView != null) return;
-        TextView bubble = text("GT", 13, Color.WHITE, true); bubble.setGravity(Gravity.CENTER);
-        bubble.setBackground(background(0xFFE51E32, 0xFFFF828A, 13)); bubble.setElevation(dp(8));
-        bubble.setOnTouchListener(new View.OnTouchListener() {
+        LinearLayout handle = column();
+        handle.setGravity(Gravity.CENTER);
+        handle.setPadding(dp(3), dp(14), dp(3), dp(14));
+        handle.setBackground(background(0xF20D1016, 0xFFE51E32, 9));
+        handle.setElevation(dp(10));
+        for (int i = 0; i < 3; i++) {
+            View dot = new View(this);
+            dot.setBackground(background(0xFFE51E32, 0xFFE51E32, 3));
+            handle.addView(dot, new LinearLayout.LayoutParams(dp(4), dp(4)));
+            if (i < 2) { View sep = new View(this); handle.addView(sep, new LinearLayout.LayoutParams(1, dp(6))); }
+        }
+        TextView label = text("GT", 9, Color.WHITE, true);
+        label.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(-1, -2);
+        llp.topMargin = dp(9);
+        handle.addView(label, llp);
+        handle.setOnTouchListener(new View.OnTouchListener() {
             private int startX, startY; private float downX, downY; private long downAt;
             @Override public boolean onTouch(View view, MotionEvent event) {
                 switch (event.getAction()) {
@@ -135,7 +149,7 @@ public class GameOverlayService extends Service {
                 } return false;
             }
         });
-        bubbleView=bubble; bubbleParams=newParams(dp(46),dp(54)); bubbleParams.gravity=Gravity.RIGHT|Gravity.CENTER_VERTICAL; bubbleParams.x=dp(2); bubbleParams.y=0;
+        bubbleView=handle; bubbleParams=newParams(dp(34),dp(120)); bubbleParams.gravity=Gravity.RIGHT|Gravity.CENTER_VERTICAL; bubbleParams.x=0; bubbleParams.y=0;
         try { windowManager.addView(bubbleView,bubbleParams); } catch(Exception e) { bubbleView=null; stopSelf(); }
     }
 
@@ -169,7 +183,9 @@ public class GameOverlayService extends Service {
         gap(root,6);
         LinearLayout tools2=row(); addWeighted(tools2,action("CRONÔMETRO",this::showSessionTime),40); addWeighted(tools2,action("BRILHO",this::showBrightnessPanel),40); addWeighted(tools2,action("WI-FI",this::openWifiPanel),40); root.addView(tools2);
         gap(root,7);
-        LinearLayout tools3=row(); addWeighted(tools3,action("CENTRAL",this::openMain),40); addWeighted(tools3,action("FECHAR",this::collapsePanel),40); addWeighted(tools3,action("OCULTAR",this::collapsePanel),40); root.addView(tools3);
+        LinearLayout toolsRam=row(); addWeighted(toolsRam,action("LIMPAR RAM",this::cleanRamNow),40); addWeighted(toolsRam,action("BOOST",this::boostGameNow),40); addWeighted(toolsRam,action("CENTRAL",this::openMain),40); root.addView(toolsRam);
+        gap(root,7);
+        LinearLayout tools3=row(); addWeighted(tools3,action("FECHAR",this::collapsePanel),40); addWeighted(tools3,action("OCULTAR",this::collapsePanel),40); addWeighted(tools3,action("FOCO",this::toggleDnd),40); root.addView(tools3);
         gap(root,7);
         if ("performance".equals(selected)) {
             performanceClean=action("ANALISAR RAM",this::cleanCachedProcesses);
@@ -177,7 +193,11 @@ public class GameOverlayService extends Service {
             memoryHint=text("Leitura de memória sem encerrar processos do sistema.",8,0xFFAFBAC8,false);
             memoryHint.setPadding(dp(2),dp(6),dp(2),0); root.addView(memoryHint);
         }
-        shizukuState=null;
+        boolean shizukuReady = ShizukuShell.isAuthorized();
+        shizukuState = text(shizukuReady ? "SHIZUKU • CONECTADO" : "SHIZUKU • DESCONECTADO", 7,
+                shizukuReady ? 0xFF58D68D : 0xFFE51E32, true);
+        shizukuState.setPadding(dp(2), dp(10), dp(2), 0);
+        root.addView(shizukuState);
         ScrollView scroller = new ScrollView(this);
         scroller.setFillViewport(false);
         scroller.setVerticalScrollBarEnabled(false);
@@ -313,6 +333,47 @@ public class GameOverlayService extends Service {
         if (memoryHint != null) memoryHint.setText(message);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         updateMetrics();
+    }
+
+    private void cleanRamNow() {
+        ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        if (am == null) { Toast.makeText(this, "Não foi possível acessar a memória.", Toast.LENGTH_SHORT).show(); return; }
+        int killed = 0;
+        try {
+            java.util.List<ActivityManager.RunningAppProcessInfo> procs = am.getRunningAppProcesses();
+            if (procs != null) {
+                for (ActivityManager.RunningAppProcessInfo p : procs) {
+                    if (p == null || p.pkgList == null || p.pkgList.length == 0) continue;
+                    String pkg = p.pkgList[0];
+                    if (pkg == null || pkg.equals(getPackageName())) continue;
+                    if (p.importance >= ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
+                        try { am.killBackgroundProcesses(pkg); killed++; } catch (Throwable ignored) { }
+                    }
+                }
+            }
+        } catch (Throwable ignored) { }
+        updateMetrics();
+        Toast.makeText(this, "RAM liberada: " + killed + " processo(s) de fundo encerrado(s).", Toast.LENGTH_LONG).show();
+    }
+
+    private void boostGameNow() {
+        if (!ShizukuShell.isAuthorized()) { openMainForShizuku(); return; }
+        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        String pkg = prefs.getString("gt_profile_package", "");
+        if (!pkg.matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)+")) pkg = "";
+        final String target = pkg;
+        new Thread(() -> {
+            StringBuilder cmd = new StringBuilder();
+            if (!target.isEmpty()) {
+                cmd.append("renice -n -10 -p $(pidof ").append(target).append(") 2>/dev/null; ");
+            }
+            cmd.append("for p in $(cmd package list packages -e 2>/dev/null | sed 's/package://'); do [ \"$p\" = \"")
+                    .append(getPackageName()).append("\" ] && continue; am kill --user 0 \"$p\" 2>/dev/null; done");
+            ShizukuShell.Result r = ShizukuShell.execute(GameOverlayService.this, cmd.toString());
+            handler.post(() -> Toast.makeText(GameOverlayService.this,
+                    r.success ? "BOOST aplicado: jogo priorizado e processos de fundo encerrados." : "Falha no boost: " + r.output,
+                    Toast.LENGTH_LONG).show());
+        }, "GamerTurbo-Boost").start();
     }
 
     private void takeScreenshot() {
