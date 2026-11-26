@@ -22,29 +22,53 @@ public final class GameOptimizer {
 
     private GameOptimizer() { }
 
-    public static synchronized String apply(Context context, String packageName, String mode, float maxRefreshRate, boolean thermalSafeForGovernor) {
-        if (packageName == null || !packageName.matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)+")) {
+    private static final String PKG_REGEX = "[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)+";
+
+    /** Aceita os ids antigos (normal/balanced/performance) e devolve eco/balance/rise/diablo. */
+    public static String normalizeMode(String mode) {
+        if (mode == null) return "balance";
+        switch (mode) {
+            case "eco": case "balance": case "rise": case "diablo": return mode;
+            case "normal": return "balance";
+            case "balanced": return "rise";
+            case "performance": return "diablo";
+            default: return "";
+        }
+    }
+
+    public static String modeLabel(String mode) {
+        switch (normalizeMode(mode)) {
+            case "eco": return "ECO";
+            case "rise": return "RISE";
+            case "diablo": return "DIABLO";
+            default: return "BALANCE";
+        }
+    }
+
+    public static synchronized String apply(Context context, String packageName, String modeInput, float maxRefreshRate, boolean thermalSafeForGovernor) {
+        String mode = normalizeMode(modeInput);
+        if (mode.isEmpty()) return "Perfil desconhecido.";
+        String pkg = packageName == null ? "" : packageName;
+        boolean hasGame = pkg.matches(PKG_REGEX);
+        if (!pkg.isEmpty() && !hasGame) {
             return "Pacote de jogo inválido. Nenhuma alteração foi aplicada.";
         }
-        if (!("normal".equals(mode) || "balanced".equals(mode) || "performance".equals(mode))) {
-            return "Perfil desconhecido.";
-        }
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        if ("normal".equals(mode)) {
+        if ("balance".equals(mode)) {
             return restore(context);
         }
-        if (!ShizukuShell.isAuthorized()) return "Shizuku não autorizado. O jogo será aberto sem ajustes avançados.";
+        if (!ShizukuShell.isAuthorized()) {
+            return "O modo " + modeLabel(mode) + " precisa do Shizuku conectado e autorizado para alterar o sistema. Nada foi alterado.";
+        }
 
         String oldPackage = prefs.getString(PACKAGE, "");
         boolean wasActive = prefs.getBoolean(ACTIVE, false);
-        String oldMode = prefs.getString("gt_profile_mode", "");
-        if (wasActive && packageName.equals(oldPackage) && mode.equals(oldMode)
+        String oldMode = normalizeMode(prefs.getString("gt_profile_mode", ""));
+        if (wasActive && pkg.equals(oldPackage) && mode.equals(oldMode)
                 && prefs.getBoolean(SNAPSHOT, false)) {
-            // Idempotent: do not reapply an already-active profile or lose ownership of its custom override.
             return prefs.getString("gt_last_profile_report", "Este perfil já está aplicado nesta sessão.");
         }
-        if (wasActive && (!packageName.equals(oldPackage) || !mode.equals(oldMode))) {
-            // End the previous profile completely before taking a fresh snapshot.
+        if (wasActive && (!pkg.equals(oldPackage) || !mode.equals(oldMode))) {
             String restored = restore(context);
             if (prefs.getBoolean(SNAPSHOT, false)) {
                 return "O perfil anterior ainda não pôde ser totalmente restaurado. "
@@ -52,12 +76,13 @@ public final class GameOptimizer {
             }
         }
 
+        String governorTarget = "eco".equals(mode) ? "powersave" : "performance";
         boolean snapshotExists = prefs.getBoolean(SNAPSHOT, false);
         if (!snapshotExists) {
             Snapshot snapshot = readSnapshot(context);
             if (!snapshot.valid) return "Não foi possível ler e guardar as configurações originais. O perfil não será aplicado para evitar deixar alterações sem restauração.";
-            String governors = readWritableGovernorSnapshot(context);
-            GameModeSnapshot gameSnapshot = readGameModeSnapshot(context, packageName);
+            String governors = readWritableGovernorSnapshot(context, governorTarget);
+            GameModeSnapshot gameSnapshot = hasGame ? readGameModeSnapshot(context, pkg) : new GameModeSnapshot("", false, true);
             boolean snapshotSaved = prefs.edit()
                     .putString(PREV_LOW_POWER, snapshot.lowPower)
                     .putString(PREV_PEAK, snapshot.peak)
@@ -67,7 +92,7 @@ public final class GameOptimizer {
                     .putBoolean(GAME_MODE_CAPTURED, gameSnapshot.valid)
                     .putBoolean(GAME_MODE_CHANGED, false)
                     .putBoolean(GAME_CUSTOM_OVERRIDE, false)
-                    .putString(PACKAGE, packageName)
+                    .putString(PACKAGE, pkg)
                     .putBoolean(ACTIVE, true)
                     .putString("gt_profile_mode", mode)
                     .putBoolean(SNAPSHOT, true)
@@ -80,93 +105,118 @@ public final class GameOptimizer {
         float hz = normalizeRefreshRate(maxRefreshRate);
         int fps = chooseFps(hz);
         StringBuilder report = new StringBuilder();
-        report.append("PERFIL ").append("balanced".equals(mode) ? "GAMER" : "PERFORMANCE EXTREMO").append('\n');
+        report.append("MODO ").append(modeLabel(mode)).append(hasGame ? "" : "  (sem jogo ativo: só ajustes do sistema)").append('\n');
 
-        boolean gameModeApplied = false;
+        // ---------- Game Mode do Android (por jogo) ----------
         boolean gameModeMayHaveChanged = false;
         boolean customOverrideApplied = false;
-        boolean gameModeCaptured = prefs.getBoolean(GAME_MODE_CAPTURED, false);
-        String previousGameMode = prefs.getString(PREV_GAME_MODE, "");
-        if (gameModeCaptured && !"unsupported".equals(previousGameMode)) {
-            ShizukuShell.Result help = ShizukuShell.execute(context, "cmd game help 2>&1");
-            boolean supportsSet = help.output != null
-                    && help.output.toLowerCase(Locale.ROOT).contains("--downscale");
-            if ("performance".equals(mode) && supportsSet) {
-                GameModeSnapshot existing = readGameModeSnapshot(context, packageName);
-                if (existing.valid && !existing.hasExistingConfig) {
-                    // Record the cleanup obligation before asking Android to persist a custom override.
-                    gameModeMayHaveChanged = true;
-                    prefs.edit().putBoolean(GAME_MODE_CHANGED, true)
-                            .putBoolean(GAME_CUSTOM_OVERRIDE, true).commit();
-                    ShizukuShell.Result custom = ShizukuShell.execute(context,
-                            "cmd game set --downscale 0.9 --fps " + fps + " " + packageName);
-                    if (custom.success) {
-                        customOverrideApplied = true;
-                        ShizukuShell.Result selected = setGameModeAndVerify(context, "custom", packageName);
-                        if (selected.success) {
-                            gameModeApplied = true;
-                            report.append("• Game Mode personalizado ativado: escala 0,90 e alvo ")
-                                    .append(fps).append(" FPS\n");
-                        } else {
-                            ShizukuShell.Result reset = ShizukuShell.execute(context, "cmd game reset " + packageName);
-                            customOverrideApplied = !reset.success;
-                            report.append("• Modo personalizado não pôde ser selecionado; tentando Performance nativo\n");
-                        }
-                    } else {
-                        ShizukuShell.Result reset = ShizukuShell.execute(context, "cmd game reset " + packageName);
-                        customOverrideApplied = !reset.success;
-                        report.append("• Intervenção personalizada recusada pela ROM\n");
-                    }
-                } else if (existing.valid) {
-                    report.append("• Intervenções existentes do jogo preservadas; não foram sobrescritas\n");
-                }
-            }
-            if (!gameModeApplied) {
-                gameModeMayHaveChanged = true;
-                prefs.edit().putBoolean(GAME_MODE_CHANGED, true).commit();
-                ShizukuShell.Result requested = setGameModeAndVerify(context, "performance", packageName);
-                gameModeApplied = requested.success;
-                report.append(gameModeApplied
-                        ? "• Game Mode Performance ativado e conferido pelo Android\n"
-                        : "• Game Mode Performance não disponível para este jogo/ROM\n");
-            }
+        if (!hasGame) {
+            report.append("• Game Mode: será aplicado quando você abrir um jogo\n");
         } else {
-            report.append("• Game Mode não foi alterado: o modo anterior não pôde ser consultado com segurança\n");
+            boolean gameModeApplied = false;
+            boolean gameModeCaptured = prefs.getBoolean(GAME_MODE_CAPTURED, false);
+            String previousGameMode = prefs.getString(PREV_GAME_MODE, "");
+            if (gameModeCaptured && !"unsupported".equals(previousGameMode)) {
+                if ("diablo".equals(mode)) {
+                    ShizukuShell.Result help = ShizukuShell.execute(context, "cmd game help 2>&1");
+                    boolean supportsSet = help.output != null
+                            && help.output.toLowerCase(Locale.ROOT).contains("--downscale");
+                    if (supportsSet) {
+                        GameModeSnapshot existing = readGameModeSnapshot(context, pkg);
+                        if (existing.valid && !existing.hasExistingConfig) {
+                            gameModeMayHaveChanged = true;
+                            prefs.edit().putBoolean(GAME_MODE_CHANGED, true)
+                                    .putBoolean(GAME_CUSTOM_OVERRIDE, true).commit();
+                            ShizukuShell.Result custom = ShizukuShell.execute(context,
+                                    "cmd game set --downscale 0.9 --fps " + fps + " " + pkg);
+                            if (custom.success) {
+                                customOverrideApplied = true;
+                                ShizukuShell.Result selected = setGameModeAndVerify(context, "custom", pkg);
+                                if (selected.success) {
+                                    gameModeApplied = true;
+                                    report.append("• Game Mode PERSONALIZADO ativo: escala 0,90 e alvo ").append(fps).append(" FPS ✔\n");
+                                } else {
+                                    ShizukuShell.Result reset = ShizukuShell.execute(context, "cmd game reset " + pkg);
+                                    customOverrideApplied = !reset.success;
+                                    report.append("• Modo personalizado não pôde ser selecionado; tentando Performance nativo\n");
+                                }
+                            } else {
+                                ShizukuShell.Result reset = ShizukuShell.execute(context, "cmd game reset " + pkg);
+                                customOverrideApplied = !reset.success;
+                                report.append("• Intervenção personalizada recusada pela ROM\n");
+                            }
+                        } else if (existing.valid) {
+                            report.append("• Intervenções existentes do jogo preservadas; não foram sobrescritas\n");
+                        }
+                    }
+                }
+                if (!gameModeApplied) {
+                    String wanted = "eco".equals(mode) ? "battery" : "performance";
+                    gameModeMayHaveChanged = true;
+                    prefs.edit().putBoolean(GAME_MODE_CHANGED, true).commit();
+                    ShizukuShell.Result requested = setGameModeAndVerify(context, wanted, pkg);
+                    report.append(requested.success
+                            ? "• Game Mode " + ("battery".equals(wanted) ? "ECONOMIA" : "PERFORMANCE") + " ativado e conferido pelo Android ✔\n"
+                            : "• Game Mode " + wanted + " não disponível para este jogo/ROM\n");
+                }
+            } else {
+                report.append("• Game Mode não foi alterado: o modo anterior não pôde ser consultado com segurança\n");
+            }
         }
 
-        if ("performance".equals(mode)) {
+        // ---------- Ajustes de sistema ----------
+        if ("eco".equals(mode)) {
+            ShizukuShell.Result battery = putAndVerifySetting(context, "global", "low_power", "1");
+            report.append(battery.success ? "• Economia de bateria LIGADA ✔\n" : "• Não foi possível ligar a economia de bateria\n");
+            ShizukuShell.Result peak = putAndVerifySetting(context, "system", "peak_refresh_rate", "60.0");
+            ShizukuShell.Result min = putAndVerifySetting(context, "system", "min_refresh_rate", "60.0");
+            report.append(peak.success && min.success ? "• Tela limitada a 60 Hz ✔\n" : "• A ROM não aceitou limitar a tela a 60 Hz\n");
+            int governors = applyGovernors(context, prefs.getString(PREV_GOVERNORS, ""), "powersave");
+            report.append(governors > 0
+                    ? "• Governador powersave aplicado em " + governors + " interface(s) CPU/GPU ✔\n"
+                    : "• Kernel não liberou governador powersave; limite de CPU/GPU fica por conta do sistema\n");
+        } else if ("rise".equals(mode)) {
             ShizukuShell.Result battery = putAndVerifySetting(context, "global", "low_power", "0");
-            report.append(battery.success ? "• Economia de bateria desativada durante a sessão\n"
-                    : "• Não foi possível alterar a economia de bateria\n");
+            report.append(battery.success ? "• Economia de bateria DESLIGADA ✔\n" : "• Não foi possível alterar a economia de bateria\n");
             ShizukuShell.Result peak = putAndVerifySetting(context, "system", "peak_refresh_rate", Float.toString(hz));
-            report.append(peak.success ? "• Taxa máxima da tela configurada: " + hz + " Hz\n"
-                    : "• Taxa de atualização máxima não pôde ser ajustada\n");
+            report.append(peak.success ? "• Taxa máxima da tela liberada: " + hz + " Hz ✔\n" : "• Taxa de atualização controlada pela ROM\n");
+            if (hasGame) report.append(boostBucket(context, pkg));
+            report.append("• CPU/GPU: o sistema sobe as frequências até o máximo quando o jogo exige (sem trava conservadora)\n");
+        } else { // diablo
+            ShizukuShell.Result battery = putAndVerifySetting(context, "global", "low_power", "0");
+            report.append(battery.success ? "• Economia de bateria DESLIGADA ✔\n" : "• Não foi possível alterar a economia de bateria\n");
+            ShizukuShell.Result peak = putAndVerifySetting(context, "system", "peak_refresh_rate", Float.toString(hz));
+            report.append(peak.success ? "• Taxa máxima da tela: " + hz + " Hz ✔\n" : "• Taxa de atualização máxima não pôde ser ajustada\n");
             if (thermalSafeForGovernor) {
                 ShizukuShell.Result min = putAndVerifySetting(context, "system", "min_refresh_rate", Float.toString(hz));
-                report.append(min.success ? "• Taxa mínima alinhada à máxima para priorizar fluidez\n"
-                        : "• Taxa mínima mantida pela ROM\n");
-                int governors = applyPerformanceGovernors(context, prefs.getString(PREV_GOVERNORS, ""));
+                report.append(min.success ? "• Taxa mínima travada no máximo (fluidez total) ✔\n" : "• Taxa mínima mantida pela ROM\n");
+                int governors = applyGovernors(context, prefs.getString(PREV_GOVERNORS, ""), "performance");
                 report.append(governors > 0
-                        ? "• Governador performance solicitado em " + governors + " interface(s) CPU/GPU graváveis\n"
-                        : "• Kernel não liberou governador performance para escrita; clocks mantidos pelo sistema\n");
+                        ? "• Governador PERFORMANCE em " + governors + " interface(s) CPU/GPU ✔\n"
+                        : "• Kernel não liberou governador performance para escrita (sem root, isso é normal)\n");
             } else {
-                report.append("• Temperatura elevada: taxa mínima e governador CPU/GPU não foram forçados\n");
+                report.append("• Temperatura elevada: taxa mínima e governador CPU/GPU NÃO foram forçados\n");
             }
-        } else {
-            ShizukuShell.Result peak = putAndVerifySetting(context, "system", "peak_refresh_rate", Float.toString(hz));
-            report.append(peak.success ? "• Taxa máxima da tela configurada: " + hz + " Hz\n"
-                    : "• Taxa de atualização controlada pela ROM\n");
-            report.append("• Sem forçar clocks, governors ou economia de bateria\n");
+            if (hasGame) report.append(boostBucket(context, pkg));
+            String clean = GameTools.cleanRam(context, pkg, 700);
+            for (String line : clean.split("\\n")) {
+                if (line.startsWith("• Apps com processo") || line.startsWith("• RAM livre")) report.append(line).append('\n');
+            }
+            report.append("• Overclock: indisponível sem root/kernel liberado; o app não altera tensão nem proteção térmica\n");
         }
+
         prefs.edit().putBoolean(GAME_MODE_CHANGED, gameModeMayHaveChanged || customOverrideApplied)
                 .putBoolean(GAME_CUSTOM_OVERRIDE, customOverrideApplied).commit();
-
-        prefs.edit().putBoolean(ACTIVE, true).putString(PACKAGE, packageName)
+        prefs.edit().putBoolean(ACTIVE, true).putString(PACKAGE, pkg)
                 .putString("gt_profile_mode", mode).apply();
-        report.append("\nCPU/GPU: governor performance só é solicitado em interfaces graváveis e com suporte explícito. Frequências máximas, tensão e proteção térmica não são alteradas.");
         String finalReport = report.toString().trim();
         prefs.edit().putString("gt_last_profile_report", finalReport).apply();
         return finalReport;
+    }
+
+    private static String boostBucket(Context context, String pkg) {
+        ShizukuShell.Result r = ShizukuShell.execute(context, "am set-standby-bucket " + pkg + " active");
+        return r.success ? "• Jogo marcado como ATIVO para o sistema ✔\n" : "";
     }
 
     public static synchronized String restore(Context context) {
@@ -291,10 +341,10 @@ public final class GameOptimizer {
     }
 
     /** Captures only sysfs governor nodes that the Shizuku identity can really write. */
-    private static String readWritableGovernorSnapshot(Context context) {
+    private static String readWritableGovernorSnapshot(Context context, String target) {
         String command = "for f in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor /sys/class/devfreq/*/governor; do "
                 + "[ -r \"$f\" ] && [ -w \"$f\" ] || continue; d=\"${f%/*}\"; a=\"$d/available_governors\"; "
-                + "[ -r \"$a\" ] || continue; grep -qw performance \"$a\" || continue; "
+                + "[ -r \"$a\" ] || continue; grep -qw " + target + " \"$a\" || continue; "
                 + "printf 'GTNODE|%s|%s\\n' \"$f\" \"$(cat \"$f\")\"; done";
         ShizukuShell.Result result = ShizukuShell.execute(context, command);
         if (!result.success || result.output == null) return "";
@@ -310,15 +360,15 @@ public final class GameOptimizer {
         return saved.toString();
     }
 
-    private static int applyPerformanceGovernors(Context context, String savedNodes) {
+    private static int applyGovernors(Context context, String savedNodes, String target) {
         int count = 0;
         if (savedNodes == null || savedNodes.isEmpty()) return count;
         for (String line : savedNodes.split("\\n")) {
             String[] parts = line.split("\\|", 2);
             if (parts.length != 2 || !validGovernorPath(parts[0])) continue;
             ShizukuShell.Result result = ShizukuShell.execute(context,
-                    "[ -w \"" + parts[0] + "\" ] && printf 'performance' > \"" + parts[0]
-                            + "\" && [ \"$(cat \"" + parts[0] + "\")\" = performance ]");
+                    "[ -w \"" + parts[0] + "\" ] && printf '" + target + "' > \"" + parts[0]
+                            + "\" && [ \"$(cat \"" + parts[0] + "\")\" = " + target + " ]");
             if (result.success) count++;
         }
         return count;

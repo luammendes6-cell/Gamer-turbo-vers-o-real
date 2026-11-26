@@ -1,0 +1,22 @@
+GAMER TURBO 2.4.0 — O QUE MUDOU
+
+CAUSAS DE "NÃO LIMPA NADA"
+- Faltava a permissão KILL_BACKGROUND_PROCESSES no AndroidManifest: o Android ignorava killBackgroundProcesses.
+- getRunningAppProcesses() só devolve o próprio app desde o Android 5.1: o laço antigo nunca via os outros apps.
+- O BOOST antigo dizia "aplicado" mesmo quando o renice falhava (shell não pode baixar nice sem root).
+Agora: lista os apps instalados, encerra e MEDE antes/depois; renice só é anunciado se o nice mudou de verdade.
+
+NOVO
+- GameTools.java: LIMPAR RAM, FECHAR APPS, PRIORIDADE, BOOST, COMPATIBILIDADE (tudo conferido).
+- 4 modos reais: ECO / BALANCE / RISE / DIABLO (ids antigos normal/balanced/performance são convertidos).
+- Janela flutuante: barra fina lateral (arrasta na vertical, cresce ao toque, fecha tocando fora), painel gamer,
+  selo SHIZUKU (conectado / autorizar / desligado) e caixa de resultado real.
+- App: tela principal só com carrossel de jogos; ferramentas e otimização na aba Ferramentas;
+  cartão do Shizuku em Configurações com estado, autorizar, abrir o Shizuku e compatibilidade.
+
+LIMITES (sem root)
+- Overclock e prioridade de CPU (nice negativo) não são possíveis; o app avisa.
+- Governador CPU/GPU só muda se o kernel deixar o shell gravar; o app avisa quando não deixa.
+- ECO/RISE/DIABLO exigem Shizuku. Sem ele o app avisa e não altera nada.
+
+ATENÇÃO: não foi compilado nem testado em aparelho nesta sessão. O GitHub Actions faz o primeiro build.

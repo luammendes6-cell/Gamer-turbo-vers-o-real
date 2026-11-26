@@ -579,17 +579,19 @@ public class MainActivity extends Activity {
             if (prefs.getBoolean("overlay_enabled", false) && (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(MainActivity.this))) {
                 runOnUiThread(MainActivity.this::startOverlayService);
             }
-            String selectedMode = prefs.getString("game_mode", "normal");
+            String selectedMode = GameOptimizer.normalizeMode(prefs.getString("game_mode", "balance"));
+            if (selectedMode.isEmpty()) selectedMode = "balance";
+            final String profileMode = selectedMode;
             float maximumRefreshRate = getMaximumRefreshRate();
             new Thread(() -> {
-                String profileReport = GameOptimizer.apply(MainActivity.this, packageName, selectedMode, maximumRefreshRate, isThermalSafeForGovernor());
+                String profileReport = GameOptimizer.apply(MainActivity.this, packageName, profileMode, maximumRefreshRate, isThermalSafeForGovernor());
                 getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString("gt_last_profile_report", profileReport).apply();
                 runOnUiThread(() -> {
                     try {
                         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         gameLaunchedInThisTask = true;
                         startActivity(launchIntent);
-                        if (!"normal".equals(selectedMode)) {
+                        if (!"balance".equals(profileMode)) {
                             String brief = profileReport == null ? "Perfil solicitado." : profileReport.split("\\n")[0];
                             Toast.makeText(MainActivity.this, brief, Toast.LENGTH_SHORT).show();
                         }
@@ -629,6 +631,75 @@ public class MainActivity extends Activity {
             }
         }
 
+        private String currentGamePackage() {
+            android.content.SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+            String pkg = prefs.getString("gt_profile_package", "");
+            if (!GameTools.validPackage(pkg)) pkg = prefs.getString("active_game_package", "");
+            return GameTools.validPackage(pkg) ? pkg : "";
+        }
+
+        /** Executa em segundo plano e devolve o relatório para a página por onNativeActionResult(). */
+        @JavascriptInterface
+        public boolean runAction(String action) {
+            if (action == null) return false;
+            final String game = currentGamePackage();
+            final String name = action;
+            if (!("ram".equals(name) || "close".equals(name) || "priority".equals(name) || "boost".equals(name) || "compat".equals(name))) return false;
+            new Thread(() -> {
+                String report;
+                try {
+                    switch (name) {
+                        case "ram": report = GameTools.cleanRam(MainActivity.this, game, 1300); break;
+                        case "close": report = GameTools.closeApps(MainActivity.this, game); break;
+                        case "priority": report = GameTools.prioritizeGame(MainActivity.this, game); break;
+                        case "compat": report = GameTools.compatibility(MainActivity.this); break;
+                        default: report = GameTools.boost(MainActivity.this, game); break;
+                    }
+                } catch (Throwable error) {
+                    report = "Falha ao executar a ação: " + error.getClass().getSimpleName();
+                }
+                final String text = report;
+                runOnUiThread(() -> {
+                    if (webView != null) {
+                        webView.evaluateJavascript("if(window.onNativeActionResult){window.onNativeActionResult("
+                                + JSONObject.quote(name) + "," + JSONObject.quote(text) + ");}", null);
+                    }
+                });
+            }, "GamerTurbo-Action-" + name).start();
+            return true;
+        }
+
+        /** JSON: {state: OFF|NEED_PERMISSION|READY, installed: bool} */
+        @JavascriptInterface
+        public String getShizukuInfo() {
+            JSONObject info = new JSONObject();
+            try {
+                boolean installed;
+                try { getPackageManager().getPackageInfo(GameTools.SHIZUKU_PACKAGE, 0); installed = true; }
+                catch (Throwable notFound) { installed = false; }
+                info.put("state", ShizukuShell.state());
+                info.put("installed", installed);
+            } catch (Throwable ignored) { }
+            return info.toString();
+        }
+
+        @JavascriptInterface
+        public boolean openShizukuApp() {
+            try {
+                Intent intent = getPackageManager().getLaunchIntentForPackage(GameTools.SHIZUKU_PACKAGE);
+                if (intent == null) {
+                    showMessage("O aplicativo Shizuku não está instalado.");
+                    return false;
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                runOnUiThread(() -> startActivity(intent));
+                return true;
+            } catch (Throwable error) {
+                showMessage("Não foi possível abrir o Shizuku.");
+                return false;
+            }
+        }
+
         @JavascriptInterface
         public String getShizukuState() { return ShizukuShell.state(); }
 
@@ -659,63 +730,15 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
-        public boolean cleanRam() {
-            try {
-                ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-                ActivityManager.MemoryInfo memory = new ActivityManager.MemoryInfo();
-                if (manager != null) manager.getMemoryInfo(memory);
-                long used = Math.max(0L, memory.totalMem - memory.availMem);
-                long total = memory.totalMem;
-                int percent = total > 0 ? Math.round(used * 100f / total) : 0;
-                String message = "RAM em uso: " + Math.round(used / 1048576f) + " MB / "
-                        + Math.round(total / 1048576f) + " MB (" + percent + "%). O Android gerencia a memória; nenhum processo foi encerrado à força.";
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show());
-                return true;
-            } catch (Throwable error) {
-                return false;
-            }
-        }
+        public boolean cleanRam() { return runAction("ram"); }
 
         @JavascriptInterface
-        public boolean killBackgroundProcesses() {
-            try {
-                ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-                if (am == null) return false;
-                int killed = 0;
-                java.util.List<ActivityManager.RunningAppProcessInfo> procs = am.getRunningAppProcesses();
-                if (procs != null) {
-                    for (ActivityManager.RunningAppProcessInfo p : procs) {
-                        if (p == null || p.pkgList == null || p.pkgList.length == 0) continue;
-                        String pkg = p.pkgList[0];
-                        if (pkg == null || pkg.equals(getPackageName())) continue;
-                        if (p.importance >= ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
-                            try { am.killBackgroundProcesses(pkg); killed++; } catch (Throwable ignored) { }
-                        }
-                    }
-                }
-                final int k = killed;
-                runOnUiThread(() -> Toast.makeText(MainActivity.this,
-                        "RAM liberada: " + k + " processo(s) de fundo encerrado(s).", Toast.LENGTH_LONG).show());
-                return true;
-            } catch (Throwable error) {
-                return false;
-            }
-        }
+        public boolean killBackgroundProcesses() { return runAction("ram"); }
 
         @JavascriptInterface
         public String boostGame() {
             if (!ShizukuShell.isAuthorized()) return "SHIZUKU_NEEDED";
-            String pkg = getSharedPreferences(PREFS, MODE_PRIVATE).getString("gt_profile_package", "");
-            if (!pkg.matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)+")) pkg = "";
-            final String target = pkg;
-            StringBuilder cmd = new StringBuilder();
-            if (!target.isEmpty()) {
-                cmd.append("renice -n -10 -p $(pidof ").append(target).append(") 2>/dev/null; ");
-            }
-            cmd.append("for p in $(cmd package list packages -e 2>/dev/null | sed 's/package://'); do [ \"$p\" = \"")
-                    .append(getPackageName()).append("\" ] && continue; am kill --user 0 \"$p\" 2>/dev/null; done");
-            ShizukuShell.Result r = ShizukuShell.execute(MainActivity.this, cmd.toString());
-            return r.success ? "OK" : r.output;
+            return runAction("boost") ? "OK" : "FALHA";
         }
 
         @JavascriptInterface
@@ -963,27 +986,28 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public String getMode() {
-            String mode = getSharedPreferences(PREFS, MODE_PRIVATE).getString("game_mode", "normal");
-            if (!"normal".equals(mode) && !"balanced".equals(mode) && !"performance".equals(mode)) return "normal";
-            return mode;
+            String mode = GameOptimizer.normalizeMode(getSharedPreferences(PREFS, MODE_PRIVATE).getString("game_mode", "balance"));
+            return mode.isEmpty() ? "balance" : mode;
         }
 
         @JavascriptInterface
-        public void setMode(String mode) {
-            if (!("normal".equals(mode) || "balanced".equals(mode) || "performance".equals(mode))) return;
+        public void setMode(String requested) {
+            final String mode = GameOptimizer.normalizeMode(requested);
+            if (mode.isEmpty()) return;
             android.content.SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
             prefs.edit().putString("game_mode", mode).apply();
             boolean profileActive = prefs.getBoolean("gt_profile_active", false);
             String packageName = prefs.getString("gt_profile_package", "");
-            if ("normal".equals(mode)) {
+            if ("balance".equals(mode)) {
                 if (profileActive) new Thread(() -> {
-                    String report = GameOptimizer.restore(MainActivity.this);
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Modo Básico: ajustes da sessão restaurados.", Toast.LENGTH_SHORT).show());
+                    GameOptimizer.restore(MainActivity.this);
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Modo BALANCE: ajustes da sessão restaurados.", Toast.LENGTH_SHORT).show());
                 }, "GamerTurbo-RestoreMode").start();
-            } else if (profileActive && packageName.matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)+")) {
+            } else if (profileActive) {
+                final String pkg = packageName.matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)+") ? packageName : "";
                 float maximumRefreshRate = getMaximumRefreshRate();
                 new Thread(() -> {
-                    String report = GameOptimizer.apply(MainActivity.this, packageName, mode, maximumRefreshRate, isThermalSafeForGovernor());
+                    String report = GameOptimizer.apply(MainActivity.this, pkg, mode, maximumRefreshRate, isThermalSafeForGovernor());
                     getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString("gt_last_profile_report", report).apply();
                 }, "GamerTurbo-ChangeMode").start();
             }
