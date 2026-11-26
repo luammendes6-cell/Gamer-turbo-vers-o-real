@@ -162,7 +162,8 @@ public final class GameTools {
             if (denied) {
                 report.append("• O Android negou a permissão KILL_BACKGROUND_PROCESSES.\n");
             } else {
-                report.append("• Método: Android (sem Shizuku). Pedido enviado a ").append(requested).append(" app(s).\n");
+                report.append("• Método: Android (sem Shizuku). Pedido enviado a ").append(requested)
+                        .append(requested == 1 ? " aplicativo.\n" : " aplicativos.\n");
                 report.append("• O Android decide o que realmente fecha; conecte o Shizuku para limpeza mais forte e conferida.\n");
             }
         }

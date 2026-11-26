@@ -1,8 +1,8 @@
-GAMER TURBO ANDROID — VERSÃO 2.6.0
+GAMER TURBO ANDROID — VERSÃO 2.6.4
 
 Projeto Android nativo com interface HTML/JS local, serviços Java e integração opcional com Shizuku.
 
-Novidades da 2.6.0:
+Novidades da 2.6.4:
 - Painel flutuante mais estreito e com limite de altura, organizado como toolbox.
 - CPU global e frequência média atual em GHz, com leitura por cluster e fallback via Shizuku quando necessário.
 - Painel CPU com controles de pico mínimo/máximo dentro dos limites de fábrica expostos pelo kernel; snapshots e restauração dos valores originais.
@@ -10,7 +10,12 @@ Novidades da 2.6.0:
 - FPS estimado a partir das amostras do SurfaceFlinger para o pacote do jogo; exige Shizuku autorizado e suporte do sistema.
 - Biblioteca de jogos na tela inicial redesenhada com cartões compactos.
 - Temporizador flutuante, exceções de memória, atalhos de Armazenamento e Cast.
-- Os apps colocados em Exceções são preservados pelas ações de limpeza/fechamento/boost/hibernação.
+- Os aplicativos colocados em Exceções são preservados pelas ações de limpeza/fechamento/boost/hibernação. A janela agora tem botão de fechar no topo e lista com rolagem própria.
+- Controles de CPU permanecem interativos para selecionar limites. Se o kernel for somente leitura, o app informa que a alteração não foi aplicada, sem simular overclock.
+- Cartões da biblioteca exibem pacote e botão ABRIR lado a lado, sem sobreposição.
+- Abertura da marca em três fases: repouso, ignição e sistema online, com efeito sonoro original sintetizado e ativado por toque.
+- Central DIABLO com sequência de inicialização, ignição do núcleo e entrada progressiva dos painéis.
+- As ações mostram resumo de sucesso, aplicação parcial ou bloqueio do Android/kernel; o relatório completo continua disponível em RESULTADO DO PERFIL.
 
 COMO COMPILAR
 1. Abra a pasta no Android Studio ou AndroidIDE, com Android SDK instalado.
@@ -27,7 +32,8 @@ PERMISSÕES / CONFIGURAÇÃO
 IMPORTANTE
 - FPS pode aparecer como -- em ROMs que não expõem SurfaceFlinger --latency. O app não usa taxa de atualização (Hz) como se fosse FPS.
 - CPU é uso global aproximado, não medição isolada do jogo. A frequência exibida é uma média ponderada dos clusters/CPUs que o kernel expõe, não uma frequência fixa de todos os núcleos.
-- Funções de hardware da Xiaomi/HyperOS que dependem de driver, HAL ou integração privilegiada não podem ser replicadas fielmente em qualquer Android. Veja AUDITORIA-2.6.0.txt.
+- Funções de hardware da Xiaomi/HyperOS que dependem de driver, HAL ou integração privilegiada não podem ser replicadas fielmente em qualquer Android. Veja AUDITORIA-2.6.4.txt.
 - Os controles de frequência só alteram scaling_min_freq/scaling_max_freq quando o Shizuku consegue gravar os nós CPUFreq. O limite máximo nunca ultrapassa cpuinfo_max_freq; não há overclock. Se o kernel bloquear escrita, a CPU segue sob controle automático.
 - Ao sair da partida ou deixar a tela inicial sem iniciar um jogo, o serviço remove as janelas flutuantes; a preferência de sobreposição permanece habilitada para a próxima partida.
 - Este ZIP contém código-fonte; não é APK pronto.
+OBSERVAÇÃO DE COMPILAÇÃO: o pacote-fonte anterior não incluía gradle-wrapper.jar. O workflow do GitHub Actions desta versão instala JDK 17 e Gradle 8.9 diretamente. Para compilar localmente, use uma instalação Gradle 8.9 ou gere o wrapper a partir de uma instalação Gradle confiável.

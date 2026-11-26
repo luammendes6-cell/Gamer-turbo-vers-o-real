@@ -1,0 +1,29 @@
+GAMER TURBO ANDROID 2.6.1 — RELATÓRIO DE CORREÇÕES
+
+CORREÇÕES DE INTERFACE
+- Exceções de memória: janela mais baixa, com cabeçalho e botão X fixos; a lista de aplicativos rola em sua própria área; SALVAR e FECHAR permanecem visíveis no rodapé.
+- Controle da CPU: botão X no cabeçalho e painel com rolagem interna. Fechar durante a leitura de CPUFreq invalida a resposta pendente e impede que a janela reapareça sozinha.
+- Painel flutuante principal: largura máxima reduzida de 600 dp para 560 dp e altura máxima de 420 dp para 390 dp.
+- Biblioteca: botão ABRIR passa a ocupar o rodapé do cartão ao lado do nome do pacote; não fica mais sobreposto ao texto.
+- Corrigida a apresentação da unidade para GHz.
+
+CONTROLE DA CPU
+- As barras continuam habilitadas para selecionar e visualizar os percentuais mesmo quando as interfaces CPUFreq são somente leitura.
+- O painel avisa antes de aplicar quando o kernel bloqueia a escrita; APLICAR retorna o relatório real do controlador, que verifica os valores lidos após a gravação.
+- Ações simultâneas são bloqueadas até a operação anterior terminar, mesmo que a janela seja fechada.
+- Fechar o painel durante a leitura de policies cancela a atualização atrasada.
+- O recurso continua limitado aos limites de fábrica publicados pelo kernel. Não é overclock. Shizuku autorizado não concede automaticamente permissão de escrita no sysfs.
+
+RETORNO DAS AÇÕES
+- O painel flutuante resume resultados: quantidade de apps encerrados e conferidos, ajustes confirmados e limitações reportadas.
+- A tela principal também resume ECO/RISE/DIABLO como aplicado, aplicado parcialmente, com limitações ou não aplicado.
+- O relatório detalhado permanece disponível em RESULTADO DO PERFIL / última ação. Nenhuma ação é apresentada como bem-sucedida sem confirmação retornada.
+
+VERSÃO
+- versionCode 17; versionName e ponte Java/HTML 2.6.1.
+
+VALIDAÇÃO
+- Código-fonte e interface foram revisados e serão submetidos a verificações estáticas de JavaScript, estrutura do ZIP e integridade dos arquivos.
+- Não foi possível gerar ou testar APK nesta sessão porque o ambiente não dispõe do Android SDK (plataforma/build-tools) necessário à compilação. O script ./gradlew deste projeto é um lançador próprio que baixa o Gradle 8.9 quando há conexão; ele não depende de gradle-wrapper.jar.
+- As verificações estáticas executadas: JavaScript passou em node --check; o analisador Java não apontou erros de sintaxe, embora a resolução de classes Android não seja possível sem o SDK.
+- A compilação e o teste funcional final devem ser feitos em Android Studio ou AndroidIDE com SDK configurado e, depois, no aparelho.

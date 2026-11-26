@@ -1,0 +1,46 @@
+GAMER TURBO ANDROID 2.6.2 — UI COMPACTA + CENTRAL DIABLO
+
+INTERFACE
+- Tela inicial mais compacta: biblioteca com 5–6 colunas em paisagem, ícones de 43 px, cartões de aproximadamente 82 px, fontes e espaços reduzidos.
+- Indicadores do dispositivo, cabeçalhos, botões de modo e painéis compactados para liberar espaço.
+- Nova central DIABLO em tela cheia: núcleo visual, leituras nativas de CPU, carga, RAM, bateria e estado térmico; inspeção CPU/GPU via Shizuku; botões de iniciar partida, BOOST e relatório.
+- GPU permanece como indisponível até que uma inspeção retorne um nó de frequência reconhecível. FPS não é inventado.
+
+PAINEL FLUTUANTE
+- Painel principal em paisagem reduzido do máximo 560 × 390 dp para 440 × 300 dp; em retrato, máximo 292 × 350 dp.
+- Controle de CPU reduzido para máximo 315 × 320 dp.
+- Exceções de memória reduzidas para máximo 320 × 310 dp, mantendo lista rolável e botões visíveis.
+
+RECURSOS DE DESEMPENHO JÁ EXISTENTES NA BASE E EXIBIDOS NA CENTRAL DIABLO
+- Android Game Mode por jogo (performance/battery/custom, conforme ROM).
+- Taxa mínima/máxima de atualização via Settings.System (quando a ROM aceita).
+- Governadores CPU e GPU via sysfs/devfreq, apenas em nós realmente graváveis.
+- CPUFreq min/max dentro dos limites de fábrica, quando o kernel permite escrita.
+- Marcação do jogo como ativo (standby bucket).
+- Fechamento de apps de terceiros com exceções e conferência.
+- Limpeza de memória disponível, leitura de RAM, CPU, bateria e estado térmico.
+- Proteção térmica para não forçar ajustes agressivos quando o estado térmico está elevado.
+
+LIMITAÇÕES IMPORTANTES
+- Shizuku executa comandos com a identidade adb/shell, mas não concede root e não remove permissões SELinux ou bloqueios do kernel.
+- FPS exato do jogo, clocks de GPU e sensores térmicos internos podem não ser expostos pelo aparelho.
+- A tela DIABLO indica os ajustes que dependem de suporte; a aplicação do perfil continua amarrada ao início de uma partida.
+- Não há overclock acima dos limites de fábrica.
+
+VALIDAÇÃO
+- Verificar JavaScript com node --check e integridade do ZIP.
+- Compilação APK e validação em aparelho exigem Android SDK/Android Studio ou AndroidIDE; não presumir sucesso sem esses testes.
+
+DETALHES DO FLUXO DIABLO
+- Ao selecionar DIABLO na interface, o modo é salvo pela ponte nativa e a central DIABLO é exibida.
+- INICIAR PARTIDA fecha a central e usa launchGame(), que mantém o fluxo existente de aplicação do perfil por jogo.
+- BOOST usa runNativeAction('boost'); a resposta nativa de onNativeActionResult é exibida no console DIABLO.
+- INSPECIONAR CPU/GPU executa a sonda de leitura existente inspectKernel(). O resultado é exibido sem tentar escrever nos nós.
+- RELATÓRIO DO PERFIL mostra getLastProfileReport().
+- Voltar ou o botão Voltar do Android fecha a central sem reiniciar a aplicação.
+
+TESTES EXECUTADOS NESTA SESSÃO
+- node --check do JavaScript incorporado: aprovado.
+- Leitura estrutural do HTML (HTMLParser): aprovada.
+- Revisão estática das alterações Java: alterações de dimensões e versão, sem novas chamadas Android.
+- APK não compilado e não testado em dispositivo nesta sessão. Não declarar a versão como funcionalmente validada até compilar e testar no AndroidIDE/Android Studio.

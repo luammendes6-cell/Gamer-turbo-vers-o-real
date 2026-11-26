@@ -18,11 +18,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.9'
+          validate-wrappers: false # Este projeto usa Gradle instalado diretamente no CI, sem wrapper JAR.
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon
+        run: gradle assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

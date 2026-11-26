@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
     private static final int REQUEST_SCREEN_CAPTURE = 7401;
     private static final int REQUEST_SHIZUKU = 7410;
     private static final String PREFS = "gamer_turbo_native";
-    private static final String APP_VERSION = "2.6.0";
+    private static final String APP_VERSION = "2.6.4";
     private static final String KEY_PENDING_OVERLAY = "pending_overlay_permission";
     private static final int REQUEST_INSTALLED_APPS = 7420;
     private static final int REQUEST_NOTIFICATIONS = 7421;
@@ -348,7 +348,7 @@ public class MainActivity extends Activity {
         /** Identifies the native API contract expected by the bundled WebView UI. */
         @JavascriptInterface
         public String getBridgeVersion() {
-            return "2.6.0";
+            return "2.6.4";
         }
 
         @JavascriptInterface
@@ -597,10 +597,8 @@ public class MainActivity extends Activity {
                         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         gameLaunchedInThisTask = true;
                         startActivity(launchIntent);
-                        if (!"balance".equals(profileMode)) {
-                            String brief = profileReport == null ? "Perfil solicitado." : profileReport.split("\\n")[0];
-                            Toast.makeText(MainActivity.this, brief, Toast.LENGTH_SHORT).show();
-                        }
+                        String brief = summarizeProfileResult(profileReport, profileMode);
+                        Toast.makeText(MainActivity.this, brief, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         gameLaunchedInThisTask = false;
                         new Thread(() -> GameOptimizer.restore(MainActivity.this), "GamerTurbo-LaunchRollback").start();
@@ -609,6 +607,44 @@ public class MainActivity extends Activity {
                 });
             }, "GamerTurbo-ApplyProfile").start();
             return true;
+        }
+
+        private String summarizeProfileResult(String report, String mode) {
+            String value = report == null ? "" : report.trim();
+            String label = GameOptimizer.modeLabel(mode);
+            if (value.isEmpty()) return "PERFIL " + label + ": o Android não retornou um relatório.";
+            String lower = value.toLowerCase(Locale.ROOT);
+            if (lower.contains("nenhum ajuste de sessão precisa ser restaurado"))
+                return "PERFIL BALANCE: o sistema já estava nos padrões; nada precisou ser alterado.";
+            if (lower.contains("shizuku não está autorizado") || lower.contains("reconecte o shizuku"))
+                return "RESTAURAÇÃO PENDENTE: reconecte e autorize o Shizuku para devolver os limites originais.";
+            if (lower.contains("nada foi alterado") || lower.contains("nenhuma otimização foi aplicada")
+                    || lower.contains("o perfil não será aplicado") || lower.contains("novo perfil não foi aplicado")) {
+                return "PERFIL " + label + " NÃO APLICADO. Nenhuma alteração foi confirmada; consulte RESULTADO DO PERFIL.";
+            }
+            int confirmed = 0;
+            int limited = 0;
+            for (String line : value.split("\\r?\\n")) {
+                if (line.contains("✔")) confirmed++;
+                String item = line.toLowerCase(Locale.ROOT);
+                if (item.contains("não foi possível") || item.contains("não disponível")
+                        || item.contains("não liberou") || item.contains("não aceitou")
+                        || item.contains("não pôde") || item.contains("recusad")
+                        || item.contains("controlada pela rom") || item.contains("mantida pela rom")
+                        || item.contains("não foi alterado") || item.contains("adiado")
+                        || item.contains("não foram forçados") || item.contains("não está autorizado")) limited++;
+            }
+            if (confirmed > 0 && limited > 0)
+                return "PERFIL " + label + " APLICADO PARCIALMENTE: " + confirmed
+                        + (confirmed == 1 ? " ajuste confirmado e " : " ajustes confirmados e ") + limited
+                        + (limited == 1 ? " limitação." : " limitações.") + " Consulte RESULTADO DO PERFIL.";
+            if (confirmed > 0)
+                return "PERFIL " + label + " APLICADO: " + confirmed
+                        + (confirmed == 1 ? " ajuste confirmado pelo Android. Consulte RESULTADO DO PERFIL."
+                        : " ajustes confirmados pelo Android. Consulte RESULTADO DO PERFIL.");
+            if (limited > 0)
+                return "PERFIL " + label + " COM LIMITAÇÕES: o Android/kernel não confirmou alterações. Consulte RESULTADO DO PERFIL.";
+            return "PERFIL " + label + " SOLICITADO: sem confirmação explícita de alterações. Consulte RESULTADO DO PERFIL.";
         }
 
         private boolean isThermalSafeForGovernor() {

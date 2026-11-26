@@ -1,0 +1,31 @@
+GAMER TURBO 2.6.4 — AUDITORIA DA ABERTURA E DIABLO
+
+CORREÇÕES APLICADAS
+1. Abertura da marca em três fases: SISTEMA EM REPOUSO → ENERGIA EM ATIVAÇÃO → GAMER TURBO / ONLINE.
+2. Efeito sonoro original sintetizado via Web Audio API: subgrave suave, subida elétrica filtrada, whoosh mecânico e sinal metálico final. Não contém gravação ou sample da BMW i8. O áudio só inicia após toque do usuário, respeitando bloqueios de autoplay do WebView.
+3. O botão de som não fecha mais a abertura. Ele ativa o áudio e reinicia a sequência visual para sincronização. Há opção separada para pular a abertura.
+4. Ao pular/fechar, os timers são cancelados e o AudioContext em execução é fechado.
+5. Abertura do DIABLO com sequência de entrada: cabeçalho, painéis, núcleo, leituras e cartões em etapas, com tratamento para redução de movimento.
+6. Três blocos CSS que estavam depois de </html> foram movidos para o <head>. O documento agora termina corretamente em </body></html>.
+7. Identificação de versão sincronizada em build.gradle.kts, MainActivity e interface: 2.6.4; versionCode 19.
+8. Pipeline GitHub Actions configurado para instalar JDK 17 e Gradle 8.9 diretamente, sem depender do gradle-wrapper.jar que não veio no ZIP anterior.
+
+VERIFICAÇÕES EXECUTADAS
+- Estrutura HTML analisada: 5 blocos de estilo no <head>, nenhum bloco de estilo no <body>, fechamento único de body/html.
+- IDs HTML duplicados: nenhum.
+- Referências estáticas a IDs DOM: resolvidas; emptyDetect é criado dinamicamente apenas quando a biblioteca está vazia.
+- Sintaxe dos 2 scripts JavaScript inline: aprovada por node --check.
+- Sintaxe dos 5 blocos CSS: sem tokens de erro no parser tinycss2.
+- AndroidManifest.xml: XML válido.
+- Versão do app, ponte nativa e rótulos visuais: alinhados em 2.6.4.
+- Teste automatizado isolado do fluxo da abertura: boot → ignite → online; acionamento de áudio mockado; botão pular. Aprovado.
+- Integridade do arquivo ZIP: verificada após geração.
+
+LIMITES DA AUDITORIA
+- Não foi possível executar assembleDebug nem instalar/testar no aparelho: este ambiente não tem Android SDK nem Gradle instalados.
+- O ZIP de origem não continha gradle-wrapper.jar. O workflow do GitHub Actions foi ajustado para usar Gradle 8.9 instalado pela action; para compilação local, use Gradle 8.9 disponível no ambiente/IDE ou gere o wrapper por uma instalação Gradle confiável.
+- O som foi testado com AudioContext simulado no teste automatizado; o timbre final precisa ser ouvido em um aparelho Android real e pode variar conforme WebView, alto-falante e volume do sistema.
+- Não foi feita validação visual/interativa em WebView Android real.
+
+RESULTADO
+As verificações estáticas e o teste isolado do fluxo de abertura passaram. A compilação Android e a validação auditiva/visual no aparelho permanecem pendentes; portanto, esta auditoria não declara o APK compilado ou testado em dispositivo.

@@ -14,8 +14,8 @@ android {
         applicationId = "com.gamerturbo.mobile"
         minSdk = 24
         targetSdk = 35
-        versionCode = 16
-        versionName = "2.6.0"
+        versionCode = 19
+        versionName = "2.6.4"
     }
 
     compileOptions {

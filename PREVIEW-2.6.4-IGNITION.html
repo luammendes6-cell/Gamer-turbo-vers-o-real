@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#090a0e">
+<title>Gamer Turbo</title>
+<style>
+:root{--accent:#f32635;--accent2:#ff5962;--accent-rgb:243,38,53;--bg:#090a0e;--panel:#11131a;--panel2:#171a23;--line:rgba(255,255,255,.085);--muted:#828897;--text:#f4f5f8;--green:#53d6a0;--yellow:#f5c84b;--blue:#55a9ff;--radius:18px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,Roboto,"Segoe UI",Arial,sans-serif}button,input{font:inherit}button{color:inherit;cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 53% 44%,rgba(var(--accent-rgb),.13),transparent 47%),linear-gradient(120deg,transparent 0 47%,rgba(255,255,255,.018) 47.1% 47.3%,transparent 47.4%);transition:background .45s ease}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(90deg,transparent,black 40%,black 80%,transparent)}
+button{border:0;background:none}.app{position:relative;z-index:1;width:100%;height:100%;display:grid;grid-template-rows:62px minmax(0,1fr);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--line);background:rgba(8,9,13,.82);backdrop-filter:blur(18px);min-width:0}.brand{display:flex;align-items:center;gap:11px;min-width:0}.brand-mark{width:31px;height:31px;position:relative;display:grid;place-items:center;background:linear-gradient(145deg,var(--accent2),#9b0715);clip-path:polygon(0 0,100% 0,100% 72%,67% 100%,0 100%);box-shadow:0 0 23px rgba(var(--accent-rgb),.3)}.brand-mark:after{content:"";width:10px;height:15px;border:2px solid #fff;border-left:0;transform:skew(-23deg);opacity:.95}.brand-name{font-weight:900;letter-spacing:.15em;font-size:14px;white-space:nowrap}.brand-sub{font-size:9px;letter-spacing:.25em;color:var(--muted);margin-top:3px}.top-actions{display:flex;align-items:center;gap:9px}.status-chip{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:#12141b;border-radius:99px;padding:7px 11px;color:#c4c8d1;font-size:10px;letter-spacing:.08em}.live-dot{height:6px;width:6px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green)}.icon-btn{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:#14161e;color:#b7bdc9;transition:.2s}.icon-btn:active{transform:scale(.92);border-color:var(--accent)}.icon-btn svg{width:16px;height:16px}
+.workspace{min-height:0;display:grid;grid-template-columns:76px minmax(0,1fr) 278px;gap:15px;padding:15px 17px 17px;overflow:hidden}.rail{border:1px solid var(--line);border-radius:19px;background:linear-gradient(180deg,rgba(23,26,35,.96),rgba(13,15,21,.96));display:flex;flex-direction:column;align-items:center;padding:11px 8px;gap:9px;min-height:0}.rail-label{font-size:8px;color:#626a79;letter-spacing:.18em;margin:4px 0 2px}.rail-btn{width:52px;height:49px;position:relative;border-radius:13px;color:#7f8796;display:grid;place-items:center;transition:transform .22s,background .22s,color .22s,border-color .22s;border:1px solid transparent;flex-shrink:0}.rail-btn svg{width:21px;height:21px}.rail-btn:hover{color:white;background:#20232d}.rail-btn.active{color:white;background:linear-gradient(135deg,rgba(var(--accent-rgb),.28),rgba(var(--accent-rgb),.07));border-color:rgba(var(--accent-rgb),.38);box-shadow:inset 3px 0 var(--accent),0 0 23px rgba(var(--accent-rgb),.10)}.rail-btn.active:after{content:"";position:absolute;right:-9px;width:3px;height:17px;border-radius:8px;background:var(--accent);box-shadow:0 0 10px var(--accent)}.rail-game{width:43px;height:39px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:#10131a;display:grid;place-items:center;font-size:18px;opacity:.78;transition:.2s}.rail-game.active{border-color:rgba(var(--accent-rgb),.65);background:rgba(var(--accent-rgb),.16);opacity:1;box-shadow:inset 0 -2px var(--accent)}.rail-spacer{flex:1}.rail-add{border:1px dashed rgba(255,255,255,.18);color:#c0c5cf}.rail-foot{font-size:8px;color:#596170;letter-spacing:.16em;writing-mode:vertical-rl;transform:rotate(180deg);margin-top:5px}
+.main{min-width:0;min-height:0;display:flex;flex-direction:column;gap:13px;overflow:hidden}.page-head{height:37px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}.eyebrow{font-size:9px;letter-spacing:.22em;color:var(--accent);font-weight:800}.page-title{font-size:17px;letter-spacing:.04em;font-weight:850;margin-top:3px}.head-right{display:flex;align-items:center;gap:8px}.subtle-btn{font-size:10px;color:#b9bfcb;border:1px solid var(--line);padding:8px 11px;border-radius:9px;background:rgba(255,255,255,.035);display:flex;align-items:center;gap:7px;transition:.2s}.subtle-btn:hover{border-color:rgba(var(--accent-rgb),.5);color:white}.subtle-btn svg{width:13px;height:13px}
+.lobby-grid{display:grid;grid-template-rows:minmax(0,1fr) 128px;gap:13px;min-height:0;flex:1}.hero{position:relative;min-height:0;overflow:hidden;border:1px solid rgba(255,255,255,.11);border-radius:22px;background:linear-gradient(110deg,#17121a 0%,#11131b 48%,#0b111a 100%);isolation:isolate}.hero:before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(ellipse at 74% 45%,rgba(var(--accent-rgb),.28),transparent 31%),radial-gradient(ellipse at 86% 100%,rgba(38,91,142,.19),transparent 36%),linear-gradient(115deg,transparent 0 55%,rgba(255,255,255,.035) 55.1% 55.4%,transparent 55.5%)}.hero-grid{position:absolute;inset:0;z-index:-1;opacity:.17;background-image:linear-gradient(30deg,transparent 24%,rgba(255,255,255,.18) 25%,transparent 26%,transparent 74%,rgba(255,255,255,.13) 75%,transparent 76%),linear-gradient(150deg,transparent 24%,rgba(255,255,255,.12) 25%,transparent 26%,transparent 74%,rgba(255,255,255,.13) 75%,transparent 76%);background-size:52px 90px;mask-image:linear-gradient(90deg,transparent,#000 35%,#000)}.hero-glow{position:absolute;right:10%;top:14%;width:310px;height:310px;border-radius:50%;border:1px solid rgba(var(--accent-rgb),.18);box-shadow:0 0 0 18px rgba(var(--accent-rgb),.025),0 0 0 42px rgba(var(--accent-rgb),.018),0 0 65px rgba(var(--accent-rgb),.12);animation:halo 5s ease-in-out infinite;pointer-events:none}.hero-glow:before,.hero-glow:after{content:"";position:absolute;inset:17px;border-radius:50%;border:1px dashed rgba(255,255,255,.15);animation:spin 38s linear infinite}.hero-glow:after{inset:42px;border-style:solid;border-color:rgba(var(--accent-rgb),.24);animation:spin 25s linear infinite reverse}.hero-content{height:100%;padding:clamp(17px,3vw,34px);display:flex;flex-direction:column;justify-content:space-between}.hero-top{display:flex;align-items:center;justify-content:space-between}.tag{font-size:8px;letter-spacing:.2em;font-weight:800;color:#ff9ca3;border:1px solid rgba(var(--accent-rgb),.32);background:rgba(var(--accent-rgb),.09);padding:7px 10px;border-radius:5px}.hero-index{font:10px/1.3 monospace;color:#687080;letter-spacing:.15em}.hero-center{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:0}.hero-copy{max-width:54%;position:relative;z-index:2}.kicker{font-size:9px;color:#8e96a5;letter-spacing:.24em;font-weight:800}.hero-game-title{font-size:clamp(25px,4vw,48px);line-height:.98;letter-spacing:-.045em;font-weight:950;text-transform:uppercase;margin:11px 0 9px;text-shadow:0 7px 24px rgba(0,0,0,.4);overflow-wrap:anywhere}.hero-game-desc{color:#9ba3b2;font-size:11px;line-height:1.55;max-width:340px}.hero-actions{display:flex;align-items:center;gap:10px;margin-top:21px;flex-wrap:wrap}.launch-btn{height:41px;padding:0 18px;background:linear-gradient(110deg,var(--accent),#a9091b);border-radius:8px;display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.08em;font-size:10px;box-shadow:0 8px 24px rgba(var(--accent-rgb),.25);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}.launch-btn:before{content:"";position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transition:transform .55s}.launch-btn:hover:before{transform:translateX(120%)}.launch-btn:active{transform:scale(.96)}.launch-btn svg{width:15px;height:15px}.outline-btn{height:41px;padding:0 14px;border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#c1c7d1;font-size:10px;letter-spacing:.06em;background:rgba(255,255,255,.035)}.game-art{width:min(36%,285px);aspect-ratio:1/1;position:relative;display:grid;place-items:center;flex-shrink:0;margin-right:5%;filter:drop-shadow(0 16px 36px rgba(0,0,0,.6));animation:float 5s ease-in-out infinite}.art-outer{position:absolute;inset:4%;border:1px solid rgba(var(--accent-rgb),.5);transform:rotate(45deg);border-radius:24%;background:linear-gradient(135deg,rgba(var(--accent-rgb),.25),rgba(4,6,11,.2));box-shadow:inset 0 0 40px rgba(var(--accent-rgb),.15),0 0 45px rgba(var(--accent-rgb),.15)}.art-inner{position:absolute;inset:17%;border:1px solid rgba(255,255,255,.14);transform:rotate(45deg);border-radius:24%;background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(var(--accent-rgb),.12));backdrop-filter:blur(6px)}.art-symbol{position:relative;font-size:clamp(44px,7vw,82px);font-weight:950;letter-spacing:-.1em;color:#fff;text-shadow:0 0 24px rgba(var(--accent-rgb),.8);transform:skew(-7deg);user-select:none}.art-caption{position:absolute;bottom:7%;font-size:8px;color:#c7cbd4;letter-spacing:.25em;font-weight:800}
+.game-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;min-height:0}.game-tile{min-width:0;position:relative;border:1px solid var(--line);border-radius:14px;background:linear-gradient(120deg,#171a22,#101219);padding:12px;display:flex;align-items:center;gap:12px;text-align:left;overflow:hidden;transition:transform .22s,border .22s,background .22s}.game-tile:before{content:"";position:absolute;inset:auto 0 0 0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);transform:scaleX(0);transition:transform .25s}.game-tile:hover{transform:translateY(-3px);border-color:rgba(var(--accent-rgb),.5)}.game-tile.selected{border-color:rgba(var(--accent-rgb),.55);background:linear-gradient(120deg,rgba(var(--accent-rgb),.13),#11141b)}.game-tile.selected:before{transform:scaleX(1)}.tile-icon{width:43px;height:43px;flex-shrink:0;border-radius:12px;display:grid;place-items:center;font-size:22px;background:linear-gradient(145deg,rgba(var(--accent-rgb),.27),#20232e);border:1px solid rgba(255,255,255,.09)}.tile-name{font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tile-sub{font-size:9px;color:var(--muted);margin-top:4px}.tile-arrow{margin-left:auto;color:#778091;font-size:16px}
+.sidepanel{min-height:0;display:flex;flex-direction:column;gap:12px;overflow-y:auto;scrollbar-width:none}.sidepanel::-webkit-scrollbar{display:none}.panel-card{border:1px solid var(--line);border-radius:17px;background:linear-gradient(155deg,rgba(23,26,35,.97),rgba(13,15,21,.97));padding:15px;position:relative;overflow:hidden}.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.panel-title{font-size:10px;font-weight:900;letter-spacing:.15em}.panel-meta{font-size:8px;color:#747d8c;letter-spacing:.12em}.mode-card{flex-shrink:0}.mode-list{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mode-btn{min-width:0;padding:10px 4px 9px;border-radius:9px;border:1px solid rgba(255,255,255,.085);background:#10131a;color:#818997;display:flex;flex-direction:column;align-items:center;gap:7px;transition:.22s}.mode-btn svg{width:17px;height:17px}.mode-btn span{font-size:8px;font-weight:900;letter-spacing:.04em}.mode-btn.active{color:white;border-color:rgba(var(--accent-rgb),.65);background:linear-gradient(160deg,rgba(var(--accent-rgb),.25),rgba(var(--accent-rgb),.07));box-shadow:inset 0 -2px var(--accent),0 0 20px rgba(var(--accent-rgb),.09)}.mode-note{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:9px;color:#9098a6;line-height:1.4}.mode-note i{width:5px;height:5px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent);flex-shrink:0}
+.stats-card{flex-shrink:0}.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{border-radius:10px;padding:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.045)}.stat-label{font-size:8px;color:#7f8794;letter-spacing:.12em}.stat-value{font-size:18px;font-weight:850;letter-spacing:-.03em;margin-top:5px}.stat-unit{font-size:9px;color:#8d95a2;font-weight:500}.stat-foot{font-size:8px;color:#626b79;margin-top:3px}.stat-bar{height:3px;background:#292d37;margin-top:8px;border-radius:8px;overflow:hidden}.stat-bar span{display:block;height:100%;width:38%;background:var(--accent);border-radius:8px;transition:width .4s}.tools-card{flex:1;min-height:150px}.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tool-btn{display:flex;align-items:center;gap:9px;padding:9px 8px;border:1px solid rgba(255,255,255,.065);border-radius:9px;background:rgba(255,255,255,.025);color:#aeb5c1;text-align:left;min-width:0;transition:.2s}.tool-btn:hover,.tool-btn.on{border-color:rgba(var(--accent-rgb),.38);background:rgba(var(--accent-rgb),.09);color:white}.tool-btn svg{width:15px;height:15px;color:var(--accent);flex-shrink:0}.tool-btn span{font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.footnote{font-size:8px;color:#596170;line-height:1.45;margin-top:auto;padding:1px 3px}
+/* Secondary views */
+.content-view{display:none;min-height:0;flex:1;overflow:auto;border:1px solid var(--line);border-radius:19px;background:rgba(15,17,24,.85);padding:clamp(15px,2.4vw,26px);animation:fadeUp .32s ease both}.content-view.active{display:block}.view-intro{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:21px}.view-h{font-size:clamp(20px,3vw,30px);font-weight:950;letter-spacing:-.04em}.view-p{font-size:10px;color:#8f97a5;margin-top:6px;line-height:1.5}.library-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:11px}.library-card{min-height:125px;padding:14px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(140deg,#1a1d26,#101219);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;transition:.2s}.library-card:hover{transform:translateY(-3px);border-color:rgba(var(--accent-rgb),.45)}.library-card.selected{border-color:rgba(var(--accent-rgb),.65);box-shadow:inset 0 -2px var(--accent)}
+.library-play{position:absolute;right:12px;bottom:12px;display:flex;align-items:center;gap:5px;border:1px solid rgba(var(--accent-rgb),.42);background:rgba(var(--accent-rgb),.13);color:var(--accent);border-radius:7px;padding:6px 8px;font-size:8px;font-weight:900;letter-spacing:.06em}.library-play svg{width:11px;height:11px;fill:currentColor;stroke:none}.library-emoji{font-size:29px}.library-name{font-size:12px;font-weight:850;margin-top:9px}.library-package{font-size:8px;color:#76808f;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card-actions{position:absolute;right:9px;top:9px;display:flex;gap:4px}.mini-icon{width:24px;height:24px;border:1px solid var(--line);border-radius:7px;background:#0c0e14;color:#9da5b2;display:grid;place-items:center;font-size:12px}.empty-state{grid-column:1/-1;min-height:200px;border:1px dashed rgba(255,255,255,.14);border-radius:15px;display:grid;place-items:center;text-align:center;color:#7e8795;padding:24px}.empty-state strong{display:block;color:#e2e5eb;font-size:13px;margin-bottom:6px}.empty-state span{font-size:10px;line-height:1.5}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.setting-row{border:1px solid var(--line);border-radius:13px;background:#141720;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px}.setting-copy strong{font-size:11px;display:block}.setting-copy span{font-size:9px;color:#818a99;display:block;margin-top:5px;line-height:1.45}.switch{width:38px;height:22px;background:#303541;border-radius:30px;padding:3px;flex-shrink:0;transition:.2s}.switch:after{content:"";display:block;width:16px;height:16px;border-radius:50%;background:#aab1bd;transition:.2s}.switch.on{background:var(--accent)}.switch.on:after{transform:translateX(16px);background:white}.timer-view{max-width:560px;margin:0 auto;text-align:center;padding:20px 0}.timer-readout{font:800 clamp(42px,8vw,74px)/1.1 ui-monospace,SFMono-Regular,monospace;letter-spacing:-.06em;margin:22px 0;color:#fff;text-shadow:0 0 25px rgba(var(--accent-rgb),.24)}.timer-controls{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}.timer-input{width:85px;background:#0c0e14;border:1px solid var(--line);border-radius:9px;padding:10px;color:white;text-align:center}.meter{height:5px;background:#282d38;border-radius:10px;overflow:hidden;max-width:300px;margin:0 auto 20px}.meter span{display:block;width:100%;height:100%;background:var(--accent);transform-origin:left;transition:transform .3s}
+/* Dialogs, toast, overlay */
+.scrim{position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.64);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:18px}.scrim.open{display:flex;animation:fade .18s ease}.dialog{width:min(440px,100%);border:1px solid rgba(255,255,255,.14);border-radius:18px;background:linear-gradient(145deg,#1b1e28,#0e1016);box-shadow:0 22px 80px rgba(0,0,0,.65);padding:20px;animation:pop .22s cubic-bezier(.2,.8,.2,1)}.dialog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.dialog-title{font-size:14px;font-weight:900;letter-spacing:.08em}.field{display:block;margin:12px 0}.field span{display:block;font-size:9px;color:#9ca4b1;margin-bottom:7px;letter-spacing:.1em}.field input{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px;background:#090b10;color:#fff;font-size:11px}.dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.primary-small,.secondary-small{padding:10px 14px;border-radius:8px;font-size:10px;font-weight:800}.primary-small{background:var(--accent);color:white}.secondary-small{border:1px solid var(--line);color:#b4bbc7}.toast{position:fixed;z-index:30;left:50%;bottom:20px;transform:translate(-50%,20px);padding:10px 15px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:#191c25;color:#e8ebf0;font-size:10px;box-shadow:0 10px 35px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:.25s;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}.toast.show{opacity:1;transform:translate(-50%,0)}.overlay-panel{position:fixed;z-index:12;right:0;top:50%;transform:translate(105%,-50%);width:min(330px,88vw);border:1px solid rgba(255,255,255,.16);border-right:0;border-radius:18px 0 0 18px;background:rgba(15,17,24,.97);backdrop-filter:blur(22px);box-shadow:-20px 15px 70px rgba(0,0,0,.55);padding:17px;transition:transform .32s cubic-bezier(.2,.8,.2,1)}.overlay-panel.open{transform:translate(0,-50%)}.overlay-handle{position:fixed;z-index:8;right:0;top:48%;height:68px;width:13px;border-radius:10px 0 0 10px;background:linear-gradient(180deg,var(--accent),#8d1020);box-shadow:0 0 17px rgba(var(--accent-rgb),.3);opacity:.85;cursor:pointer}.overlay-panel.open~.overlay-handle{opacity:0}.overlay-panel .tool-grid{margin-top:12px}.overlay-hint{font-size:8px;color:#747d8b;line-height:1.5;margin-top:12px}.hidden{display:none!important}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes halo{0%,100%{transform:scale(.97);opacity:.7}50%{transform:scale(1.035);opacity:1}}@keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(2deg)}}@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes pop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@media(max-width:850px){.workspace{grid-template-columns:62px minmax(0,1fr) 225px;gap:10px;padding:10px}.rail{padding:9px 5px}.rail-btn{width:47px;height:45px}.sidepanel{gap:8px}.panel-card{padding:11px}.game-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.game-tile{padding:9px;gap:8px}.tile-icon{width:36px;height:36px}.tile-name{font-size:10px}.hero-content{padding:19px}.hero-glow{right:2%;width:245px;height:245px}}
+@media(max-width:650px){.app{grid-template-rows:53px minmax(0,1fr)}.topbar{padding:0 12px}.status-chip{display:none}.workspace{grid-template-columns:51px minmax(0,1fr);grid-template-rows:minmax(0,1fr);padding:8px;gap:8px}.rail{border-radius:14px}.rail-btn{width:40px;height:42px}.rail-btn svg{width:18px;height:18px}.sidepanel{display:none}.lobby-grid{grid-template-rows:minmax(0,1fr) 104px;gap:8px}.hero-content{padding:14px}.hero-copy{max-width:62%}.hero-game-title{font-size:clamp(22px,6vw,37px)}.hero-game-desc{font-size:9px}.hero-actions{margin-top:13px;gap:6px}.launch-btn,.outline-btn{height:35px;padding:0 10px;font-size:9px}.game-art{width:35%;margin-right:1%}.hero-glow{width:180px;height:180px;right:-1%}.game-strip{gap:6px}.game-tile{padding:7px;gap:6px;flex-direction:column;align-items:flex-start;justify-content:center}.tile-icon{width:30px;height:30px;font-size:17px}.tile-name{font-size:9px}.tile-sub,.tile-arrow{display:none}.page-head{height:31px}.content-view{padding:13px}.settings-grid{grid-template-columns:1fr}.brand-name{font-size:12px}.brand-sub{font-size:8px}}
+@media(max-height:430px){.app{grid-template-rows:48px minmax(0,1fr)}.workspace{padding-top:8px;padding-bottom:8px}.hero-content{padding:14px}.hero-game-title{font-size:clamp(22px,5vh,38px);margin:7px 0}.hero-actions{margin-top:10px}.game-strip{grid-template-rows:1fr}.panel-card{padding:9px}.stats-grid{gap:5px}.stat{padding:7px}.stat-value{font-size:15px}.tools-card{min-height:120px}.page-head{height:30px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* Android app discovery and device controls */
+.scan-btn{width:36px;height:36px;border:1px solid var(--line);border-radius:9px;background:#151922;color:#d8dde6;display:grid;place-items:center;transition:.2s}
+.scan-btn:hover{border-color:var(--accent);color:var(--accent)}
+.scan-btn svg{width:16px;height:16px}
+.installed-dialog{width:min(720px,96vw);max-height:min(82vh,620px);display:flex;flex-direction:column}
+.installed-toolbar{display:flex;gap:9px;align-items:center;margin:3px 0 12px}
+.installed-search{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#090b10;color:#fff;font-size:11px}
+.installed-count{font-size:9px;color:#8f98a6;white-space:nowrap}
+.installed-list{overflow:auto;min-height:100px;max-height:48vh;display:grid;grid-template-columns:1fr 1fr;gap:7px;padding-right:3px}
+.installed-app{display:flex;align-items:center;gap:9px;min-width:0;padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.025)}
+.installed-app-icon{width:35px;height:35px;flex:0 0 35px;display:grid;place-items:center;border-radius:9px;background:linear-gradient(145deg,#313744,#151922);font-size:11px;font-weight:900;color:#f2f4f8}
+.installed-app-info{flex:1;min-width:0}
+.installed-app-info strong{display:block;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.installed-app-info small{display:block;font-size:8px;color:#788291;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}
+.installed-badge{display:inline-block;font-size:7px;letter-spacing:.08em;color:#ff9ca3;margin-top:4px}
+.installed-add{flex-shrink:0;border:1px solid rgba(var(--accent-rgb),.38);border-radius:7px;padding:7px 8px;background:rgba(var(--accent-rgb),.1);color:#f3c3c7;font-size:8px;font-weight:850}
+.installed-add:disabled{color:#6f7885;border-color:#303640;background:#181c24}
+.brightness-dialog{width:min(420px,94vw)}
+.brightness-range{width:100%;accent-color:var(--accent);margin:15px 0}
+.permission-note{font-size:9px;color:#8f98a6;line-height:1.6;margin-top:10px}
+@media(max-width:740px){.installed-list{grid-template-columns:1fr}.installed-dialog{width:96vw}.installed-app{padding:8px}.top-actions .status-chip{display:none}}
+
+
+/* Gamer Turbo — real control-room layout */
+:root{--accent:#f12636;--accent2:#ff626d;--accent-rgb:241,38,54;--bg:#090a0d;--panel:#111318;--line:rgba(255,255,255,.09)}
+body:before{background:radial-gradient(ellipse at 82% 12%,rgba(241,38,54,.075),transparent 35%)}
+body:after{display:none}
+.app{grid-template-rows:58px minmax(0,1fr)}
+.topbar{padding:0 20px;background:#08090c;border-bottom-color:#22252c}
+.brand-mark{clip-path:none;border-radius:8px;box-shadow:none;display:grid;place-items:center;color:#fff;font-size:10px;font-weight:950;letter-spacing:-.06em}
+.brand-mark:after{display:none}
+.brand-name{font-size:13px;letter-spacing:.19em}
+.brand-sub{letter-spacing:.18em}
+.workspace{grid-template-columns:70px minmax(0,1fr);gap:13px;padding:12px 15px 14px}
+.rail{border-radius:13px;background:#101217;border-color:#252932;padding:10px 7px;gap:7px}
+.rail-btn{width:50px;height:46px;border-radius:10px}
+.rail-btn.active{box-shadow:inset 3px 0 var(--accent);border-color:rgba(var(--accent-rgb),.4)}
+.rail-btn.active:after{display:none}
+.main{gap:10px}
+.page-head{height:39px}
+.page-title{font-size:16px;letter-spacing:.08em}
+.eyebrow{font-size:8px;letter-spacing:.18em}
+.head-right{gap:7px}
+.subtle-btn{padding:7px 10px}
+.scan-btn{width:32px;height:32px}
+.lobby-grid{display:grid;grid-template-columns:minmax(0,1.03fr) minmax(330px,.97fr);grid-template-rows:minmax(0,1fr);gap:13px;min-height:0;flex:1;overflow:hidden}
+.game-library{min-width:0;min-height:0;display:flex;flex-direction:column;border:1px solid #2a2d35;border-radius:15px;background:#111318;padding:14px;overflow:hidden}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-shrink:0}
+.section-title{font-size:14px;font-weight:850;letter-spacing:.015em}
+.section-meta{font-size:8px;color:#78808d;letter-spacing:.12em;margin-top:4px}
+.section-action{border:0;background:none;color:#cbd0d8;font-size:10px;font-weight:750;letter-spacing:.06em;padding:7px}
+.section-action em{font-style:normal;color:var(--accent);font-size:18px;vertical-align:-1px;margin-left:5px}
+.game-grid{min-height:0;flex:1;overflow:auto;display:grid;grid-template-columns:repeat(4,minmax(80px,1fr));grid-auto-rows:minmax(116px,1fr);gap:9px;align-content:start;padding:3px 2px 8px;scrollbar-width:thin;scrollbar-color:#343943 transparent}
+.game-card{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 7px 7px;border:1px solid #282c35;border-radius:13px;background:linear-gradient(155deg,#1c2029 0%,#12151b 78%);color:#f5f6f8;cursor:pointer;overflow:hidden;animation:tileReveal .34s both;animation-delay:calc(var(--tile-index,0) * 24ms);transition:border-color .2s,background .2s,transform .2s,box-shadow .2s}
+.game-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 18%,rgba(var(--accent-rgb),.13),transparent 58%);opacity:0;transition:opacity .2s;pointer-events:none}
+.game-card:active{transform:scale(.965)}
+.game-card.selected{background:linear-gradient(155deg,#25191e,#15161d 78%);border-color:rgba(var(--accent-rgb),.72);box-shadow:inset 0 -2px var(--accent),0 0 18px rgba(var(--accent-rgb),.09)}
+.game-card.selected::before{opacity:1}
+.game-icon{height:65px;width:65px;flex:0 0 65px;border-radius:17px;background:linear-gradient(145deg,#303644,#1d222c);display:grid;place-items:center;overflow:hidden;font-size:29px;font-weight:800;color:#f5f5f6;box-shadow:0 5px 16px #0009;border:1px solid #ffffff12;position:relative;z-index:1}
+.game-icon img{width:100%;height:100%;object-fit:cover}
+.game-card.selected .game-icon{animation:appIconSpin .62s cubic-bezier(.18,.78,.25,1) both;box-shadow:0 0 0 2px rgba(var(--accent-rgb),.3),0 7px 20px #000a}
+.game-name{max-width:100%;font-size:10px;line-height:1.2;color:#eef0f4;font-weight:800;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;position:relative;z-index:1}
+.game-footer{width:100%;display:flex;align-items:center;justify-content:space-between;gap:5px;position:relative;z-index:1}
+.game-sub{font-size:6px;letter-spacing:.09em;color:#747d8b;text-transform:uppercase;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.game-open{width:24px;height:21px;flex:0 0 24px;border:1px solid rgba(var(--accent-rgb),.35);border-radius:7px;background:rgba(var(--accent-rgb),.14);color:var(--accent);display:grid;place-items:center;padding:0;transition:transform .18s,background .18s}
+.game-open svg{width:12px;height:12px;fill:currentColor;stroke:none;margin-left:1px}
+.game-open:active{transform:scale(.86)}
+.game-card:focus-visible,.game-open:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@keyframes tileReveal{from{opacity:0;transform:translateY(9px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes appIconSpin{0%{transform:perspective(260px) rotateY(-360deg) scale(.78);filter:brightness(1.5)}100%{transform:perspective(260px) rotateY(0) scale(1);filter:brightness(1)}}
+@media(hover:hover){.game-card:hover{transform:translateY(-3px);border-color:rgba(var(--accent-rgb),.48);box-shadow:0 9px 22px #0006}.game-card:hover::before{opacity:.75}}
+@media(prefers-reduced-motion:reduce){.game-card,.game-card.selected .game-icon{animation:none!important;transition:none!important}}
+.game-empty{grid-column:1/-1;min-height:170px;border:1px dashed #343944;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#a7afbc;padding:18px;gap:9px}
+.game-empty strong{font-size:13px;color:#edf0f5}
+.game-empty span{font-size:10px;color:#7e8795;max-width:280px;line-height:1.5}
+.game-empty button{background:var(--accent);border-radius:7px;padding:8px 13px;font-size:9px;font-weight:850;margin-top:4px}
+.selected-bar{min-height:43px;border-top:1px solid #292d36;margin-top:8px;padding-top:9px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+.selected-copy{min-width:0}
+.selected-copy strong{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selected-copy span{display:block;font-size:8px;color:#7e8794;margin-top:3px}
+.selected-launch{height:32px;padding:0 15px;border-radius:7px;background:var(--accent);font-size:9px;font-weight:900;letter-spacing:.06em;flex-shrink:0}
+.home-side{min-width:0;min-height:0;display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:11px;overflow-y:auto;scrollbar-width:none}
+.home-side::-webkit-scrollbar{display:none}
+.panel-card{border:1px solid #292d35;border-radius:14px;background:#111318;padding:13px;position:relative;overflow:hidden}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.panel-title{font-size:10px;font-weight:900;letter-spacing:.12em}
+.panel-meta{font-size:7px;color:#79818e;letter-spacing:.1em}
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.stat{min-width:0;background:#191c23;border:1px solid #262b34;border-radius:9px;padding:8px}
+.stat-label{font-size:7px;color:#8992a0;letter-spacing:.1em;font-weight:800}
+.stat-value{font-size:18px;font-weight:900;letter-spacing:-.04em;margin-top:6px;white-space:nowrap}
+.stat-unit{font-size:9px;color:#aeb5c0;margin-left:2px;letter-spacing:0}
+.stat-foot{font-size:7px;color:#77818f;margin-top:4px;min-height:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-bar{height:3px;background:#2a2e37;border-radius:4px;margin-top:8px;overflow:hidden}.stat-bar span{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .3s}
+.mode-card .mode-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.mode-btn{min-width:0;min-height:54px;padding:9px 5px;border-radius:9px;background:#191c23;border:1px solid #2c3039;color:#929aa6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.mode-btn svg{width:16px;height:16px}.mode-btn span{font-size:8px;font-weight:900;letter-spacing:.04em}
+.mode-btn.active{color:white;background:rgba(var(--accent-rgb),.15);border-color:var(--accent);box-shadow:inset 0 -2px var(--accent)}
+.mode-note{display:flex;align-items:flex-start;gap:7px;margin-top:8px;font-size:8px;color:#8a93a0;line-height:1.4}.mode-note i{width:5px;height:5px;border-radius:50%;background:var(--accent);margin-top:3px;flex-shrink:0}
+.tools-card{min-height:0;display:flex;flex-direction:column}
+.tool-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.tool-btn{min-width:0;min-height:49px;border:1px solid #2a2e37;border-radius:9px;background:#191c23;color:#bec4cf;display:flex;align-items:center;justify-content:flex-start;gap:8px;padding:8px;font-size:8px;font-weight:750;text-align:left;transition:.16s}
+.tool-btn svg{width:16px;height:16px;color:var(--accent);flex-shrink:0}.tool-btn:active{transform:scale(.97)}.tool-btn.on{border-color:rgba(var(--accent-rgb),.5);background:rgba(var(--accent-rgb),.12)}
+.performance-extra{display:none;margin-top:9px;padding:9px;border:1px solid rgba(241,38,54,.38);border-radius:10px;background:linear-gradient(100deg,rgba(241,38,54,.12),rgba(241,38,54,.035));align-items:center;gap:10px}
+body.mode-performance .performance-extra{display:flex}
+.performance-extra .ram-button{height:37px;flex:1;min-width:0;background:#d7192b;color:white;border-radius:7px;font-size:9px;font-weight:900;letter-spacing:.04em}
+.performance-extra .ram-button:disabled{opacity:.55}
+.performance-extra .shizuku-connect{height:34px;padding:0 10px;border:1px solid #464b55;border-radius:7px;color:#cbd1da;font-size:8px;font-weight:850;background:#171a20}
+.performance-extra .shizuku-state{font-size:7px;color:#89929f;margin-top:4px;max-width:115px;line-height:1.3}
+.footnote{font-size:7px;color:#656e7c;line-height:1.4;margin-top:2px}
+.content-view{min-width:0}
+.library-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.library-card{background:#15181f;border-radius:11px}
+.library-emoji{width:55px;height:55px;border-radius:12px;background:#242832;display:grid;place-items:center;font-size:24px}
+.rail-game{height:37px;width:41px}
+.overlay-panel{right:13px;width:320px;max-width:calc(100vw - 30px);background:#101318;border-color:#414651;border-radius:14px;box-shadow:0 14px 48px #000b}
+.overlay-handle{width:13px;height:70px;right:0;border-radius:8px 0 0 8px;background:linear-gradient(180deg,#f04a55,#a80e1d);border:1px solid #fa6a72;box-shadow:none}
+.toast{border-radius:8px}
+@media(max-width:1050px){.lobby-grid{grid-template-columns:minmax(0,1fr) minmax(285px,.85fr)}.game-grid{grid-template-columns:repeat(3,minmax(75px,1fr));grid-auto-rows:116px}}
+@media(max-width:760px){.workspace{grid-template-columns:58px minmax(0,1fr);padding:8px;gap:8px}.rail{padding:8px 4px}.rail-btn{width:44px;height:42px}.lobby-grid{grid-template-columns:1fr;grid-template-rows:minmax(210px,1fr) auto;overflow:auto}.home-side{grid-template-rows:auto auto auto}.game-grid{grid-template-columns:repeat(4,minmax(60px,1fr));grid-auto-rows:110px}.home-side .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.tools-card{min-height:170px}.tool-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.top-actions .status-chip{display:none}}
+
+/* v1.2.2: a coluna direita tinha 3 linhas de grid para 4 itens e esmagava as ferramentas */
+.home-side{grid-template-rows:none!important;grid-auto-rows:max-content;align-content:start;overflow-y:auto}
+.home-side>.panel-card,.home-side>.footnote{min-height:auto}
+@media(max-height:430px){#timerView .view-intro{display:none}#timerView .timer-readout{font-size:clamp(38px,15vh,64px)}}
+
+/* v1.3 — identidade visual e estúdio de animações */
+:root{--tile-duration:.34s;--icon-duration:.62s;--transition-duration:.2s;--ambient-duration:5s;--ring-duration:38s;--inner-ring-duration:25s}
+.topbar{background:linear-gradient(90deg,rgba(8,9,13,.96),rgba(17,15,21,.88),rgba(8,9,13,.96));border-bottom-color:rgba(255,255,255,.11)}
+.brand-mark{box-shadow:0 0 0 1px rgba(255,255,255,.13),0 0 25px rgba(var(--accent-rgb),.42);animation:brandBreath 4s ease-in-out infinite}
+@keyframes brandBreath{0%,100%{filter:brightness(1)}50%{filter:brightness(1.22)}}
+.game-library{background:linear-gradient(145deg,#141720 0%,#101217 62%,#151218 100%);border-color:rgba(255,255,255,.105);box-shadow:0 14px 35px rgba(0,0,0,.17)}
+body:not(.reduce-motion) *{transition-duration:var(--transition-duration)}
+.game-card{animation-duration:var(--tile-duration);transition-duration:var(--transition-duration);background:linear-gradient(145deg,rgba(34,38,49,.96),rgba(16,19,26,.98));border-color:rgba(255,255,255,.095)}
+.game-card.selected{box-shadow:inset 0 -2px var(--accent),0 0 0 1px rgba(var(--accent-rgb),.13),0 10px 25px rgba(var(--accent-rgb),.12)}
+.game-card.selected .game-icon{animation-duration:var(--icon-duration)}
+.hero-glow{animation-duration:var(--ambient-duration)}
+.hero-glow:before{animation-duration:var(--ring-duration)}
+.hero-glow:after{animation-duration:var(--inner-ring-duration)}
+body.no-ambient-motion .hero-glow,body.no-ambient-motion .hero-glow:before,body.no-ambient-motion .hero-glow:after,body.no-ambient-motion .brand-mark{animation:none!important}
+body.no-card-motion .game-card,body.no-card-motion .library-card{animation:none!important;transition:none!important}
+body.no-icon-spin .game-card.selected .game-icon{animation:none!important}
+body.no-glow-effects .hero-glow{box-shadow:none!important;opacity:.45}
+body.no-glow-effects .game-card.selected{box-shadow:inset 0 -2px var(--accent)!important}
+body.no-glow-effects .rail-btn.active,body.no-glow-effects .mode-btn.active,body.no-glow-effects .launch-btn{box-shadow:none!important}
+body.reduce-motion *,body.reduce-motion *:before,body.reduce-motion *:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
+.settings-version{font:800 9px/1.2 ui-monospace,monospace;letter-spacing:.16em;color:#737d8e;text-align:right;white-space:nowrap}.settings-version span{display:block;color:var(--accent);margin-top:5px}
+#settingsView .settings-grid{margin-bottom:14px}
+.motion-studio{position:relative;isolation:isolate;overflow:hidden;padding:17px;border:1px solid rgba(var(--accent-rgb),.25);border-radius:17px;background:linear-gradient(120deg,rgba(26,28,37,.98),rgba(16,18,25,.98) 62%,rgba(var(--accent-rgb),.075));box-shadow:0 14px 32px rgba(0,0,0,.18)}
+.motion-studio:before{content:"";position:absolute;z-index:-1;width:260px;height:260px;right:4%;top:-170px;border-radius:50%;border:1px solid rgba(var(--accent-rgb),.16);box-shadow:0 0 0 22px rgba(var(--accent-rgb),.025),0 0 0 48px rgba(var(--accent-rgb),.018)}
+.motion-studio-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:15px}
+.motion-kicker{font:800 8px/1.3 ui-monospace,monospace;letter-spacing:.2em;color:var(--accent)}
+.motion-title{font-size:16px;font-weight:950;letter-spacing:.04em;margin-top:5px}
+.motion-description{font-size:9px;color:#8e97a6;line-height:1.5;margin-top:5px;max-width:440px}
+.motion-live{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid rgba(var(--accent-rgb),.25);border-radius:20px;background:rgba(var(--accent-rgb),.08);color:#c5cbd5;font:800 8px/1 ui-monospace,monospace;letter-spacing:.09em;white-space:nowrap}
+.motion-live i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green)}
+.motion-studio-content{display:grid;grid-template-columns:minmax(190px,.72fr) minmax(0,1.5fr);gap:17px;align-items:stretch}
+.motion-side{padding:12px;border:1px solid rgba(255,255,255,.075);border-radius:13px;background:rgba(7,9,14,.43);display:flex;flex-direction:column;justify-content:center;min-width:0}
+.motion-preview{height:125px;position:relative;display:grid;place-items:center;overflow:hidden;margin-bottom:12px;background:radial-gradient(ellipse,rgba(var(--accent-rgb),.14),transparent 68%);border-radius:10px}
+.preview-orbit{position:absolute;width:86px;height:86px;border:1px solid rgba(var(--accent-rgb),.42);border-radius:24%;transform:rotate(45deg)}
+.preview-orbit.orbit-one{width:58px;height:58px;border-color:rgba(255,255,255,.32)}
+.preview-orbit.orbit-two{width:88px;height:88px;border-style:dashed}
+.preview-orbit.orbit-three{width:112px;height:112px;border-color:rgba(var(--accent-rgb),.2);border-radius:50%}
+.preview-core{position:relative;width:43px;height:43px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(140deg,var(--accent),#8d0d1b);box-shadow:0 0 25px rgba(var(--accent-rgb),.42);font-size:15px;font-weight:950;letter-spacing:-.06em}
+.preview-caption{position:absolute;bottom:5px;font:7px/1 ui-monospace,monospace;letter-spacing:.24em;color:#737e90}
+.motion-preview.is-playing .orbit-one{animation:spin var(--ambient-duration,5s) linear infinite}
+.motion-preview.is-playing .orbit-two{animation:spin var(--ring-duration,38s) linear infinite reverse}
+.motion-preview.is-playing .orbit-three{animation:spin var(--inner-ring-duration,25s) linear infinite}
+.motion-preview.is-playing .preview-core{animation:previewPulse 1.15s ease-in-out infinite}
+@keyframes previewPulse{0%,100%{transform:scale(1);box-shadow:0 0 16px rgba(var(--accent-rgb),.28)}50%{transform:scale(1.09);box-shadow:0 0 30px rgba(var(--accent-rgb),.62)}}
+.motion-speed-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:8px;font-weight:850;letter-spacing:.09em;color:#aab2bf}
+.motion-speed-head strong{color:var(--accent);font:900 12px ui-monospace,monospace}
+.motion-range{width:100%;height:22px;margin:8px 0 5px;accent-color:var(--accent);cursor:pointer}
+.motion-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.motion-presets button{padding:7px 4px;border:1px solid rgba(255,255,255,.09);border-radius:6px;background:#191c24;color:#8e97a5;font-size:7px;font-weight:900;letter-spacing:.08em}
+.motion-presets button.active{border-color:rgba(var(--accent-rgb),.55);background:rgba(var(--accent-rgb),.13);color:white}
+.motion-options-wrap{min-width:0;display:flex;flex-direction:column;justify-content:center}
+.motion-options-title{display:flex;justify-content:space-between;gap:9px;align-items:center;margin-bottom:8px;color:#d7dbe3;font-size:8px;font-weight:900;letter-spacing:.13em}
+.motion-options-title span{color:#6f798a;font:7px ui-monospace,monospace}
+.motion-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.motion-option{padding:10px 11px;min-height:62px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.075);border-radius:9px;display:flex;align-items:center;justify-content:space-between;gap:9px;transition:border-color .2s,background .2s}
+.motion-option.enabled{border-color:rgba(var(--accent-rgb),.22);background:rgba(var(--accent-rgb),.045)}
+.motion-option strong{display:block;font-size:9px;color:#edf0f4}.motion-option small{display:block;margin-top:4px;color:#7f8998;font-size:7px;line-height:1.35}
+.motion-option .switch{transform:scale(.88);transform-origin:right center}
+.motion-option .switch:disabled{opacity:.35}
+.motion-actions{display:flex;align-items:center;gap:7px;margin-top:9px}
+.motion-preview-btn,.motion-reset-btn{height:30px;padding:0 10px;border-radius:6px;font-size:7px;font-weight:900;letter-spacing:.08em}
+.motion-preview-btn{background:var(--accent);color:white;box-shadow:0 5px 14px rgba(var(--accent-rgb),.2)}
+.motion-reset-btn{border:1px solid rgba(255,255,255,.1);color:#a8b0bd;background:rgba(255,255,255,.035)}
+.motion-footnote{border-top:1px solid rgba(255,255,255,.075);padding-top:9px;margin-top:12px;color:#687283;font-size:7px;line-height:1.45}
+body.reduce-motion .motion-preview.is-playing .preview-orbit,body.reduce-motion .motion-preview.is-playing .preview-core{animation:none!important}
+@media(max-width:780px){.motion-studio-content{grid-template-columns:1fr}.motion-side{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:center}.motion-preview{grid-row:span 2;margin:0}.motion-speed-head{align-self:end}.motion-presets{align-self:start}}
+@media(max-width:520px){.motion-studio-head{align-items:flex-start}.motion-live{font-size:7px}.motion-option-grid{grid-template-columns:1fr}.settings-version{display:none}}
+
+#nativeBridgeStatus[data-state="connected"]{border-color:rgba(61,190,126,.35);color:#8be0b0}
+#nativeBridgeStatus[data-state="web-preview"]{border-color:rgba(244,174,74,.35);color:#e9bd78}
+#nativeBridgeStatus[data-state="checking"]{color:#aab2bf}
+#nativeBridgeStatus{cursor:pointer;user-select:none}
+#nativeBridgeStatus:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* v2.6.2 COMPACT GAME SPACE + DIABLO CONSOLE */
+.topbar{height:52px;padding:0 15px}
+.workspace{grid-template-columns:58px minmax(0,1fr);gap:10px;padding:9px 11px 11px}
+.rail{padding:8px 5px;gap:5px;border-radius:12px}
+.rail-btn{width:43px;height:40px;border-radius:9px}
+.rail-btn svg{width:18px;height:18px}
+.rail-game{width:34px;height:32px;border-radius:8px;font-size:15px}
+.main{gap:8px}
+.page-head{height:32px}
+.page-title{font-size:14px}
+.eyebrow{font-size:7px}
+.subtle-btn{font-size:8px;padding:6px 8px}
+.scan-btn{width:28px;height:28px}
+.lobby-grid{gap:9px}
+.game-library{padding:10px;border-radius:12px}
+.section-head{margin-bottom:7px}
+.section-title{font-size:11px}
+.section-meta{font-size:7px;margin-top:2px}
+.section-action{font-size:8px;padding:5px}
+.game-grid{grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:82px;gap:6px;padding:2px 1px 5px}
+.game-card{gap:4px;padding:5px 4px 4px;border-radius:9px}
+.game-icon{height:43px;width:43px;flex-basis:43px;border-radius:10px;font-size:21px}
+.game-card.selected .game-icon{animation:none}
+.game-name{font-size:8px}
+.game-footer{gap:3px}
+.game-sub{font-size:5px;letter-spacing:.04em}
+.game-open{width:19px;height:18px;flex-basis:19px;border-radius:5px}
+.game-open svg{width:10px;height:10px}
+.game-empty{min-height:115px;padding:12px;gap:6px}
+.game-empty strong{font-size:11px}
+.game-empty span{font-size:8px}
+.selected-bar{min-height:35px;margin-top:5px;padding-top:6px;gap:6px}
+.selected-copy strong{font-size:9px}
+.selected-copy span{font-size:7px;margin-top:2px}
+.selected-launch{height:27px;padding:0 10px;font-size:8px}
+.launch-wrap{gap:5px}
+.home-side{gap:7px}
+.panel-card{padding:9px;border-radius:11px}
+.panel-head{margin-bottom:7px}
+.panel-title{font-size:8px}
+.panel-meta{font-size:6px}
+.stats-grid{gap:5px}
+.stat{padding:6px;border-radius:7px}
+.stat-label{font-size:6px}
+.stat-value{font-size:14px;margin-top:3px}
+.stat-unit{font-size:7px}
+.stat-foot{font-size:6px;margin-top:2px;min-height:8px}
+.stat-bar{margin-top:5px;height:2px}
+.mode-card .mode-list{gap:5px}
+.mode-btn{min-height:39px;padding:5px 3px;gap:3px;border-radius:7px}
+.mode-btn svg{width:13px;height:13px}
+.mode-btn span{font-size:7px}
+.mode-note{font-size:7px;margin-top:5px;line-height:1.25}
+.tool-grid{gap:5px}
+.tool-btn{min-height:39px;padding:5px 6px;gap:5px;font-size:7px}
+.tool-btn svg{width:13px;height:13px}
+.performance-extra{margin-top:6px;padding:6px;gap:6px}
+.performance-extra .ram-button{height:30px;font-size:8px}
+.performance-extra .shizuku-connect{height:28px;font-size:7px}
+.footnote{font-size:6px}
+.library-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:7px}
+.library-card{min-height:92px;padding:8px;border-radius:9px}
+.library-emoji{width:42px;height:42px;border-radius:9px;font-size:20px}
+.library-name{font-size:9px;margin-top:5px}
+.library-package{font-size:6px}
+.library-play{right:7px;bottom:7px;padding:4px 5px;font-size:6px}
+@media(max-width:1050px){.game-grid{grid-template-columns:repeat(5,minmax(0,1fr));grid-auto-rows:78px}}
+@media(max-width:760px){.workspace{grid-template-columns:50px minmax(0,1fr);padding:6px;gap:6px}.rail-btn{width:39px;height:37px}.lobby-grid{grid-template-columns:1fr;grid-template-rows:minmax(180px,1fr) auto;gap:7px}.game-grid{grid-template-columns:repeat(5,minmax(0,1fr));grid-auto-rows:75px}.home-side{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}.home-side>.panel-card:first-child{grid-column:1/-1}.stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:500px){.game-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.home-side{grid-template-columns:1fr}.home-side>.panel-card:first-child{grid-column:auto}}
+/* DIABLO full-screen performance console */
+.diablo-screen{display:none;position:fixed;z-index:80;inset:0;background:radial-gradient(ellipse at 35% 48%,#361019 0,#120a0f 35%,#07090e 75%);color:#f4f6fa;overflow:auto;padding:clamp(10px,2vw,22px)}
+.diablo-screen.open{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px;animation:diabloIn .28s ease both}
+@keyframes diabloIn{from{opacity:0;transform:scale(1.015)}to{opacity:1;transform:scale(1)}}
+.diablo-screen:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.16;background:linear-gradient(120deg,transparent 0 48%,#ff243b22 48.2%,transparent 48.5%),repeating-linear-gradient(0deg,transparent 0 34px,#ffffff08 35px)}
+.diablo-top,.diablo-main,.diablo-bottom{position:relative;z-index:1}
+.diablo-top{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #ffffff16;padding-bottom:9px}
+.diablo-brand{font-size:14px;font-weight:950;letter-spacing:.2em}.diablo-sub{font-size:7px;color:#9b8790;letter-spacing:.2em;margin-top:3px}
+.diablo-pill{border:1px solid #a92c43;background:#2b111a;color:#ff8190;border-radius:99px;padding:6px 10px;font-size:8px;letter-spacing:.1em;font-weight:850}
+.diablo-back{border:1px solid #4b3038;background:#171016;border-radius:8px;padding:8px 11px;color:#e9dce0;font-size:8px;font-weight:850}
+.diablo-main{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(340px,1.1fr);gap:12px;min-height:0}
+.diablo-left,.diablo-right{border:1px solid #ffffff18;background:linear-gradient(145deg,#17131bde,#0c0e15e8);border-radius:14px;padding:clamp(10px,1.4vw,16px);min-width:0}
+.diablo-kicker{font-size:7px;letter-spacing:.2em;color:#ff687b;font-weight:900}.diablo-section-title{font-size:12px;font-weight:950;letter-spacing:.08em;margin-top:4px}
+.diablo-core-wrap{display:grid;grid-template-columns:minmax(145px,1fr) minmax(100px,.7fr);align-items:center;gap:10px;margin-top:7px}
+.diablo-core{aspect-ratio:1;width:min(100%,245px);margin:auto;border-radius:50%;position:relative;display:grid;place-items:center;background:radial-gradient(circle,#f4263d 0 5%,#681323 18%,#190d15 36%,#090b11 62%);border:7px solid #4a2530;box-shadow:inset 0 0 24px #ff203c66,0 0 0 5px #24141c,0 0 34px #ed1a3e35}
+.diablo-core:before,.diablo-core:after{content:"";position:absolute;inset:9%;border-radius:50%;border:1px dashed #ff6c7d88;animation:diabloSpin 28s linear infinite}.diablo-core:after{inset:20%;border-style:solid;border-color:#ffffff44;animation-direction:reverse;animation-duration:16s}
+@keyframes diabloSpin{to{transform:rotate(360deg)}}
+.diablo-core-mark{font-size:36px;font-weight:950;text-shadow:0 0 16px #ff203b;z-index:1}.diablo-core-caption{position:absolute;bottom:15%;font-size:6px;letter-spacing:.25em;color:#ffc2ca;z-index:1}
+.diablo-readouts{display:grid;gap:7px}.diablo-readout{border:1px solid #ffffff14;background:#090c12b8;border-radius:8px;padding:8px}.diablo-readout span{display:block;font-size:6px;color:#a8aeb9;letter-spacing:.12em}.diablo-readout strong{display:block;font-size:16px;margin-top:4px}.diablo-readout small{font-size:6px;color:#77818f}
+.diablo-right{display:flex;flex-direction:column;gap:9px}.diablo-action-row{display:flex;gap:7px;align-items:center}.diablo-primary{flex:1;background:linear-gradient(100deg,#f21e39,#a90c2b);border:1px solid #ff687e;border-radius:8px;padding:10px 12px;font-size:9px;font-weight:950;letter-spacing:.12em;color:#fff;box-shadow:0 5px 20px #e61f393a}.diablo-secondary{border:1px solid #4b3038;border-radius:8px;background:#17131b;padding:9px 10px;font-size:8px;font-weight:850;color:#e6dce1}
+.diablo-mini-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.diablo-mini{border:1px solid #ffffff15;background:#0c0f16;border-radius:7px;padding:7px}.diablo-mini b{display:block;font-size:11px}.diablo-mini span{display:block;color:#808895;font-size:6px;margin-top:3px;letter-spacing:.1em}
+.diablo-feature-head{display:flex;justify-content:space-between;align-items:center}.diablo-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;overflow:auto;min-height:0}
+.diablo-feature{border:1px solid #ffffff15;background:#10131b;border-radius:8px;padding:7px;display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center;min-width:0}.diablo-feature b{font-size:7px;display:block}.diablo-feature small{display:block;color:#818a98;font-size:6px;margin-top:3px;line-height:1.3}.diablo-feature em{font-style:normal;font-size:6px;color:#efb5bd;border:1px solid #63303d;border-radius:99px;padding:4px 5px;white-space:nowrap}
+.diablo-log{border:1px solid #ffffff15;background:#070a10;border-radius:8px;padding:8px;color:#98a3b0;font:7px/1.5 ui-monospace,monospace;white-space:pre-wrap;max-height:64px;overflow:auto}.diablo-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#717c8c;font-size:7px}
+@media(max-width:760px){.diablo-main{grid-template-columns:1fr;overflow:auto}.diablo-core-wrap{grid-template-columns:minmax(130px,.8fr) minmax(100px,1fr)}.diablo-core{max-width:185px}.diablo-screen.open{overflow:auto}.diablo-feature-grid{overflow:visible}}
+@media(max-width:480px){.diablo-mini-stats{grid-template-columns:repeat(2,1fr)}.diablo-top{flex-wrap:wrap}.diablo-feature-grid{grid-template-columns:1fr}}
+
+
+/* 2.6.3 VISUAL POLISH: softer glass, restrained motion, animated transitions */
+:root{--radius:14px}
+.panel-card,.game-library,.library-card,.panel-card,.mode-card,.stat,.tool-btn,.game-card,.rail{border-color:rgba(255,255,255,.075)!important;box-shadow:0 8px 26px rgba(0,0,0,.18)!important}
+.panel-card,.game-library,.library-card,.mode-card,.stat,.tool-btn,.game-card,.rail,.overlay-panel{backdrop-filter:blur(14px)!important}
+.game-card,.library-card,.mode-btn,.tool-btn,.panel-card,.stat,.rail-btn,.icon-btn{transition:transform .22s cubic-bezier(.2,.75,.2,1),border-color .22s ease,background .22s ease,box-shadow .22s ease!important}
+.game-card:active,.library-card:active,.mode-btn:active,.tool-btn:active{transform:scale(.975)}
+.mode-btn.active{box-shadow:0 0 18px rgba(var(--accent-rgb),.17),inset 0 0 14px rgba(var(--accent-rgb),.06)!important}
+.overlay-panel{border:1px solid rgba(255,255,255,.12)!important;border-right:0!important;border-radius:20px 0 0 20px!important;background:linear-gradient(145deg,rgba(19,22,30,.96),rgba(9,11,16,.97))!important;box-shadow:-18px 0 55px rgba(0,0,0,.48),inset 1px 0 rgba(255,255,255,.03)!important}
+.overlay-panel.open{animation:overlayArrival .42s cubic-bezier(.18,.8,.2,1) both}
+@keyframes overlayArrival{0%{transform:translate(105%,-50%);opacity:.35}70%{transform:translate(-2%,-50%)}100%{transform:translate(0,-50%);opacity:1}}
+.diablo-screen.open{animation:diabloCinematic .62s cubic-bezier(.16,.82,.2,1) both!important}
+@keyframes diabloCinematic{0%{opacity:0;transform:scale(.96);filter:blur(9px)}45%{opacity:1;filter:blur(2px)}100%{transform:scale(1);filter:blur(0)}}
+.diablo-screen:before{opacity:.22;background:radial-gradient(ellipse at 50% 50%,#ff1d3a24,transparent 62%),linear-gradient(120deg,transparent 0 48%,#ff243b15 48.2%,transparent 48.5%),repeating-linear-gradient(0deg,transparent 0 36px,#ffffff05 37px)!important}
+.diablo-core{animation:coreIgnition .75s cubic-bezier(.2,.8,.2,1) both;box-shadow:inset 0 0 30px #ff203c77,0 0 0 5px #24141c,0 0 42px #ed1a3e44!important}
+@keyframes coreIgnition{0%{transform:scale(.72);filter:brightness(.3)}45%{transform:scale(1.06);filter:brightness(1.5)}100%{transform:scale(1);filter:brightness(1)}}
+.diablo-readout,.diablo-feature,.diablo-mini{animation:diabloTile .5s cubic-bezier(.2,.8,.2,1) both}
+.diablo-readout:nth-child(2),.diablo-feature:nth-child(2){animation-delay:.06s}.diablo-readout:nth-child(3),.diablo-feature:nth-child(3){animation-delay:.12s}.diablo-feature:nth-child(4){animation-delay:.18s}
+@keyframes diabloTile{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+.gt-intro{position:fixed;inset:0;z-index:999;background:radial-gradient(ellipse at 50% 50%,#1d1118,#08090e 65%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;overflow:hidden;transition:opacity .65s ease,visibility .65s ease}.gt-intro.dismiss{opacity:0;visibility:hidden;pointer-events:none}.intro-core{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;border:1px solid #ff435766;background:radial-gradient(circle,#ed1837 0,#571021 30%,#101017 68%);box-shadow:0 0 28px #ff243b55,inset 0 0 25px #ff243b44;animation:introPulse 1.6s ease-in-out infinite}.intro-core span{font-size:32px;font-weight:950;letter-spacing:-.08em;text-shadow:0 0 20px #ff304e}.intro-name{font-size:21px;font-weight:950;letter-spacing:.25em;margin-top:13px}.intro-name span{color:#ff344e}.intro-tag{font-size:9px;color:#777f90;letter-spacing:.32em}.intro-progress{width:150px;height:2px;background:#ffffff13;margin-top:20px;overflow:hidden}.intro-progress i{display:block;height:100%;width:100%;background:linear-gradient(90deg,transparent,#ff2e49,transparent);animation:introSweep 1.7s ease-in-out infinite}.intro-sound{margin-top:20px;border:1px solid #ffffff1c;border-radius:30px;padding:9px 13px;background:#ffffff08;color:#b7bbc6;font-size:9px;letter-spacing:.12em}.intro-orbit{position:absolute;width:260px;height:260px;border-radius:50%;border:1px solid #ff243b13;pointer-events:none}.orbit-a{animation:introOrbit 12s linear infinite}.orbit-b{width:320px;height:320px;border-color:#ffffff08;animation:introOrbit 19s linear infinite reverse}.intro-orbit:after{content:'';position:absolute;top:20%;left:3%;width:4px;height:4px;border-radius:50%;background:#ff324b;box-shadow:0 0 12px #ff324b}.@keyframes introPulse{50%{transform:scale(1.06);box-shadow:0 0 44px #ff243b66,inset 0 0 30px #ff243b55}}@keyframes introSweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}@keyframes introOrbit{to{transform:rotate(360deg)}}
+
+</style>
+
+<style>
+/* LANDSCAPE-FIRST PATCH: compact phone/tablet horizontal layout */
+@media (max-width:760px) and (orientation:landscape){
+ .app{grid-template-rows:50px minmax(0,1fr)!important}
+ .workspace{grid-template-columns:54px minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;padding:7px!important;gap:8px!important}
+ .rail{padding:6px 4px!important}.rail-btn{width:42px!important;height:39px!important}
+ .lobby-grid{grid-template-columns:minmax(0,1fr) minmax(245px,.8fr)!important;grid-template-rows:minmax(0,1fr)!important;overflow:hidden!important;gap:8px!important}
+ .game-grid{grid-template-columns:repeat(4,minmax(60px,1fr))!important;grid-auto-rows:minmax(90px,1fr)!important;gap:7px!important}
+ .game-icon{width:48px!important;height:48px!important;flex-basis:48px!important;font-size:22px!important}
+ .game-card{padding:8px!important;min-height:0!important}
+ .home-side{grid-template-rows:max-content max-content minmax(0,1fr)!important;overflow-y:auto!important;gap:7px!important}
+ .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+ .panel-card{padding:9px!important}.tools-card{min-height:0!important}
+ .topbar{padding:0 12px!important}.brand-name{font-size:11px!important}
+}
+/* If the device is physically held portrait, rotate the interface as a landscape canvas. */
+@media (max-width:760px) and (orientation:portrait){
+ .app{position:fixed!important;top:0;left:0;width:100dvh!important;height:100vw!important;max-width:none!important;transform:rotate(90deg) translateY(-100%)!important;transform-origin:top left!important;overflow:hidden!important}
+ .app{grid-template-rows:50px minmax(0,1fr)!important}
+ .workspace{grid-template-columns:54px minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;padding:7px!important;gap:8px!important}
+ .rail{padding:6px 4px!important}.rail-btn{width:42px!important;height:39px!important}
+ .lobby-grid{grid-template-columns:minmax(0,1fr) minmax(245px,.8fr)!important;grid-template-rows:minmax(0,1fr)!important;overflow:hidden!important;gap:8px!important}
+ .game-grid{grid-template-columns:repeat(4,minmax(60px,1fr))!important;grid-auto-rows:minmax(90px,1fr)!important;gap:7px!important}
+ .game-icon{width:48px!important;height:48px!important;flex-basis:48px!important;font-size:22px!important}
+ .game-card{padding:8px!important;min-height:0!important}.home-side{grid-template-rows:max-content max-content minmax(0,1fr)!important;overflow-y:auto!important;gap:7px!important}
+ .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}.panel-card{padding:9px!important}
+ .topbar{padding:0 12px!important}.brand-name{font-size:11px!important}
+}
+
+/* ===== v2.4 gamer ===== */
+.mode-card .mode-list{grid-template-columns:repeat(4,minmax(0,1fr))}
+.mode-btn[data-mode=eco]{--mc:61,220,132}.mode-btn[data-mode=balance]{--mc:62,155,255}.mode-btn[data-mode=rise]{--mc:255,159,28}.mode-btn[data-mode=diablo]{--mc:255,45,67}
+.mode-card .mode-btn{border-top:2px solid rgba(var(--mc),.6)}.mode-card .mode-btn svg{color:rgb(var(--mc))}
+.mode-card .mode-btn.active{color:#fff;background:linear-gradient(180deg,rgba(var(--mc),.26),rgba(var(--mc),.08));border-color:rgb(var(--mc));box-shadow:0 0 16px rgba(var(--mc),.38),inset 0 -2px rgb(var(--mc))}
+.panel-card{box-shadow:0 0 0 1px rgba(var(--accent-rgb),.10),0 10px 30px rgba(0,0,0,.35)}
+.opt-center{margin-top:10px;padding:10px;border:1px solid rgba(var(--accent-rgb),.45);border-radius:12px;background:linear-gradient(140deg,rgba(var(--accent-rgb),.12),rgba(8,10,14,.6))}
+.shz-row{display:flex;align-items:center;gap:9px;margin-bottom:9px}.shz-copy{flex:1;min-width:0}.shz-copy strong{display:block;font-size:9px;letter-spacing:.12em}
+.opt-center .shizuku-state{display:block;font-size:8px;color:#9aa3b1;line-height:1.35;margin-top:2px}
+.shz-dot{width:10px;height:10px;border-radius:50%;background:#ff3b4e;box-shadow:0 0 10px #ff3b4e}.shz-dot[data-state=READY]{background:#3ddc84;box-shadow:0 0 10px #3ddc84}.shz-dot[data-state=NEED_PERMISSION]{background:#ffb020;box-shadow:0 0 10px #ffb020}
+.opt-center .shizuku-connect,.opt-links .shizuku-connect{height:32px;padding:0 10px;border:1px solid #464b55;border-radius:7px;color:#cbd1da;font-size:8px;font-weight:850;background:#171a20}
+.opt-center .shizuku-connect:disabled{opacity:.55}
+.act-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.act-btn{height:38px;border-radius:9px;border:1px solid rgba(var(--accent-rgb),.55);background:#12151c;color:#fff;font-size:9px;font-weight:900;letter-spacing:.06em}
+.act-btn:active{transform:scale(.97)}.act-btn:disabled{opacity:.5}
+.act-btn.boost{background:linear-gradient(100deg,rgba(var(--accent-rgb),.85),rgba(var(--accent-rgb),.45));border-color:rgb(var(--accent-rgb))}
+.result-box{margin:9px 0 0;padding:9px 10px;max-height:150px;overflow:auto;white-space:pre-wrap;word-break:break-word;border:1px solid rgba(var(--accent-rgb),.35);border-radius:9px;background:#0b0d12;color:#d6dce6;font:8.5px/1.5 ui-monospace,Menlo,monospace}
+.opt-links{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+#shizukuChip{cursor:pointer;user-select:none}#shizukuChip[data-state=READY]{border-color:rgba(61,220,132,.45);color:#8be0b0}#shizukuChip[data-state=NEED_PERMISSION]{border-color:rgba(255,176,32,.5);color:#ffcf6b}#shizukuChip[data-state=OFF]{border-color:rgba(255,59,78,.45);color:#ff8a96}
+.shz-card{border:1px solid rgba(var(--accent-rgb),.4);border-radius:16px;padding:16px;margin:0 0 14px;background:linear-gradient(140deg,rgba(var(--accent-rgb),.10),rgba(15,17,24,.96))}
+.shz-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.shz-badge{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:99px;border:1px solid rgba(255,59,78,.5);color:#ff8a96;font-size:9px;font-weight:900;letter-spacing:.08em;white-space:nowrap}
+.shz-badge i{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 9px currentColor}
+.shz-badge[data-state=READY]{border-color:rgba(61,220,132,.55);color:#5fe6a0}.shz-badge[data-state=NEED_PERMISSION]{border-color:rgba(255,176,32,.55);color:#ffcf6b}
+.shz-steps{margin:8px 0 12px 18px;padding:0;font-size:11px;line-height:1.7;color:#b9c1ce}.shz-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ===== v2.4 tela principal limpa: só os jogos, em carrossel ===== */
+#homeView.lobby-grid{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr) auto!important;gap:9px!important;overflow:hidden!important}
+#homeView .game-library{padding:10px 12px 8px!important;align-items:stretch;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--accent-rgb),.16),rgba(12,14,19,.96) 62%)!important;border-color:rgba(var(--accent-rgb),.35)!important}
+#homeView .section-head{justify-content:center!important;text-align:center;margin-bottom:2px!important}
+#homeView #viewAllGames{display:none!important}
+#homeView .game-grid{--cw:clamp(112px,19vw,158px);display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;align-items:center!important;padding:8px calc(50% - var(--cw)/2)!important;grid-template-columns:none!important;grid-auto-rows:unset!important;scrollbar-width:none}
+#homeView .game-grid::-webkit-scrollbar{display:none}
+#homeView .game-card{flex:0 0 var(--cw)!important;height:min(100%,176px)!important;min-height:112px!important;scroll-snap-align:center;animation:none!important;opacity:.62;transform:scale(.9);transition:transform .22s,opacity .22s,border-color .22s,box-shadow .22s!important}
+#homeView .game-card.selected{opacity:1;transform:scale(1.04);border-color:rgb(var(--accent-rgb))!important;box-shadow:0 0 22px rgba(var(--accent-rgb),.45),0 8px 22px rgba(0,0,0,.5)!important}
+#homeView .game-empty{flex:1 1 100%}
+#homeView .selected-bar{justify-content:center!important;gap:18px!important;border-top-color:rgba(var(--accent-rgb),.25)!important}
+#homeView .selected-copy{text-align:center;min-width:0;max-width:46%}
+#homeView .selected-copy strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#homeView .selected-copy span{display:block;font-size:8px;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.launch-wrap{display:flex;gap:8px;align-items:center}
+.boost-mini{background:#15181f!important;border:1px solid rgba(var(--accent-rgb),.65)!important;color:#fff!important;box-shadow:none!important}
+#homeView .selected-launch{min-width:112px;height:38px;font-weight:900;letter-spacing:.08em}
+#homeView .home-side{display:grid!important;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)!important;grid-template-rows:none!important;gap:9px!important;overflow:visible!important;align-items:stretch}
+#homeView .home-side .panel-head{display:none!important}
+#homeView .home-side .panel-card{padding:8px 10px!important;border-radius:13px}
+#homeView .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important}
+#homeView .stat{padding:6px 7px!important;text-align:center}
+#homeView .stat-foot,#homeView .stat-bar{display:none!important}
+#homeView .stat-label{font-size:7px!important}#homeView .stat-value{font-size:15px!important}
+#homeView .mode-card .mode-list{gap:6px!important}
+#homeView .mode-btn{min-height:40px!important;padding:5px 3px!important;gap:3px!important}
+#homeView .mode-btn svg{width:14px;height:14px}
+#homeView .mode-note{margin-top:5px!important;font-size:8px;line-height:1.3;max-height:2.7em;overflow:hidden}
+.rail [data-view=library],.rail #railGames,.rail .rail-foot,.rail .rail-label:nth-of-type(2){display:none!important}
+.tools-hub{display:grid;gap:12px;margin-bottom:14px}
+.tools-hub .footnote{opacity:.75}
+#homeView ~ .content-view{min-height:0}
+#infoDialog .dialog p{white-space:pre-wrap;max-height:60vh;overflow:auto}
+
+/* ===== v2.5 / biblioteca compacta ===== */
+#homeView .game-library{padding:12px 14px 9px!important;gap:0!important;border-radius:16px!important;background:linear-gradient(145deg,rgba(23,27,36,.98),rgba(11,13,18,.98))!important;border-color:rgba(255,255,255,.11)!important}
+#homeView .section-head{justify-content:space-between!important;text-align:left!important;margin-bottom:9px!important}
+#homeView .section-title{font-size:13px!important;letter-spacing:.02em}
+#homeView .section-meta{font-size:7px!important;letter-spacing:.13em!important}
+#homeView #viewAllGames{display:inline-flex!important;align-items:center;color:#aeb7c5!important;font-size:8px!important;padding:5px 7px!important}
+#homeView #viewAllGames em{color:var(--accent)!important}
+#homeView .game-grid{display:flex!important;flex:1 1 auto!important;flex-wrap:nowrap!important;align-items:stretch!important;justify-content:flex-start!important;gap:9px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x proximity!important;padding:3px 2px 8px!important;scrollbar-width:thin!important;scrollbar-color:#39404d transparent!important;min-height:0!important}
+#homeView .game-card{position:relative!important;flex:0 0 102px!important;width:102px!important;height:100%!important;min-height:102px!important;max-height:132px!important;opacity:1!important;transform:none!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;padding:9px 7px 7px!important;border-radius:12px!important;background:linear-gradient(155deg,#202530,#141820)!important;border:1px solid rgba(255,255,255,.09)!important;box-shadow:none!important;scroll-snap-align:start!important;animation:none!important}
+#homeView .game-card.selected{transform:translateY(-2px)!important;background:linear-gradient(155deg,rgba(var(--accent-rgb),.18),#151820 75%)!important;border-color:rgba(var(--accent-rgb),.9)!important;box-shadow:inset 0 -2px var(--accent),0 5px 17px rgba(var(--accent-rgb),.13)!important}
+#homeView .game-card.selected .game-icon{animation:none!important;box-shadow:0 0 0 1px rgba(var(--accent-rgb),.3),0 5px 13px #0008!important}
+#homeView .game-icon{width:49px!important;height:49px!important;flex:0 0 49px!important;border-radius:12px!important;font-size:22px!important}
+#homeView .game-name{font-size:9px!important;line-height:1.15!important;max-width:100%!important}
+#homeView .game-footer{justify-content:center!important}
+#homeView .game-sub{display:none!important}
+#homeView .game-open{width:20px!important;height:18px!important;flex-basis:20px!important;border-radius:6px!important}
+#homeView .selected-bar{min-height:44px!important;justify-content:space-between!important;gap:10px!important;padding:8px 2px 0!important;margin-top:5px!important;border-top:1px solid rgba(255,255,255,.09)!important}
+#homeView .selected-copy{text-align:left!important;max-width:none!important;min-width:0!important}
+#homeView .selected-copy strong{font-size:12px!important}
+#homeView .selected-copy span{font-size:7px!important;opacity:.72!important}
+#homeView .launch-wrap{gap:7px!important;flex-shrink:0!important}
+#homeView .selected-launch{min-width:88px!important;height:33px!important;padding:0 11px!important;font-size:8px!important}
+#homeView .home-side{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;grid-template-rows:none!important;gap:9px!important;overflow:visible!important;align-items:stretch!important}
+#homeView .home-side .panel-head{display:flex!important;align-items:center!important;margin-bottom:7px!important}
+#homeView .home-side .panel-meta{display:none!important}
+#homeView .home-side .panel-card{padding:9px 10px!important;border-radius:13px!important;background:linear-gradient(145deg,#171b23,#101319)!important;box-shadow:none!important}
+#homeView .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+#homeView .stat{padding:6px 5px!important;text-align:center!important;background:#1b2029!important;border-color:rgba(255,255,255,.06)!important}
+#homeView .stat-label{font-size:6px!important;letter-spacing:.07em!important}
+#homeView .stat-value{font-size:14px!important;margin-top:5px!important}
+#homeView .stat-foot,#homeView .stat-bar{display:none!important}
+#homeView .mode-card .mode-list{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+#homeView .mode-btn{min-height:39px!important;padding:5px 2px!important;gap:3px!important}
+#homeView .mode-btn svg{width:13px!important;height:13px!important}
+#homeView .mode-btn span{font-size:7px!important}
+#homeView .mode-note{margin-top:6px!important;font-size:7px!important;line-height:1.25!important;max-height:2.6em!important;overflow:hidden!important}
+@media(max-width:760px){
+ #homeView .game-card{flex-basis:90px!important;width:90px!important;min-height:92px!important}
+ #homeView .game-icon{width:44px!important;height:44px!important;flex-basis:44px!important}
+ #homeView .home-side{gap:6px!important}
+ #homeView .home-side .panel-card{padding:7px!important}
+ #homeView .stat-value{font-size:12px!important}
+ #homeView .selected-launch{min-width:72px!important}
+}
+</style>
+<style>
+/* v2.6.2 — cards da biblioteca sem sobreposição entre pacote e botão */
+.library-grid{grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;align-content:start}
+.library-card{min-height:142px;padding:12px;gap:8px;justify-content:flex-start}
+.library-emoji{width:50px;height:50px;flex:0 0 50px;border-radius:11px;overflow:hidden}
+.library-details{display:flex;flex:1;flex-direction:column;gap:7px;min-width:0;width:100%}
+.library-name{font-size:11px;line-height:1.2;margin-top:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.library-footer{display:flex;align-items:center;gap:6px;min-width:0;width:100%;margin-top:auto}
+.library-package{flex:1;min-width:0;margin-top:0;font-size:7px}
+.library-play{position:static;flex:0 0 auto;display:flex;align-items:center;justify-content:center;min-height:26px;padding:5px 7px;white-space:nowrap}
+@media(max-width:760px){.library-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}.library-card{min-height:132px;padding:10px}.library-emoji{width:44px;height:44px;flex-basis:44px}}
+</style>
+<style id="gt-compact-final-v262">
+/* Final size overrides: densidade prioriza conteúdo útil, sem letras ou alvos minúsculos demais. */
+@media (orientation:landscape){
+ .app{grid-template-rows:46px minmax(0,1fr)!important}
+ .topbar{padding:0 10px!important}.brand-mark{width:27px!important;height:27px!important}.brand-name{font-size:10px!important}.brand-sub{font-size:7px!important}
+ .workspace{grid-template-columns:48px minmax(0,1fr)!important;padding:6px!important;gap:7px!important}
+ .rail{padding:5px 3px!important;gap:4px!important}.rail-btn{width:37px!important;height:35px!important}.rail-btn svg{width:16px!important;height:16px!important}
+ .main{gap:6px!important}.page-head{height:28px!important}.page-title{font-size:12px!important}.eyebrow{font-size:6px!important}.head-right{gap:5px!important}.subtle-btn{font-size:7px!important;padding:5px 7px!important}.scan-btn{width:24px!important;height:24px!important}
+ #homeView .game-library{padding:8px 9px 6px!important;border-radius:11px!important}
+ #homeView .section-head{margin-bottom:5px!important}.section-title{font-size:10px!important}.section-meta{font-size:6px!important}
+ #homeView .game-grid{gap:7px!important;padding:2px 1px 5px!important}
+ #homeView .game-card{flex:0 0 80px!important;width:80px!important;height:86px!important;min-height:80px!important;max-height:86px!important;padding:6px 4px!important;gap:4px!important;border-radius:9px!important}
+ #homeView .game-icon{width:38px!important;height:38px!important;flex:0 0 38px!important;border-radius:9px!important;font-size:19px!important}
+ #homeView .game-name{font-size:7px!important}.game-open{width:17px!important;height:16px!important;flex-basis:17px!important}
+ #homeView .selected-bar{min-height:32px!important;padding:5px 1px 0!important;margin-top:3px!important;gap:7px!important}
+ #homeView .selected-copy strong{font-size:10px!important}#homeView .selected-copy span{font-size:6px!important}
+ #homeView .selected-launch{min-width:70px!important;height:27px!important;padding:0 8px!important;font-size:7px!important}
+ #homeView .home-side{gap:6px!important}
+ #homeView .home-side .panel-card{padding:7px!important;border-radius:9px!important}
+ #homeView .home-side .panel-head{margin-bottom:5px!important}.panel-title{font-size:7px!important}
+ #homeView .stats-grid{gap:4px!important}.stat{padding:5px 3px!important;border-radius:6px!important}.stat-label{font-size:5px!important}.stat-value{font-size:12px!important;margin-top:3px!important}.stat-unit{font-size:6px!important}
+ #homeView .mode-card .mode-list{gap:4px!important}.mode-btn{min-height:32px!important;padding:3px 2px!important;border-radius:6px!important}.mode-btn svg{width:11px!important;height:11px!important}.mode-btn span{font-size:6px!important}.mode-note{font-size:6px!important;margin-top:4px!important}
+}
+@media(max-width:760px) and (orientation:portrait){
+ .diablo-screen{position:fixed!important;top:0!important;left:0!important;width:100dvh!important;height:100vw!important;transform:rotate(90deg) translateY(-100%)!important;transform-origin:top left!important;overflow:hidden!important;padding:8px!important}
+ .diablo-screen.open{grid-template-rows:auto minmax(0,1fr) auto!important}
+ .diablo-main{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;grid-template-rows:minmax(0,1fr)!important;overflow:hidden!important}
+ .diablo-left,.diablo-right{padding:7px!important;overflow:hidden!important}
+ .diablo-core-wrap{grid-template-columns:minmax(90px,1fr) minmax(72px,.75fr)!important;gap:6px!important}
+ .diablo-core{max-width:145px!important}
+ .diablo-readout{padding:5px!important}.diablo-readout strong{font-size:12px!important}
+ .diablo-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;overflow:auto!important}
+ .diablo-feature{padding:5px!important}.diablo-feature b{font-size:6px!important}
+ .diablo-log{max-height:42px!important}
+}
+@media(max-width:760px) and (orientation:landscape){
+ #homeView .game-card{flex-basis:73px!important;width:73px!important;height:78px!important;min-height:74px!important;max-height:78px!important}
+ #homeView .game-icon{width:34px!important;height:34px!important;flex-basis:34px!important}
+ #homeView .home-side .panel-card{padding:6px!important}
+}
+/* The Diablo overlay keeps the primary data readable even on short landscape displays. */
+.diablo-screen{padding:10px!important}.diablo-main{gap:9px!important}.diablo-left,.diablo-right{padding:10px!important}
+</style>
+<style id="gt-ignition-264">
+/* v2.6.4 — three-stage startup identity + synchronized DIABLO ignition */
+.gt-intro{isolation:isolate;background:radial-gradient(ellipse at 50% 48%,#281018 0,#101016 39%,#050609 78%);gap:0;padding:22px 18px;}
+.intro-grid{position:absolute;inset:0;z-index:-1;opacity:.22;background:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(ellipse at center,#000 8%,transparent 75%);}
+.intro-overline{font-size:8px;font-weight:800;letter-spacing:.28em;color:#78808e;margin-bottom:22px;opacity:.9}.intro-overline span{color:#ff4059;padding:0 7px}
+.intro-core{width:112px;height:112px;position:relative;flex:0 0 auto;border:1px solid #ff526c66;background:radial-gradient(circle,#f02b48 0,#73152b 24%,#22101a 55%,#090b11 74%);box-shadow:0 0 0 7px #ff334b0c,0 0 42px #ff243b30,inset 0 0 28px #ff243b55;animation:introPulse 2.6s ease-in-out infinite;}
+.intro-core-inner{position:absolute;inset:8px;border:1px solid #ff8b9a55;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 42% 35%,#ff8c9a55,transparent 36%);}
+.intro-core-inner span{font-size:35px;font-weight:950;letter-spacing:-.1em;color:#fff;text-shadow:0 0 22px #fff8,0 0 38px #ff304e;}
+.intro-core-flare{position:absolute;inset:-15px;border:1px solid #ff435733;border-radius:50%;transform:scale(.78);opacity:0;pointer-events:none;}
+.intro-phase{margin-top:23px;min-height:12px;color:#ff7889;font-size:8px;font-weight:900;letter-spacing:.27em;text-align:center;transition:opacity .3s ease,transform .3s ease;}
+.intro-name{margin-top:13px;font-size:25px;font-weight:950;letter-spacing:.22em;opacity:0;transform:translateY(10px);transition:opacity .55s ease,transform .65s cubic-bezier(.2,.8,.2,1);}
+.intro-name span{color:#f5f6f8}.intro-name em{font-style:normal;color:#ff405b;text-shadow:0 0 24px #ff244344}
+.intro-tag{margin-top:8px;letter-spacing:.34em;font-size:8px}
+.intro-progress{width:min(220px,60vw);height:2px;margin-top:25px;background:#ffffff14;border-radius:4px;}
+.intro-progress i{width:8%;transform-origin:left center;background:linear-gradient(90deg,#a70d2e,#ff526d,#ffd0d5);transition:width .65s cubic-bezier(.2,.8,.2,1);}
+.intro-actions{display:flex;align-items:center;gap:12px;margin-top:22px;}
+.intro-sound{margin:0;border:1px solid #ff4a6266;border-radius:30px;padding:10px 16px;background:linear-gradient(120deg,#511221bb,#190d15dd);color:#fff;font-size:9px;font-weight:850;letter-spacing:.13em;box-shadow:0 5px 24px #e51a3920;transition:background .2s ease,border-color .2s ease,transform .2s ease;}
+.intro-sound:active,.intro-skip:active{transform:scale(.97)}.intro-sound.sound-active{border-color:#55b98d;color:#9ce6c3;background:#0e2b22}
+.intro-sound:disabled{opacity:.7}.intro-skip{border:0;background:transparent;color:#7e8794;font-size:8px;font-weight:800;letter-spacing:.12em;padding:9px 4px}.intro-skip span{color:#ff536a;font-size:14px;margin-left:3px}
+.intro-footnote{position:absolute;bottom:18px;color:#525966;font-size:6px;letter-spacing:.3em}
+.gt-intro[data-phase="ignite"] .intro-core{animation:introIgnition .9s cubic-bezier(.18,.8,.2,1) both;}
+.gt-intro[data-phase="ignite"] .intro-core-flare{animation:introFlare .9s ease-out both;}
+.gt-intro[data-phase="online"] .intro-core{box-shadow:0 0 0 10px #ff334b0c,0 0 60px #ff243b55,inset 0 0 32px #ff243b66;}
+.gt-intro[data-phase="online"] .intro-name{opacity:1;transform:translateY(0)}
+.gt-intro[data-phase="online"] .intro-phase{color:#ffb7c0;}
+@keyframes introIgnition{0%{transform:scale(.82);filter:brightness(.55)}42%{transform:scale(1.13);filter:brightness(1.65)}72%{transform:scale(.97);filter:brightness(1.15)}100%{transform:scale(1);filter:brightness(1.2)}}
+@keyframes introFlare{0%{opacity:.9;transform:scale(.65)}100%{opacity:0;transform:scale(1.75)}}
+@keyframes diabloHeaderReveal{from{opacity:0;transform:translateY(-9px);filter:blur(4px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes diabloPanelReveal{from{opacity:0;transform:translateY(13px) scale(.985);filter:blur(5px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes diabloCoreIgnition264{0%{transform:scale(.58);filter:brightness(.35) blur(5px)}38%{transform:scale(1.1);filter:brightness(1.75) blur(0)}70%{transform:scale(.97);filter:brightness(1.2)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes diabloReadoutReveal{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.diablo-screen.diablo-boot .diablo-top{animation:diabloHeaderReveal .48s cubic-bezier(.2,.8,.2,1) both}
+.diablo-screen.diablo-boot .diablo-left,.diablo-screen.diablo-boot .diablo-right{animation:diabloPanelReveal .58s cubic-bezier(.2,.8,.2,1) .08s both}
+.diablo-screen.diablo-boot .diablo-core{animation:diabloCoreIgnition264 1.02s cubic-bezier(.16,.84,.22,1) .16s both!important}
+.diablo-screen.diablo-boot .diablo-readout{animation:diabloReadoutReveal .42s cubic-bezier(.2,.8,.2,1) both!important}
+.diablo-screen.diablo-boot .diablo-readout:nth-child(1){animation-delay:.5s!important}.diablo-screen.diablo-boot .diablo-readout:nth-child(2){animation-delay:.64s!important}.diablo-screen.diablo-boot .diablo-readout:nth-child(3){animation-delay:.78s!important}
+.diablo-screen.diablo-boot .diablo-action-row{animation:diabloPanelReveal .42s ease .52s both}
+.diablo-screen.diablo-boot .diablo-feature{animation:diabloReadoutReveal .38s ease both!important}
+.diablo-screen.diablo-boot .diablo-feature:nth-child(1){animation-delay:.72s!important}.diablo-screen.diablo-boot .diablo-feature:nth-child(2){animation-delay:.82s!important}.diablo-screen.diablo-boot .diablo-feature:nth-child(3){animation-delay:.92s!important}.diablo-screen.diablo-boot .diablo-feature:nth-child(4){animation-delay:1.02s!important}
+body.reduce-motion .gt-intro *,body.reduce-motion .diablo-screen.diablo-boot *{animation:none!important;transition:none!important;filter:none!important}
+@media(max-width:760px){.intro-core{width:92px;height:92px}.intro-name{font-size:20px}.intro-overline{margin-bottom:15px}.intro-phase{margin-top:17px}}
+</style>
+</head>
+<body>
+<div id="gtIntro" class="gt-intro" data-phase="boot" role="dialog" aria-label="Abertura Gamer Turbo">
+  <div class="intro-orbit orbit-a"></div><div class="intro-orbit orbit-b"></div><div class="intro-grid"></div>
+  <div class="intro-overline">GT SYSTEMS <span>•</span> PERFORMANCE INTERFACE</div>
+  <div class="intro-core"><div class="intro-core-inner"><span>GT</span></div><i class="intro-core-flare"></i></div>
+  <div id="introPhase" class="intro-phase" aria-live="polite">SISTEMA EM REPOUSO</div>
+  <div class="intro-name"><span>GAMER</span> <em>TURBO</em></div>
+  <div class="intro-tag">MOBILE GAME CENTER</div>
+  <div class="intro-progress"><i id="introProgressFill"></i></div>
+  <div class="intro-actions"><button id="introSound" class="intro-sound" type="button">♫ OUVIR ABERTURA</button><button id="introSkip" class="intro-skip" type="button">PULAR INTRO <span>›</span></button></div>
+  <div class="intro-footnote">DESIGNED FOR PERFORMANCE</div>
+</div>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">GT</div><div><div class="brand-name">GAMER TURBO</div><div class="brand-sub">MOBILE GAME CENTER</div></div></div>
+    <div class="top-actions"><div class="status-chip" id="nativeBridgeStatus" data-state="checking" role="button" tabindex="0" title="Toque para testar a integração Android"><i class="live-dot"></i><span>VERIFICANDO ANDROID...</span></div><div class="status-chip" id="shizukuChip" data-state="OFF" role="button" tabindex="0" title="Estado do Shizuku"><i class="live-dot"></i><span>SHIZUKU --</span></div><div class="status-chip" id="clock">--:--</div><button class="icon-btn" id="openQuick" aria-label="Abrir ferramentas rápidas" title="Ferramentas rápidas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="#11131a"/><circle cx="15" cy="12" r="2" fill="#11131a"/><circle cx="8" cy="18" r="2" fill="#11131a"/></svg></button><button class="icon-btn" id="openSettings" aria-label="Configurações" title="Configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/><path d="m19.4 13.5 1.1.9-1.5 2.6-1.4-.5a7.7 7.7 0 0 1-1.8 1l-.2 1.5h-3l-.3-1.5a7.7 7.7 0 0 1-1.8-1l-1.4.5-1.5-2.6 1.1-.9a7.2 7.2 0 0 1 0-2l-1.1-.9 1.5-2.6 1.4.5a7.7 7.7 0 0 1 1.8-1l.3-1.5h3l.2 1.5a7.7 7.7 0 0 1 1.8 1l1.4-.5 1.5 2.6-1.1.9a7.2 7.2 0 0 1 0 2Z" transform="translate(-1 -1)"/></svg></button></div>
+  </header>
+  <div class="workspace">
+    <nav class="rail" aria-label="Navegação principal">
+      <div class="rail-label">MENU</div>
+      <button class="rail-btn active" data-view="home" title="Central"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1Z"/></svg></button>
+      <button class="rail-btn" data-view="library" title="Biblioteca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="7" rx="2"/><rect x="13" y="13" width="8" height="7" rx="2"/></svg></button>
+      <button class="rail-btn" data-view="tools" title="Ferramentas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 6 18 2l4 4-4 4M4 20l10-10M8 4l2 2-4 4-2-2Zm8 8 4 4-4 4-4-4"/></svg></button>
+      <button class="rail-btn" data-view="timer" title="Cronômetro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6M12 2v3"/></svg></button>
+      <div class="rail-label" style="margin-top:9px">JOGOS</div><div id="railGames" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%"></div>
+      <div class="rail-spacer"></div>
+      <button class="rail-btn rail-add" id="railAdd" title="Adicionar jogo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button>
+      <div class="rail-foot">LANDSCAPE MODE</div>
+    </nav>
+
+    <main class="main">
+      <div class="page-head"><div><div class="eyebrow" id="pageEyebrow">WELCOME BACK / PLAYER</div><div class="page-title" id="pageTitle">GAME SPACE</div></div><div class="head-right"><button class="scan-btn" id="scanGamesBtn" title="Detectar jogos instalados" aria-label="Detectar jogos instalados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.8-2L20 12M4 12l2.6 5a7 7 0 0 0 11.8-2"/></svg></button><button class="subtle-btn" id="addGameBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> ADICIONAR JOGO</button></div></div>
+      <section class="lobby-grid" id="homeView">
+        <section class="game-library">
+          <div class="section-head">
+            <div><div class="section-title">Seus jogos</div><div class="section-meta">BIBLIOTECA DO DISPOSITIVO</div></div>
+            <button class="section-action" id="viewAllGames">VER TODOS <em>›</em></button>
+          </div>
+          <div class="game-grid" id="gameGrid"></div>
+          <div class="selected-bar"><div class="selected-copy"><strong id="selectedGameName">Nenhum jogo selecionado</strong><span id="selectedGameMeta">Detecte os jogos instalados para começar</span></div><div class="launch-wrap"><button class="selected-launch boost-mini" id="homeBoostBtn" title="Prioridade + fechar apps + limpar RAM">⚡ BOOST</button><button class="selected-launch" id="launchSelectedBtn" disabled>JOGAR</button></div></div>
+        </section>
+        <div class="home-side">
+          <section class="panel-card stats-card"><div class="panel-head"><div class="panel-title">STATUS DO DISPOSITIVO</div><div class="panel-meta">LEITURA DO ANDROID</div></div><div class="stats-grid">
+            <div class="stat"><div class="stat-label">BATERIA</div><div class="stat-value" id="batteryValue">--<span class="stat-unit">%</span></div><div class="stat-foot" id="batteryState">Aguardando leitura</div><div class="stat-bar"><span id="batteryBar" style="width:0"></span></div></div>
+            <div class="stat"><div class="stat-label">RAM USADA</div><div class="stat-value" id="ramValue">--<span class="stat-unit">%</span></div><div class="stat-foot" id="ramState">Aguardando leitura</div><div class="stat-bar"><span id="ramBar" style="width:0"></span></div></div>
+            <div class="stat"><div class="stat-label">TEMP. BATERIA</div><div class="stat-value" id="temperatureValue">--<span class="stat-unit">°C</span></div><div class="stat-foot" id="temperatureState">Sensor do aparelho</div><div class="stat-bar"><span id="temperatureBar" style="width:0"></span></div></div>
+            <div class="stat"><div class="stat-label">SESSÃO</div><div class="stat-value" id="sessionValue">00<span class="stat-unit"> min</span></div><div class="stat-foot">Tempo nesta central</div><div class="stat-bar"><span id="sessionBar" style="width:0"></span></div></div>
+          </div></section>
+          <section class="panel-card mode-card"><div class="panel-head"><div class="panel-title">MODO DE JOGO</div><div class="panel-meta">GT / CORE</div></div><div class="mode-list">
+            <button class="mode-btn" data-mode="eco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-14 14Z"/><path d="M5 19 13 11"/></svg><span>ECO</span></button>
+            <button class="mode-btn active" data-mode="balance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M5 7h14M7 7l-3 6a3 3 0 0 0 6 0L7 7Zm10 0-3 6a3 3 0 0 0 6 0l-3-6Z"/></svg><span>BALANCE</span></button>
+            <button class="mode-btn" data-mode="rise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20V6m-6 6 6-6 6 6"/></svg><span>RISE</span></button>
+            <button class="mode-btn" data-mode="diablo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9Z"/></svg><span>DIABLO</span></button>
+          </div><div class="mode-note"><i></i><span id="modeDescription">BALANCE: equilíbrio entre desempenho, consumo e temperatura.</span></div></section>
+          
+        </div>
+      </section>
+      <section class="content-view" id="libraryView"><div class="view-intro"><div><div class="eyebrow">YOUR COLLECTION / 02</div><div class="view-h">BIBLIOTECA DE JOGOS</div><div class="view-p">Os jogos instalados são reconhecidos pelo Android. Você também pode adicionar aplicativos manualmente.</div></div><div style="display:flex;gap:8px"><button class="secondary-small" id="libraryScan">⟳ DETECTAR</button><button class="launch-btn" id="libraryAdd">＋ ADICIONAR</button></div></div><div class="library-grid" id="libraryGrid"></div></section>
+      <section class="content-view" id="toolsView"><div class="view-intro"><div><div class="eyebrow">QUICK ACCESS / 03</div><div class="view-h">FERRAMENTAS DE JOGO</div><div class="view-p">Atalhos, sessão e recursos internos do Gamer Turbo.</div></div></div><div class="tools-hub"><section class="panel-card tools-card"><div class="panel-head"><div class="panel-title">FERRAMENTAS RÁPIDAS</div><div class="panel-meta">ATALHOS DE PARTIDA</div></div><div class="tool-grid" id="quickTools"></div>
+                        <div class="opt-center"><div class="shz-row"><i class="shz-dot" id="shizukuDot" data-state="OFF"></i><div class="shz-copy"><strong>SHIZUKU</strong><span class="shizuku-state" id="shizukuStateText">Verificando...</span></div><button class="shizuku-connect" id="shizukuConnectButton">CONECTAR</button></div><div class="act-grid"><button class="act-btn" id="ramCleanButton">LIMPAR RAM</button><button class="act-btn" id="closeAppsButton">FECHAR APPS</button><button class="act-btn" id="priorityButton">PRIORIDADE</button><button class="act-btn boost" id="boostButton">⚡ BOOST</button></div><pre class="result-box" id="actionResult">Toque em uma ação. O resultado real (antes → depois) aparece aqui. LIMPAR RAM funciona sem Shizuku; FECHAR APPS e PRIORIDADE exigem Shizuku.</pre><div class="opt-links"><button class="shizuku-connect" id="kernelInspectButton">INSPECIONAR CPU / GPU</button><button class="shizuku-connect" id="profileReportButton">RESULTADO DO PERFIL</button></div></div>
+          </section>
+          <div class="footnote">ECO, RISE e DIABLO são aplicados ao tocar em JOGAR (exigem Shizuku) e restaurados ao voltar. BALANCE mantém o padrão do sistema. O app só altera o que o Android aceita e confere cada ajuste; Ajustes de CPU/GPU dependem das permissões e do suporte do kernel; o app não faz overclock.</div></div><div class="settings-grid" id="toolsSettings"></div></section>
+      <section class="content-view" id="timerView"><div class="view-intro"><div><div class="eyebrow">SESSION CONTROL / 04</div><div class="view-h">CRONÔMETRO DE SESSÃO</div><div class="view-p">Controle o tempo da sua partida sem sair do painel.</div></div></div><div class="timer-view"><div class="kicker">TEMPO DE SESSÃO</div><div class="timer-readout" id="timerReadout">00:00:00</div><div class="meter"><span id="timerMeter"></span></div><div class="timer-controls"><input class="timer-input" id="timerMinutes" type="number" min="1" max="999" value="30" aria-label="Minutos da sessão"><button class="primary-small" id="timerStart">INICIAR</button><button class="secondary-small" id="timerPause">PAUSAR</button><button class="secondary-small" id="timerReset">ZERAR</button></div><div class="view-p" style="margin-top:15px">Defina a duração em minutos e inicie seu contador. O tempo segue pelo relógio do aparelho, mesmo se você sair para o jogo, desde que o Android mantenha o app aberto.</div></div></section>
+      <section class="content-view" id="settingsView">
+        <div class="view-intro"><div><div class="eyebrow">PERSONALIZATION / 05</div><div class="view-h">CONFIGURAÇÕES</div><div class="view-p">Personalize a aparência, os efeitos e o comportamento do Gamer Turbo.</div></div><div class="settings-version">GAMER TURBO <span>V 2.6.4</span></div></div>
+        <section class="shz-card" id="shizukuSettingsCard"><div class="shz-head"><div><div class="motion-kicker">GT / SHIZUKU</div><div class="motion-title">CONEXÃO COM O SHIZUKU</div></div><div class="shz-badge" id="shizukuBadge" data-state="OFF"><i></i><span>VERIFICANDO</span></div></div><p class="view-p" id="shizukuSettingsText">Verificando o estado do Shizuku...</p><ol class="shz-steps"><li>Instale o app <b>Shizuku</b>.</li><li>Nas opções do desenvolvedor, ative a <b>depuração sem fio</b> e inicie o Shizuku.</li><li>Toque em <b>CONECTAR / AUTORIZAR</b> e aceite o pedido do Gamer Turbo.</li></ol><div class="shz-actions"><button class="primary-small" id="shizukuSettingsConnect">CONECTAR / AUTORIZAR</button><button class="secondary-small" id="shizukuOpenApp">ABRIR SHIZUKU</button><button class="secondary-small" id="shizukuRecheck">VERIFICAR AGORA</button><button class="secondary-small" id="compatButton">COMPATIBILIDADE</button></div><div class="view-p" style="margin-top:10px">Sem o Shizuku o app só lê dados e limpa RAM de forma básica. ECO, RISE, DIABLO, fechar apps e prioridade exigem o Shizuku.</div></section>
+        <div class="settings-grid" id="settingsGrid"></div>
+        <section class="motion-studio" aria-label="Personalização das animações">
+          <div class="motion-studio-head"><div><div class="motion-kicker">GT / MOTION ENGINE</div><div class="motion-title">ESTÚDIO DE ANIMAÇÕES</div><div class="motion-description">Controle cada efeito separadamente e ajuste a velocidade para combinar com seu aparelho.</div></div><div class="motion-live"><i></i> EFEITOS VISUAIS</div></div>
+          <div class="motion-studio-content">
+            <div class="motion-side">
+              <div class="motion-preview" id="motionPreview"><div class="preview-orbit orbit-one"></div><div class="preview-orbit orbit-two"></div><div class="preview-orbit orbit-three"></div><div class="preview-core">GT</div><div class="preview-caption">MOTION SYSTEM</div></div>
+              <div class="motion-speed-head"><label for="motionSpeedRange">VELOCIDADE DAS ANIMAÇÕES</label><strong id="motionSpeedValue">1.0x</strong></div>
+              <input class="motion-range" id="motionSpeedRange" type="range" min="70" max="140" step="5" value="100">
+              <div class="motion-presets"><button type="button" data-speed-preset="80">SUAVE</button><button type="button" data-speed-preset="100" class="active">NORMAL</button><button type="button" data-speed-preset="125">RÁPIDA</button></div>
+            </div>
+            <div class="motion-options-wrap"><div class="motion-options-title">EFEITOS INDEPENDENTES <span>PERSONALIZÁVEL</span></div><div class="motion-option-grid" id="motionSettingsGrid"></div><div class="motion-actions"><button class="motion-preview-btn" id="previewMotionButton" type="button">TESTAR EFEITOS</button><button class="motion-reset-btn" id="resetMotionButton" type="button">RESTAURAR PADRÃO</button></div></div>
+          </div>
+          <div class="motion-footnote">Esses ajustes controlam as animações da interface. Eles não alteram a frequência da CPU/GPU nem o desempenho interno dos jogos.</div>
+        </section>
+      </section>
+    </main>
+
+
+  </div>
+</div>
+
+
+
+<section class="diablo-screen" id="diabloConsole" aria-label="Central de desempenho DIABLO">
+  <header class="diablo-top">
+    <div><div class="diablo-brand">GAMER TURBO <span style="color:#ff334d">/ DIABLO</span></div><div class="diablo-sub">EXTREME PERFORMANCE CONSOLE</div></div>
+    <div class="diablo-pill" id="diabloConnection">● ANDROID NATIVO · VERIFICANDO</div>
+    <button class="diablo-back" id="diabloBack">← VOLTAR À CENTRAL</button>
+  </header>
+  <div class="diablo-main">
+    <section class="diablo-left">
+      <div class="diablo-kicker">GT / PERFORMANCE CORE</div><div class="diablo-section-title">MONITORAMENTO DO HARDWARE</div>
+      <div class="diablo-core-wrap">
+        <div class="diablo-core"><div class="diablo-core-mark">GT</div><div class="diablo-core-caption">DIABLO ENGINE</div></div>
+        <div class="diablo-readouts">
+          <div class="diablo-readout"><span>CPU / FREQUÊNCIA</span><strong id="diabloCpu">-- GHz</strong><small id="diabloCpuMeta">Aguardando leitura nativa</small></div>
+          <div class="diablo-readout"><span>USO DA CPU</span><strong id="diabloCpuLoad">--%</strong><small>Leitura de /proc/stat</small></div>
+          <div class="diablo-readout"><span>RAM DISPONÍVEL</span><strong id="diabloRam">-- MB</strong><small id="diabloRamMeta">ActivityManager.MemoryInfo</small></div>
+        </div>
+      </div>
+      <div class="diablo-mini-stats" style="margin-top:10px">
+        <div class="diablo-mini"><b id="diabloBattery">--%</b><span>BATERIA</span></div><div class="diablo-mini"><b id="diabloBatteryTemp">--°C</b><span>TEMP. BATERIA</span></div><div class="diablo-mini"><b id="diabloThermal">--</b><span>ESTADO TÉRMICO</span></div><div class="diablo-mini"><b id="diabloGpu">--</b><span>GPU / CLOCK</span></div>
+      </div>
+    </section>
+    <section class="diablo-right">
+      <div class="diablo-feature-head"><div><div class="diablo-kicker">X MODE / GT CORE</div><div class="diablo-section-title">PERFIL DIABLO</div></div><span class="diablo-pill" id="diabloProfileState">PRONTO PARA PARTIDA</span></div>
+      <div class="diablo-action-row"><button class="diablo-primary" id="diabloLaunch">INICIAR PARTIDA</button><button class="diablo-secondary" id="diabloBoost">⚡ BOOST</button></div>
+      <div class="diablo-action-row"><button class="diablo-secondary" id="diabloProbe">INSPECIONAR CPU / GPU</button><button class="diablo-secondary" id="diabloReport">RELATÓRIO DO PERFIL</button></div>
+      <div class="diablo-feature-head"><div class="diablo-kicker">RECURSOS ANDROID / SHIZUKU</div><span class="diablo-sub">SUPORTE VERIFICADO POR APARELHO</span></div>
+      <div class="diablo-feature-grid">
+        <div class="diablo-feature"><div><b>Android Game Mode</b><small>Performance / modo personalizado por jogo</small></div><em>POR JOGO</em></div>
+        <div class="diablo-feature"><div><b>Taxa de atualização</b><small>Limite mínimo e máximo da tela</small></div><em>SETTINGS</em></div>
+        <div class="diablo-feature"><div><b>CPU governor</b><small>Performance quando o kernel permite escrita</small></div><em>KERNEL</em></div>
+        <div class="diablo-feature"><div><b>GPU governor</b><small>Devfreq / KGSL, se exposto e gravável</small></div><em>KERNEL</em></div>
+        <div class="diablo-feature"><div><b>Limites CPUFreq</b><small>Faixa mínima e máxima dentro do padrão de fábrica</small></div><em>CONDICIONAL</em></div>
+        <div class="diablo-feature"><div><b>Prioridade do jogo</b><small>Standby bucket ativo quando aceito pelo Android</small></div><em>ANDROID</em></div>
+        <div class="diablo-feature"><div><b>Apps em segundo plano</b><small>Fechamento de apps de terceiros com lista de exceções</small></div><em>SHIZUKU</em></div>
+        <div class="diablo-feature"><div><b>Proteção térmica</b><small>Reduz ações agressivas quando a temperatura sobe</small></div><em>ANDROID</em></div>
+      </div>
+      <pre class="diablo-log" id="diabloLog">DIABLO preparado. Os ajustes do perfil são executados ao iniciar um jogo.
+Dados de hardware serão lidos do Android; suporte de CPU/GPU depende do kernel.</pre>
+    </section>
+  </div>
+  <footer class="diablo-bottom"><span>SEM OVERCLOCK · SEM LIMITES FORÇADOS FORA DO SUPORTE DO KERNEL</span><span>GT PERFORMANCE SYSTEM · 2.6.4</span></footer>
+</section>
+<div class="scrim" id="gameDialog"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-head"><div class="dialog-title" id="dialogTitle">ADICIONAR JOGO</div><button class="icon-btn" id="closeDialog" aria-label="Fechar">×</button></div><form id="gameForm"><label class="field"><span>NOME DO JOGO</span><input id="gameName" maxlength="28" placeholder="Ex.: Free Fire" required></label><label class="field"><span>EMOJI / ÍCONE (OPCIONAL)</span><input id="gameEmoji" maxlength="4" placeholder="🎮"></label><label class="field"><span>PACOTE ANDROID (OPCIONAL)</span><input id="gamePackage" maxlength="120" placeholder="com.dts.freefireth"></label><div class="view-p">Você pode escolher um jogo detectado automaticamente ou salvar um atalho manual com o pacote Android.</div><div class="dialog-actions" style="justify-content:space-between"><button class="secondary-small" type="button" id="pickInstalledBtn">ESCOLHER INSTALADO</button><div style="display:flex;gap:8px"><button class="secondary-small" type="button" id="cancelDialog">CANCELAR</button><button class="primary-small" type="submit">SALVAR JOGO</button></div></div></form></div></div>
+<div class="scrim" id="installedDialog"><div class="dialog installed-dialog" role="dialog" aria-modal="true" aria-labelledby="installedTitle"><div class="dialog-head"><div><div class="dialog-title" id="installedTitle">JOGOS E APLICATIVOS INSTALADOS</div><div class="minor" id="installedSummary">Lendo a lista do Android...</div></div><button class="icon-btn" id="closeInstalled" aria-label="Fechar">×</button></div><div class="installed-toolbar"><input class="installed-search" id="installedSearch" placeholder="Pesquisar aplicativo instalado..." autocomplete="off"><span class="installed-count" id="installedCount">0 apps</span></div><div class="installed-list" id="installedList"></div><div class="permission-note">O Android mostra os aplicativos que possuem um ícone de inicialização. Os identificados como jogos entram automaticamente; os demais podem ser adicionados manualmente.</div><div class="dialog-actions"><button class="secondary-small" id="rescanInstalled">ATUALIZAR LISTA</button><button class="primary-small" id="closeInstalled2">CONCLUÍDO</button></div></div></div>
+<div class="scrim" id="brightnessDialog"><div class="dialog brightness-dialog" role="dialog" aria-modal="true"><div class="dialog-head"><div class="dialog-title">BRILHO DO SISTEMA</div><button class="icon-btn" id="closeBrightness">×</button></div><div class="view-p">Ajusta o brilho geral do aparelho, não apenas o painel Gamer Turbo.</div><div class="row" style="margin-top:18px"><strong style="font-size:12px">Nível de brilho</strong><strong id="systemBrightnessValue" style="font-size:12px;color:var(--accent)">65%</strong></div><input class="brightness-range" id="systemBrightnessRange" type="range" min="5" max="255" value="166"><div class="permission-note">O Android exige autorização especial para alterar o brilho do sistema. O botão abaixo abre a tela oficial de permissão quando necessário.</div><div class="dialog-actions"><button class="secondary-small" id="cancelBrightness">CANCELAR</button><button class="primary-small" id="applyBrightness">APLICAR</button></div></div></div>
+<div class="scrim" id="infoDialog"><div class="dialog"><div class="dialog-head"><div class="dialog-title">DETALHES DO PAINEL</div><button class="icon-btn" id="closeInfo">×</button></div><p class="view-p" style="font-size:11px">Modos: ECO limita CPU/GPU, tela em 60 Hz e liga a economia de bateria. BALANCE mantém o padrão do sistema. RISE libera frequências máximas, tela na taxa máxima e prioridade ao jogo. DIABLO é o modo mais agressivo: tenta usar o governador performance, encerrar aplicativos em segundo plano e priorizar o jogo. Não faz overclock. ECO, RISE e DIABLO usam o Shizuku e restauram os valores originais ao voltar do jogo. Cada ajuste é conferido e o resultado aparece no painel.</p><div class="dialog-actions" id="diagnosticActions" style="display:none;flex-wrap:wrap"><button class="secondary-small" type="button" id="diagAppSettings">AJUSTES DO APP</button><button class="secondary-small" type="button" id="diagAppsPermission">ACESSO À LISTA DE APPS</button><button class="secondary-small" type="button" id="diagNotifications">NOTIFICAÇÕES</button></div><div class="dialog-actions"><button class="primary-small" id="okInfo">ENTENDI</button></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const STORE='gamerTurboLibraryV3';
+const MODE_STORE='gamerTurboModeV3';
+const LEGACY_SAMPLE_IDS=new Set(['ff','pubg','cod']);
+const defaultGames=[];
+let games=load(STORE,defaultGames),selectedId=games[0]?.id||null,currentView='home',mode=normMode(load(MODE_STORE,'balance')),sessionSeconds=0,timerSeconds=0,timerTotal=1800,timerRunning=false,timerInterval=null,toastTimer=null,availableApps=[],screenRecording=false;
+const hiddenPackages=new Set(load('gamerTurboHiddenGamesV1',[]));
+let emptyScanWarned=false;
+function normMode(m){m=String(m==null?'':m).replace(/["']/g,'');return({normal:'balance',balanced:'rise',performance:'diablo'}[m])||(['eco','balance','rise','diablo'].includes(m)?m:'balance')}
+const modeConfig={eco:{color:'#3ddc84',color2:'#8cf0b8',rgb:'61,220,132',desc:'ECO: limita o desempenho máximo de CPU/GPU, tela em 60 Hz e economia de bateria ligada. Menos calor, mais tempo de uso.'},balance:{color:'#3e9bff',color2:'#8bc5ff',rgb:'62,155,255',desc:'BALANCE: equilíbrio entre desempenho, consumo e temperatura. CPU/GPU sobem conforme o jogo pede; tudo volta ao padrão do sistema.'},rise:{color:'#ff9f1c',color2:'#ffd08a',rgb:'255,159,28',desc:'RISE: libera as frequências máximas quando exigidas, tela na taxa máxima, economia desligada e prioridade ao jogo.'},diablo:{color:'#ff2d43',color2:'#ff7a88',rgb:'255,45,67',desc:'DIABLO: o modo mais agressivo. Tenta usar o governador performance, fechar aplicativos em segundo plano e priorizar o jogo. Pode aquecer e gastar mais bateria; não faz overclock.'}};
+function load(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch(_){return fallback}}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(games));if(settingState.persist!==false)localStorage.setItem(MODE_STORE,JSON.stringify(mode));else localStorage.removeItem(MODE_STORE);localStorage.setItem('gamerTurboHiddenGamesV1',JSON.stringify([...hiddenPackages]))}catch(_){toast('Não foi possível salvar neste aparelho.')}}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function icon(name){const paths={play:'<path d="m8 5 11 7-11 7z"/>',timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6M12 2v3"/>',bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',focus:'<circle cx="12" cy="12" r="8"/><path d="M12 7v10M7 12h10"/>',settings:'<path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="m19 13 2 1-2 4-2-1-2 1v2H9v-2l-2-1-2 1-2-4 2-1v-2l-2-1 2-4 2 1 2-1V4h6v2l2 1 2-1 2 4-2 1z"/>',wifi:'<path d="M5 9a11 11 0 0 1 14 0M8 12a6.5 6.5 0 0 1 8 0m-5 4a2 2 0 0 1 2 0M12 20h.01"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',record:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor"/>',zap:'<path d="M13 2 3 14h7l-1 8 10-12h-7z"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths[name]||paths.focus}</svg>`}
+function toast(msg){const el=$('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3200)}
+window.addEventListener('error',event=>{const el=$('nativeBridgeStatus');if(el){el.dataset.state='web-preview';const label=el.querySelector('span')||el;label.textContent='ERRO NA INTERFACE • TOQUE PARA VER';el.title=String(event.message||'Erro JavaScript')} });
+window.addEventListener('unhandledrejection',event=>{const el=$('nativeBridgeStatus');if(el){el.dataset.state='web-preview';const label=el.querySelector('span')||el;label.textContent='ERRO EM UMA FUNÇÃO • TOQUE PARA VER';el.title=String(event.reason||'Falha assíncrona')}});
+function bridge(){
+ const candidate=window.GamerTurboAndroid;
+ if(!candidate)return null;
+ // Não bloqueia o app por diferença de versão entre o HTML e o APK.
+ // Recursos ausentes são verificados individualmente no momento do uso.
+ try{
+  // A presença da interface é o critério de conexão; não rejeita a ponte
+  // inteira se uma função individual faltar numa versão antiga.
+  return candidate;
+ }catch(_){return null}
+}
+function nativeBridgeVersion(native){
+ try{return native&&typeof native.getBridgeVersion==='function'?String(native.getBridgeVersion()):'versão antiga'}catch(_){return'versão não identificada'}
+}
+function updateNativeBridgeStatus(){
+ const el=$('nativeBridgeStatus');if(!el)return;
+ const native=bridge();
+ el.dataset.state=native?'connected':'web-preview';
+ const label=el.querySelector('span')||el;
+ label.textContent=native?'ANDROID NATIVO • '+nativeBridgeVersion(native).toUpperCase():'SEM PONTE • TOQUE PARA TESTAR';
+ el.title=native?'Ponte Android detectada. Toque para conferir permissões e recursos.':'A interface não encontrou a ponte Java do APK. Toque para ver o diagnóstico.';
+}
+function showBridgeDiagnostics(){
+ const dlg=$('infoDialog');
+ const title=dlg.querySelector('.dialog-title');
+ const body=dlg.querySelector('.dialog p');
+ const actions=$('diagnosticActions');
+ const native=bridge();
+ title.textContent='DIAGNÓSTICO DO GAMER TURBO';
+ if(actions)actions.style.display=native?'flex':'none';
+ if(!native){
+  body.textContent='PONTE ANDROID NÃO DETECTADA.\n\nA interface está aberta, mas não conseguiu acessar a ponte Java do APK. Confira se o aplicativo foi compilado a partir do projeto Android completo e se o index.html está em app/src/main/assets/.';
+ }else{
+  try{
+   const d=typeof native.getBridgeDiagnostics==='function'?JSON.parse(native.getBridgeDiagnostics()||'{}'):{};
+   const p=typeof native.getPermissionStatus==='function'?JSON.parse(native.getPermissionStatus()||'{}'):{};
+   const stats=typeof native.getDeviceStats==='function'?JSON.parse(native.getDeviceStats()||'{}'):{};
+   const ramLine=stats.ramAvailable&&Number.isFinite(Number(stats.ramPercent))
+    ?`RAM: ${stats.ramUsedMB} MB usados de ${stats.ramTotalMB} MB (${stats.ramPercent}%)`
+    :`RAM: leitura indisponível${stats.ramError?' • '+stats.ramError:''}`;
+   body.textContent=[
+    'PONTE: CONECTADA',
+    'Versão: '+(d.version||nativeBridgeVersion(native)),
+    'Android: '+(d.sdk||'?')+' • '+(d.release||'?'),
+    'Fabricante: '+(d.manufacturer||'?'),
+    '',
+    'ESTATÍSTICAS',
+    ramLine,
+    'RAM não exige autorização especial do usuário.',
+    'Temperatura: '+(Number.isFinite(Number(stats.batteryTempC))&&Number(stats.batteryTempC)>=0?stats.batteryTempC+' °C':'sensor indisponível'),
+    'Bateria: '+(Number.isFinite(Number(stats.batteryLevel))&&Number(stats.batteryLevel)>=0?stats.batteryLevel+'%':'indisponível'),
+    '',
+    'ACESSOS DO ANDROID',
+    'Lista de apps (QUERY_ALL_PACKAGES): '+(p.queryAllPackagesGranted?'declarada/concedida':'não confirmada'),
+    'Permissão adicional da fabricante: '+(!p.oemAppsPermissionDefined?'não existe nesta ROM':p.oemAppsPermissionGranted?'concedida':'pendente'),
+    'Notificações: '+(p.notificationsPermission&&p.notificationsEnabled?'permitidas':'não permitidas'),
+    'Sobreposição: '+(p.overlay?'permitida':'sem acesso'),
+    'Modificar configurações: '+(p.writeSettings?'permitido':'sem acesso'),
+    'Não Perturbe: '+(p.dnd?'permitido':'sem acesso'),
+    'Shizuku: '+(p.shizuku||d.shizuku||'não verificado'),
+    'Recursos que exigem Shizuku: perfis de jogo (Gamer/Extremo), captura de tela, gravação do painel e inspeção de CPU/GPU.',
+    '',
+    'JOGOS E APLICATIVOS',
+    'Apps encontrados na última busca: '+(p.appsFound??d.appsFound??0),
+    d.scanError?'Detalhe da busca: '+d.scanError:'',
+    p.scanError?'Detalhe das permissões: '+p.scanError:'',
+    '',
+    'A lista completa depende da visibilidade de pacotes concedida pelo Android. O Gamer Turbo não encerra processos para fingir liberar RAM.'
+   ].filter(Boolean).join('\n');
+  }catch(e){body.textContent='A ponte foi encontrada, mas o diagnóstico falhou: '+String(e);}
+ }
+ body.style.whiteSpace='pre-line';
+ dlg.classList.add('open');
+}
+
+function updateModeDescription(){const el=$('modeDescription');if(!el||!modeConfig[mode])return;el.textContent=modeConfig[mode].desc+(mode!=='balance'&&getShizukuState()!=='READY'?'  ⚠ Precisa do Shizuku conectado.':'')}
+let diabloMonitorTimer=null,diabloBootTimer=null;
+function openDiabloConsole(){const el=$('diabloConsole');if(!el)return;clearTimeout(diabloBootTimer);el.classList.remove('diablo-boot');el.classList.add('open');document.body.classList.add('diablo-open');void el.offsetWidth;el.classList.add('diablo-boot');diabloBootTimer=setTimeout(()=>{el.classList.remove('diablo-boot');diabloBootTimer=null;},1750);refreshDiabloConsole();clearInterval(diabloMonitorTimer);diabloMonitorTimer=setInterval(refreshDiabloConsole,2200);}
+function closeDiabloConsole(){const el=$('diabloConsole');if(el){el.classList.remove('open','diablo-boot');}clearTimeout(diabloBootTimer);diabloBootTimer=null;document.body.classList.remove('diablo-open');clearInterval(diabloMonitorTimer);diabloMonitorTimer=null;}
+function refreshDiabloConsole(){const b=bridge();const chip=$('diabloConnection');if(chip){const st=getShizukuState();chip.textContent=st==='READY'?'● SHIZUKU AUTORIZADO':st==='NEED_PERMISSION'?'● SHIZUKU · AUTORIZAR':st==='OFF'?'● SHIZUKU DESLIGADO':'● MODO LEITURA';}
+ if(!b||typeof b.getDeviceStats!=='function'){$('diabloCpu').textContent='-- GHz';$('diabloCpuMeta').textContent='Disponível no APK Android';$('diabloCpuLoad').textContent='--%';$('diabloRam').textContent='-- MB';$('diabloRamMeta').textContent='Aguardando leitura nativa';$('diabloLog').textContent='Prévia visual. Abra o APK para obter dados reais do Android.';return;}
+ try{const d=JSON.parse(b.getDeviceStats()||'{}');const freq=Number(d.cpuFrequencyMhz);$('diabloCpu').textContent=freq>0?(freq/1000).toFixed(2)+' GHz':'-- GHz';$('diabloCpuMeta').textContent=d.cpuDataSource||'Frequência não exposta';$('diabloCpuLoad').textContent=Number(d.cpuPercent)>=0?d.cpuPercent+'%':'--%';$('diabloRam').textContent=Number(d.ramAvailableMB)>=0?Number(d.ramAvailableMB).toLocaleString('pt-BR')+' MB':'-- MB';$('diabloRamMeta').textContent=Number(d.ramUsedMB)>=0?d.ramUsedMB+' / '+d.ramTotalMB+' MB usados':'Memória não disponível';$('diabloBattery').textContent=Number(d.batteryLevel)>=0?d.batteryLevel+'%':'--%';$('diabloBatteryTemp').textContent=Number(d.batteryTempC)>=0?Number(d.batteryTempC).toFixed(1)+'°C':'--°C';$('diabloThermal').textContent=d.thermalStatus||'--';}catch(e){$('diabloLog').textContent='Falha ao ler estatísticas do Android: '+(e.message||'erro');}}
+function showDiabloReport(){const b=bridge();$('diabloLog').textContent=b&&typeof b.getLastProfileReport==='function'?String(b.getLastProfileReport()||'Nenhum perfil aplicado nesta sessão.'): 'Relatório nativo disponível na versão APK.';}
+function runDiabloProbe(){const b=bridge();if(!b||typeof b.inspectKernel!=='function'){$('diabloLog').textContent='A inspeção CPU/GPU exige a versão APK Android com Shizuku.';return;}if(getShizukuState()!=='READY'){$('diabloLog').textContent='Shizuku não autorizado. Conecte e autorize para inspecionar os nós do kernel.';connectShizuku();return;}$('diabloLog').textContent='Inspecionando interfaces expostas pelo kernel...';try{const report=String(b.inspectKernel()||'Sem dados retornados.');$('diabloLog').textContent=report.slice(0,2800);const gpuLine=report.split(/\r?\n/).find(line=>/(gpu|mali|kgsl|3d)/i.test(line)&&/(?:gpuclk|cur_freq):/i.test(line));const gpu=gpuLine&&gpuLine.match(/(?:gpuclk|cur_freq):\s*([0-9]+)/i);if(gpu){const n=Number(gpu[1]);$('diabloGpu').textContent=n>1000000?(n/1000000).toFixed(0)+' MHz':n>1000?(n/1000).toFixed(0)+' MHz':n+' MHz';}else $('diabloGpu').textContent='--';}catch(e){$('diabloLog').textContent='Falha na inspeção: '+(e.message||'erro');}}
+function setMode(next,notify=true,showConsole=true){next=normMode(next);if(!modeConfig[next])return;mode=next;document.body.classList.toggle('mode-performance',mode==='diablo');const c=modeConfig[mode];document.documentElement.style.setProperty('--accent',c.color);document.documentElement.style.setProperty('--accent2',c.color2);document.documentElement.style.setProperty('--accent-rgb',c.rgb);document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));updateModeDescription();save();try{const native=bridge();if(native)native.setMode(next)}catch(_){}if(mode==='diablo'&&showConsole)openDiabloConsole();else if(mode!=='diablo')closeDiabloConsole();if(notify)toast(c.desc)}
+function setView(view){currentView=view;document.querySelectorAll('.rail-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));$('homeView').style.display=view==='home'?'grid':'none';['library','tools','timer','settings'].forEach(v=>$(v+'View').classList.toggle('active',view===v));const labels={home:['WELCOME BACK / PLAYER','GAME SPACE'],library:['YOUR COLLECTION / 02','BIBLIOTECA'],tools:['QUICK ACCESS / 03','FERRAMENTAS'],timer:['SESSION CONTROL / 04','CRONÔMETRO'],settings:['PERSONALIZATION / 05','CONFIGURAÇÕES']};$('pageEyebrow').textContent=labels[view][0];$('pageTitle').textContent=labels[view][1];$('addGameBtn').classList.toggle('hidden',view!=='home'&&view!=='library');if(view==='library')renderLibrary();if(view==='tools')renderSettings('toolsSettings',toolSettings);if(view==='settings'){renderSettings('settingsGrid',settingOptions);renderMotionSettings();applyMotionSettings()}}
+function ptCount(n,singular,plural){return String(n)+' '+(Number(n)===1?singular:plural)}
+function gameEmoji(name){const n=String(name).toLowerCase();if(/free fire|garena/.test(n))return '🔥';if(/pubg|battle/.test(n))return '🎯';if(/call of duty|cod mobile/.test(n))return '⚔️';if(/roblox/.test(n))return '🧱';if(/minecraft/.test(n))return '⛏️';if(/racing|asphalt|carx|need for speed/.test(n))return '🏎️';if(/football|futebol|efootball|fc mobile|fifa/.test(n))return '⚽';if(/clash|brawl/.test(n))return '💥';if(/genshin|honkai/.test(n))return '✨';return '🎮'}
+function renderStrip(){const grid=$('gameGrid');if(!grid)return;if(!games.length){grid.innerHTML='<div class="game-empty"><strong>Nenhum jogo na biblioteca</strong><span>O Gamer Turbo procura jogos instalados automaticamente. Também pode adicionar um aplicativo na lista manual.</span><button type="button" id="emptyDetect">DETECTAR JOGOS</button></div>';const emptyDetect=$('emptyDetect');if(emptyDetect)emptyDetect.addEventListener('click',()=>scanInstalledGames(true));}else{grid.innerHTML=games.map((g,i)=>`<article class="game-card ${g.id===selectedId?'selected':''}" data-select="${esc(g.id)}" tabindex="0" role="button" aria-label="Selecionar ${esc(g.name)}" style="--tile-index:${i}"><div class="game-icon">${g.iconData?`<img src="${g.iconData}" alt="Ícone de ${esc(g.name)}" loading="lazy">`:esc(g.emoji||'🎮')}</div><div class="game-name">${esc(g.name)}</div><div class="game-footer"><span class="game-sub">${g.source==='device'?'DETECTADO':g.pkg?'INSTALADO':'ATALHO'}</span>${g.pkg?`<button class="game-open" type="button" data-play="${esc(g.id)}" aria-label="Abrir ${esc(g.name)}" title="Jogar">${icon('play')}</button>`:''}</div></article>`).join('');grid.querySelectorAll('[data-select]').forEach(card=>{card.addEventListener('click',e=>{if(e.target.closest('[data-play]'))return;selectGame(card.dataset.select)});card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectGame(card.dataset.select)}})});grid.querySelectorAll('[data-play]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();launchGameById(b.dataset.play)}));}const rail=$('railGames');rail.innerHTML=games.slice(0,4).map(g=>`<button class="rail-game ${g.id===selectedId?'active':''}" data-railgame="${esc(g.id)}" title="${esc(g.name)}">${g.iconData?`<img src="${g.iconData}" style="width:100%;height:100%;object-fit:cover;border-radius:9px">`:esc(g.emoji||'🎮')}</button>`).join('');rail.querySelectorAll('[data-railgame]').forEach(b=>b.addEventListener('click',()=>selectGame(b.dataset.railgame)));}
+function selectGame(id){selectedId=id;const g=games.find(x=>x.id===id);if(!g)return;$('selectedGameName').textContent=g.name;$('selectedGameMeta').textContent=g.pkg?'Aplicativo instalado • '+g.pkg:'Atalho local • pacote Android necessário';$('launchSelectedBtn').disabled=!g.pkg;renderStrip();if(currentView==='library')renderLibrary()}
+function renderLibrary(){const grid=$('libraryGrid');if(!games.length){grid.innerHTML='<div class="empty-state"><div><strong>Sua biblioteca está vazia</strong><span>Detecte os jogos instalados ou adicione um atalho.</span></div></div>';return}grid.innerHTML=games.map(g=>`<article class="library-card ${g.id===selectedId?'selected':''}" data-card="${esc(g.id)}"><div class="card-actions"><button class="mini-icon" data-delete="${esc(g.id)}" title="Remover" aria-label="Remover ${esc(g.name)}">×</button></div><div class="library-emoji">${g.iconData?`<img src="${g.iconData}" alt="Ícone de ${esc(g.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`:esc(g.emoji||'🎮')}</div><div class="library-details"><div class="library-name">${esc(g.name)}</div><div class="library-footer"><div class="library-package">${esc(g.pkg||'ATALHO LOCAL')}</div>${g.pkg?`<button class="library-play" data-library-play="${esc(g.id)}">ABRIR ${icon('play')}</button>`:''}</div></div></article>`).join('');grid.querySelectorAll('[data-card]').forEach(card=>card.addEventListener('click',e=>{if(e.target.closest('[data-delete]')||e.target.closest('[data-library-play]'))return;selectGame(card.dataset.card)}));grid.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();removeGame(b.dataset.delete)}));grid.querySelectorAll('[data-library-play]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();launchGameById(b.dataset.libraryPlay)}))}
+function openAdd(){ $('gameDialog').classList.add('open');$('gameName').focus() }
+function closeAdd(){ $('gameDialog').classList.remove('open') }
+function addGame(e){e.preventDefault();const name=$('gameName').value.trim(),emoji=$('gameEmoji').value.trim()||gameEmoji(name),pkg=$('gamePackage').value.trim();if(!name){toast('Informe o nome do jogo.');return}if(pkg&&!/^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$/.test(pkg)){toast('Pacote Android inválido.');return}if(pkg&&games.some(g=>g.pkg===pkg)){toast('Esse aplicativo já está na biblioteca.');closeAdd();return}const id='manual-'+Date.now().toString(36);games.push({id,name,emoji,pkg,source:'manual'});if(pkg)hiddenPackages.delete(pkg);selectedId=id;save();closeAdd();$('gameForm').reset();renderStrip();selectGame(id);if(currentView==='library')renderLibrary();toast('Atalho adicionado à biblioteca')}
+function removeGame(id){const g=games.find(x=>x.id===id);if(!g)return;if(!confirm('Remover '+g.name+' da biblioteca?'))return;if(g.pkg)hiddenPackages.add(g.pkg);games=games.filter(x=>x.id!==id);if(selectedId===id){selectedId=games[0]?.id||null;if(selectedId)selectGame(selectedId);else{$('selectedGameName').textContent='Nenhum jogo selecionado';$('selectedGameMeta').textContent='Detecte os jogos instalados para começar';$('launchSelectedBtn').disabled=true}}save();renderStrip();renderLibrary();toast('Jogo removido')}
+function scanInstalledGames(openPicker=false,notify=true){const b=bridge();if(!b||typeof b.getInstalledApps!=='function'){toast('A ponte de leitura dos aplicativos não está disponível nesta versão do APK.');if(openPicker&&b)openInstalledDialog();return}try{const data=JSON.parse(b.getInstalledApps()||'[]');availableApps=Array.isArray(data)?data:[];if(!availableApps.length){warnEmptyScan(notify);if($('installedDialog').classList.contains('open'))renderInstalledApps();if(openPicker)openInstalledDialog(false);return}const byPackage=new Map(availableApps.map(a=>[a.packageName,a]));const detected=availableApps.filter(a=>a.isGame&&!hiddenPackages.has(a.packageName));const keep=games.filter(g=>g.source!=='device'&&!LEGACY_SAMPLE_IDS.has(g.id)&&(!g.pkg||byPackage.has(g.pkg))).map(g=>{const installed=g.pkg?byPackage.get(g.pkg):null;return installed?{...g,name:installed.label,iconData:installed.iconData||g.iconData||'',source:g.source==='device'?'device':g.source}:g});const keepPkgs=new Set(keep.map(g=>g.pkg).filter(Boolean));const imported=detected.filter(a=>!keepPkgs.has(a.packageName)).map(a=>({id:'device-'+a.packageName,name:a.label,emoji:gameEmoji(a.label),iconData:a.iconData||'',pkg:a.packageName,source:'device'}));games=[...keep,...imported];if(!games.some(g=>g.id===selectedId))selectedId=games[0]?.id||null;save();renderStrip();renderLibrary();if(selectedId)selectGame(selectedId);else renderStrip();if(notify)toast(detected.length?`${ptCount(detected.length,'jogo reconhecido','jogos reconhecidos')} • ${ptCount(availableApps.length,'aplicativo disponível','aplicativos disponíveis')}`:`Nenhum jogo reconhecido automaticamente • ${ptCount(availableApps.length,'aplicativo disponível','aplicativos disponíveis')}. Escolha na lista.`);if($('installedDialog').classList.contains('open'))renderInstalledApps();if(openPicker)openInstalledDialog(false)}catch(e){toast('O Android não conseguiu consultar os aplicativos instalados.')}}
+function warnEmptyScan(notify){if(notify||!emptyScanWarned){emptyScanWarned=true;toast('O Android não liberou a lista de apps. Toque em DETECTAR para ver como corrigir.')}}
+function scanHelpHtml(){let info='';try{const b=bridge();if(b&&typeof b.getScanDiagnostics==='function'){const d=JSON.parse(b.getScanDiagnostics()||'{}');info=`<small style="display:block;margin-top:8px;opacity:.7">Android ${esc(d.sdk??'?')} • ${esc(d.manufacturer||'?')} • apps encontrados: ${esc(d.total??0)}${d.error?' • erro: '+esc(d.error):''}</small>`}}catch(_){}return `<div class="empty-state" style="grid-column:1/-1"><div><strong>Nenhum aplicativo foi retornado pelo Android</strong><span>O acesso à lista de apps vem declarado no APK (QUERY_ALL_PACKAGES) e normalmente não abre uma janela de permissão. Se a lista vier vazia, abra os ajustes do aplicativo, confira se o acesso está permitido e toque em ATUALIZAR LISTA.</span>${info}<div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap"><button class="launch-btn" type="button" data-scan-help="settings">ABRIR AJUSTES DO APP</button><button class="secondary-small" type="button" data-scan-help="permission">VER ACESSO À LISTA</button></div></div></div>`}
+function bindScanHelp(root){root.querySelectorAll('[data-scan-help]').forEach(btn=>btn.addEventListener('click',()=>{const b=bridge();if(!b)return;try{if(btn.dataset.scanHelp==='settings'&&typeof b.openAppSettings==='function')b.openAppSettings();else if(typeof b.requestInstalledAppsPermission==='function')b.requestInstalledAppsPermission()}catch(_){toast('Não foi possível abrir os ajustes.')}}))}
+function openInstalledDialog(refresh=true){if(refresh)scanInstalledGames(false,false);if(!bridge()){toast('Escolher aplicativos instalados exige o APK Android.');return}$('installedDialog').classList.add('open');$('installedSearch').value='';renderInstalledApps()}
+function closeInstalledDialog(){$('installedDialog').classList.remove('open')}
+function renderInstalledApps(){const query=$('installedSearch').value.trim().toLowerCase();const apps=availableApps.filter(a=>(a.label+' '+a.packageName).toLowerCase().includes(query)).sort((a,b)=>Number(b.isGame)-Number(a.isGame)||a.label.localeCompare(b.label,'pt-BR'));$('installedCount').textContent=ptCount(apps.length,'aplicativo','aplicativos');const gameCount=availableApps.filter(a=>a.isGame).length;$('installedSummary').textContent=`${ptCount(gameCount,'jogo reconhecido','jogos reconhecidos')} automaticamente • ${ptCount(availableApps.length,'aplicativo disponível','aplicativos disponíveis')}`;const list=$('installedList');if(!apps.length){if(!availableApps.length){list.innerHTML=scanHelpHtml();bindScanHelp(list)}else list.innerHTML='<div class="empty-state" style="grid-column:1/-1">Nenhum aplicativo encontrado.</div>';return}list.innerHTML=apps.map(a=>{const added=games.some(g=>g.pkg===a.packageName);const initial=(a.label||'A').trim().slice(0,2).toUpperCase();return `<div class="installed-app"><div class="installed-app-icon">${a.iconData?`<img src="${a.iconData}" style="width:100%;height:100%;object-fit:cover;border-radius:9px">`:esc(gameEmoji(a.label)==='🎮'?initial:gameEmoji(a.label))}</div><div class="installed-app-info"><strong>${esc(a.label)}</strong><small>${esc(a.packageName)}</small>${a.isGame?'<span class="installed-badge">JOGO DETECTADO</span>':'<span class="installed-badge" style="color:#8491a3">OUTRO APLICATIVO</span>'}</div><button class="installed-add" data-add-installed="${esc(a.packageName)}" ${added?'disabled':''}>${added?'ADICIONADO':'ADICIONAR'}</button></div>`}).join('');list.querySelectorAll('[data-add-installed]').forEach(btn=>btn.addEventListener('click',()=>addInstalledApp(btn.dataset.addInstalled)))}
+function addInstalledApp(pkg){const app=availableApps.find(a=>a.packageName===pkg);if(!app)return;if(games.some(g=>g.pkg===pkg)){toast('Esse app já está na biblioteca.');return}hiddenPackages.delete(pkg);games.push({id:'manual-'+pkg,name:app.label,emoji:gameEmoji(app.label),iconData:app.iconData||'',pkg,source:'manual'});selectedId=games[games.length-1].id;save();renderStrip();renderLibrary();selectGame(selectedId);renderInstalledApps();toast(app.label+' adicionado à biblioteca')}
+function launchGameById(id){if(!games.some(x=>x.id===id)){toast('Este jogo não está mais na biblioteca. Atualize a lista.');return}selectedId=id;renderStrip();selectGame(id);launchGame()}
+function launchGame(){const g=games.find(x=>x.id===selectedId);if(!g){toast('Detecte ou adicione um jogo primeiro.');return}if(!g.pkg){toast('Este atalho não tem um pacote Android associado.');openAdd();$('gameName').value=g.name;return}const b=bridge();if(!b){toast('A abertura direta exige o APK Android.');return}try{const ok=b.launchGame(g.pkg);toast(ok?'Preparando perfil '+({eco:'ECO',balance:'BALANCE',rise:'RISE',diablo:'DIABLO'}[mode])+' para '+g.name+'...':'O Android não encontrou esse aplicativo. Atualize a biblioteca.')}catch(e){toast('Não foi possível abrir esse aplicativo.')}}
+let timerAccum=0,timerStartedAt=0;
+function timerNow(){return Math.floor(timerAccum+(timerRunning?(Date.now()-timerStartedAt)/1000:0))}
+function timerStopLoop(){clearInterval(timerInterval);timerInterval=null}
+function timerTick(){timerSeconds=timerNow();if(timerSeconds>=timerTotal){timerSeconds=timerTotal;timerAccum=timerTotal;timerRunning=false;timerStopLoop();toast('Tempo da sessão concluído.');try{if(bridge())bridge().vibrate()}catch(_){}}syncTimer()}
+function timerAction(){if(timerRunning)return;const mins=Math.max(1,Math.min(999,Math.floor(Number($('timerMinutes').value))||30));timerTotal=mins*60;if(timerAccum>=timerTotal)timerAccum=0;timerStartedAt=Date.now();timerRunning=true;timerStopLoop();timerInterval=setInterval(timerTick,500);timerTick()}
+function timerPause(){if(!timerRunning)return;timerAccum=timerNow();timerRunning=false;timerStopLoop();timerSeconds=timerAccum;syncTimer()}
+function timerReset(){timerStopLoop();timerRunning=false;timerAccum=0;timerSeconds=0;syncTimer();toast('Cronômetro zerado.')}
+function formatTime(total){const h=Math.floor(total/3600),m=Math.floor(total%3600/60),s=total%60;return [h,m,s].map(n=>String(n).padStart(2,'0')).join(':')}
+function syncTimer(){const value=formatTime(timerSeconds);$('timerReadout').textContent=value;$('timerMeter').style.transform='scaleX('+(timerTotal?Math.min(1,timerSeconds/timerTotal):0)+')';$('timerStart').textContent=timerRunning?'EM ANDAMENTO':'INICIAR'}
+function toggleDnd(){const b=bridge();if(!b){toast('O modo foco exige o APK Android.');return}try{if(!b.hasNotificationPolicyAccess()){b.requestNotificationPolicyAccess();toast('Autorize o Gamer Turbo na tela de acesso Não Perturbe e toque novamente.');return}const next=!b.isGameDndEnabled();const ok=b.setGameDnd(next);if(ok){toolState.dnd=next;persistToolState();renderTools();if(currentView==='tools')renderSettings('toolsSettings',toolSettings);toast(next?'Não Perturbe ativado para a partida.':'Não Perturbe desativado.')}else toast('O Android não permitiu alterar Não Perturbe.')}catch(e){toast('Falha ao alterar o modo foco.')}}
+function persistToolState(){try{localStorage.setItem('gamerTurboToolsV2',JSON.stringify(toolState))}catch(_) {}}
+function openBrightnessDialog(){const b=bridge();if(!b){toast('O brilho global exige o APK Android.');return}let value=166;try{value=b.getSystemBrightness()}catch(_){}if(!Number.isFinite(value)||value<5)value=166;$('systemBrightnessRange').value=Math.max(5,Math.min(255,value));updateBrightnessValue();$('brightnessDialog').classList.add('open')}
+function updateBrightnessValue(){const value=Number($('systemBrightnessRange').value);$('systemBrightnessValue').textContent=Math.round(value/255*100)+'%'}
+function applyBrightness(){const b=bridge();if(!b)return;if(!b.canWriteSettings()){b.requestWriteSettings();toast('Permita modificar as configurações do sistema e depois aplique novamente.');return}const value=Number($('systemBrightnessRange').value);try{if(b.setSystemBrightness(value)){ $('brightnessDialog').classList.remove('open');toast('Brilho do sistema atualizado.')}else toast('Não foi possível alterar o brilho.')}catch(e){toast('Falha ao alterar o brilho do sistema.')}}
+function openWifiSettings(){const b=bridge();if(!b){toast('Abra as configurações de Wi-Fi do aparelho.');return}try{b.openWifiSettings()}catch(e){toast('Não foi possível abrir as configurações de Wi-Fi.')}}
+function toggleOverlaySetting(next){const b=bridge();if(!b){toast('O painel flutuante exige o APK Android.');return false}try{if(next&&!b.canDrawOverlays()){b.requestOverlayPermission();toast('Autorize “Mostrar sobre outros apps”. O painel será ativado ao voltar.');return false}const ok=b.setOverlayEnabled(next);if(ok){settingState.overlay=next;persistSettings();renderSettings('settingsGrid',settingOptions);toast(next?'Painel flutuante ativado. Abra um jogo e use a alça lateral.':'Painel flutuante desativado.');return true}return false}catch(e){toast('Não foi possível ativar o painel flutuante.');return false}}
+function toggleScreenRecording(){const b=bridge();if(!b){toast('A gravação exige o APK Android.');return}try{if(b.isScreenRecording()){b.stopScreenRecording();screenRecording=false;toast('Encerrando gravação. O vídeo será salvo em Filmes/GamerTurbo.')}else{b.requestScreenRecording();toast('Confirme a captura de tela do Android para começar a gravar.')}renderTools()}catch(e){toast('Não foi possível iniciar a gravação.')}}
+function getShizukuState(){const b=bridge();if(!b||typeof b.getShizukuState!=='function')return 'INDISPONÍVEL';try{return b.getShizukuState()}catch(_){return 'INDISPONÍVEL'}}
+function shizukuInfo(){const b=bridge();if(!b||typeof b.getShizukuInfo!=='function')return{state:getShizukuState(),installed:null};try{return JSON.parse(b.getShizukuInfo()||'{}')}catch(_){return{state:getShizukuState(),installed:null}}}
+function refreshShizukuUI(){const info=shizukuInfo();const state=info.state||'INDISPONÍVEL';const texts={READY:'Conectado e autorizado ✔ • otimizações reais liberadas',NEED_PERMISSION:'Shizuku rodando • falta autorizar o Gamer Turbo',OFF:info.installed===false?'Shizuku não instalado neste aparelho':'Shizuku instalado, mas desligado • inicie por depuração sem fio',INDISPONÍVEL:'Disponível apenas no APK Android'};const text=texts[state]||state;const short={READY:'SHIZUKU ON',NEED_PERMISSION:'AUTORIZAR',OFF:'SHIZUKU OFF'}[state]||'SHIZUKU --';const label=$('shizukuStateText');if(label)label.textContent=text;const btn=$('shizukuConnectButton');if(btn){btn.textContent=state==='READY'?'CONECTADO':state==='NEED_PERMISSION'?'AUTORIZAR':info.installed===false?'COMO INSTALAR':'ABRIR SHIZUKU';btn.disabled=state==='READY'}const dot=$('shizukuDot');if(dot)dot.dataset.state=state;const chip=$('shizukuChip');if(chip){chip.dataset.state=state;const sp=chip.querySelector('span');if(sp)sp.textContent=short}const badge=$('shizukuBadge');if(badge){badge.dataset.state=state;const sp=badge.querySelector('span');if(sp)sp.textContent=short}const st=$('shizukuSettingsText');if(st)st.textContent=text;const sc=$('shizukuSettingsConnect');if(sc){sc.textContent=state==='READY'?'CONECTADO ✔':'CONECTAR / AUTORIZAR';sc.disabled=state==='READY'}updateModeDescription()}
+function connectShizuku(){const b=bridge();if(!b){toast('A integração Shizuku funciona na versão APK Android.');return}const info=shizukuInfo();try{if(info.state==='NEED_PERMISSION'){b.requestShizukuPermission();toast('Aceite o pedido de permissão do Shizuku.')}else if(info.state==='READY'){toast('Shizuku já está conectado.')}else if(info.installed===false){toast('Instale o app Shizuku e inicie por depuração sem fio.')}else{if(typeof b.openShizukuApp==='function')b.openShizukuApp();toast('Inicie o Shizuku e volte ao Gamer Turbo.')}setTimeout(refreshShizukuUI,800);setTimeout(refreshShizukuUI,2500)}catch(_){toast('Não foi possível abrir o Shizuku.')}}
+function inspectKernelNow(){const actions=$('diagnosticActions');if(actions)actions.style.display='none';const b=bridge();if(!b){toast('Inspeção exige APK Android.');return}if(getShizukuState()!=='READY'){connectShizuku();toast('Autorize o Shizuku para inspecionar interfaces do sistema.');return}try{const report=b.inspectKernel();const dlg=$('infoDialog');dlg.querySelector('.dialog-title').textContent='INSPEÇÃO CPU / GPU';dlg.querySelector('.dialog p').textContent=String(report||'Sem dados retornados.');dlg.classList.add('open');}catch(e){toast('Falha na inspeção.')}}
+function showProfileReport(){const actions=$('diagnosticActions');if(actions)actions.style.display='none';const b=bridge();if(!b){toast('Relatório disponível na versão APK.');return}try{const dlg=$('infoDialog');dlg.querySelector('.dialog-title').textContent='RESULTADO DO PERFIL';dlg.querySelector('.dialog p').textContent=String(b.getLastProfileReport()||'Nenhum resultado disponível.');dlg.classList.add('open')}catch(_){toast('Não foi possível abrir o relatório.')}}
+function setActionResult(t){const el=$('actionResult');if(el)el.textContent=t}
+function setActionBusy(on){document.querySelectorAll('.act-btn').forEach(b=>b.disabled=!!on)}
+function runNativeAction(act){const b=bridge();if(!b||typeof b.runAction!=='function'){toast('Esta ação exige o APK Android atualizado.');return}if((act==='close'||act==='priority')&&getShizukuState()!=='READY'){setActionResult('⚠ Esta ação precisa do Shizuku conectado e autorizado. Nada foi alterado.');connectShizuku();return}setActionBusy(true);setActionResult('⏳ Executando...');try{if(!b.runAction(act)){setActionBusy(false);setActionResult('Ação desconhecida.')}}catch(_){setActionBusy(false);setActionResult('Falha ao executar a ação.')}}
+function summarizeNativeAction(report){const value=String(report||'').trim();const lines=value.split('\n');const first=lines[0]||'Ação';const lower=value.toLowerCase();if(lower.includes('nada foi alterado')||lower.includes('nenhuma otimização foi aplicada'))return 'NÃO APLICADO: '+first+'. Nenhuma alteração foi confirmada.';if(first.startsWith('FECHAR APPS')){const m=value.match(/Fechados e conferidos:\s*(\d+)\s+de\s+(\d+)/i);if(m){const done=Number(m[1]),total=Number(m[2]);return total===0?'FECHAR APPS: nenhum aplicativo de terceiros estava em execução.':'FECHAR APPS: '+done+' de '+total+' aplicativos encerrados e conferidos.'}if(lower.includes('nenhum app de terceiros estava em execução'))return 'FECHAR APPS: nenhum app de terceiros em execução.'}if(first.startsWith('LIMPAR RAM')){const m=value.match(/Apps com processo ativo:\s*(\d+)\s*→\s*(\d+)\s*\((\d+) encerrado/i);if(m)return 'LIMPAR RAM: '+m[3]+' processo(s) encerrado(s); confira a memória antes/depois no relatório.';if(lower.includes('pedido enviado')||lower.includes('o android decide o que realmente fecha'))return 'LIMPAR RAM: pedido enviado; o Android decide quais processos pode encerrar.';if(lower.includes('nenhum app de terceiros'))return 'LIMPAR RAM: nenhum aplicativo em segundo plano para encerrar.'}if(first.startsWith('PRIORIDADE')&&(lower.includes('não alterada')||lower.includes('não confirmou')||lower.includes('não foi possível')))return 'PRIORIDADE: bloqueada ou não confirmada pelo Android. Consulte os detalhes.';if(first.startsWith('BOOST COMPLETO')){const m=value.match(/Fechados e conferidos:\s*(\d+)\s+de\s+(\d+)/i);if(m){const closed=Number(m[1]),total=Number(m[2]);if(closed>0)return 'BOOST: '+closed+' de '+total+' aplicativos encerrados e conferidos; veja as demais etapas no relatório.';if(total===0)return 'BOOST: nenhum app de terceiros precisou ser encerrado; confira as demais etapas no relatório.'}if(lower.includes('pedido enviado')&&lower.includes('sem shizuku'))return 'BOOST BÁSICO: solicitação de limpeza enviada; o Android decide quais processos encerra.'}const confirmed=(value.match(/✔/g)||[]).length;const limited=lines.filter(line=>/não foi possível|não disponível|não liberou|não aceitou|não pôde|recusad|controlada pela rom|mantida pela rom|não foi alterado|adiado/i.test(line)).length;if(confirmed&&limited)return first+': aplicado parcialmente ('+confirmed+' '+(confirmed===1?'confirmação':'confirmações')+', '+limited+' '+(limited===1?'limitação':'limitações')+').';if(confirmed)return first+': '+confirmed+' '+(confirmed===1?'ajuste confirmado':'ajustes confirmados')+' pelo Android.';if(limited)return first+': o Android/kernel não confirmou os ajustes. Consulte os detalhes.';return first+': solicitação concluída, mas sem confirmação explícita de alteração.'}window.onNativeActionResult=function(act,text){if($('diabloConsole')&&$('diabloConsole').classList.contains('open')&&act==='boost')$('diabloLog').textContent=String(text||'BOOST sem retorno detalhado do Android.');if(act==='compat'){const dlg=$('infoDialog');dlg.querySelector('.dialog-title').textContent='COMPATIBILIDADE';dlg.querySelector('.dialog p').textContent=String(text||'');dlg.classList.add('open');return}setActionBusy(false);setActionResult(text);toast(summarizeNativeAction(text).slice(0,150));if(typeof refreshDeviceStats==='function')refreshDeviceStats()};
+function optimizeRam(){runNativeAction('ram')}
+function persistSettings(){try{localStorage.setItem('gamerTurboSettingsV2',JSON.stringify(settingState));if(settingState.persist)localStorage.setItem(MODE_STORE,JSON.stringify(mode));else localStorage.removeItem(MODE_STORE)}catch(_) {}}
+function boostNow(){runNativeAction('boost')}
+const quickDefinitions=[{id:'timer',label:'Cronômetro',ico:'timer',action:()=>setView('timer')},{id:'boost',label:'Boost',ico:'zap',action:boostNow},{id:'dnd',label:'Não perturbe',ico:'focus',action:toggleDnd},{id:'session',label:'Sessão',ico:'bell',action:()=>toast('Tempo de sessão: '+formatTime(sessionSeconds))},{id:'brightness',label:'Brilho',ico:'sun',action:openBrightnessDialog},{id:'wifi',label:'Wi-Fi',ico:'wifi',action:openWifiSettings},{id:'record',label:'Gravar tela',ico:'record',action:toggleScreenRecording}];
+let toolState=load('gamerTurboToolsV2',{dnd:false});toolState.dnd=false;
+function renderTools(){const html=quickDefinitions.map(t=>`<button class="tool-btn ${t.id==='dnd'&&toolState.dnd?'on':''} ${t.id==='record'&&screenRecording?'on':''}" data-tool="${t.id}">${icon(t.ico)}<span>${t.id==='record'&&screenRecording?'Parar gravação':t.label}</span></button>`).join('');['quickTools','overlayTools'].forEach(id=>{const el=$(id);if(!el)return;el.innerHTML=html;el.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>{const item=quickDefinitions.find(t=>t.id===b.dataset.tool);if(item)item.action()}))})}
+const toolSettings=[{title:'Não Perturbe durante o jogo',desc:'Silencia notificações usando o acesso oficial do Android; só alarmes tocam.',id:'dnd'}];
+const settingOptions=[
+ {title:'Animações da interface',desc:'Ativa ou desativa os movimentos da central.',id:'animations',on:true},
+ {title:'Vibração de feedback',desc:'Usa o motor de vibração do Android ao tocar nos controles.',id:'feedback',on:true},
+ {title:'Painel flutuante sobre os jogos',desc:'Mostra a alça de acesso rápido sobre outros aplicativos; exige permissão.',id:'overlay',on:false},
+ {title:'Tela imersiva',desc:'Oculta as barras de status e navegação enquanto o Gamer Turbo está aberto.',id:'immersive',on:false},
+ {title:'Manter tema escolhido',desc:'Salva o último perfil de cor neste aparelho.',id:'persist',on:true}
+];
+const motionOptions=[
+ {id:'ambientMotion',title:'Fundo dinâmico',desc:'Anima os anéis e o halo do painel principal.'},
+ {id:'cardMotion',title:'Entrada dos cartões',desc:'Movimento suave ao carregar os jogos.'},
+ {id:'iconSpin',title:'Giro 3D dos ícones',desc:'Rotação do ícone ao selecionar um jogo.'},
+ {id:'glowEffects',title:'Brilho neon',desc:'Realça bordas e elementos selecionados.'}
+];
+let settingState=Object.assign({animations:true,feedback:true,overlay:false,immersive:false,persist:true,ambientMotion:true,cardMotion:true,iconSpin:true,glowEffects:true,motionSpeed:100},load('gamerTurboSettingsV2',{})||{});
+settingState.overlay=false;
+function renderSettings(target,items){
+ const state=target==='toolsSettings'?toolState:settingState;
+ $(target).innerHTML=items.map(s=>{const value=(s.id in state)?state[s.id]:!!s.on;return `<div class="setting-row"><div class="setting-copy"><strong>${s.title}</strong><span>${s.desc}</span></div><button class="switch ${value?'on':''}" data-setting="${s.id}" aria-label="Alternar ${s.title}" aria-pressed="${value?'true':'false'}"></button></div>`}).join('');
+ $(target).querySelectorAll('[data-setting]').forEach(b=>b.addEventListener('click',()=>{
+  const id=b.dataset.setting;
+  if(target==='toolsSettings'&&id==='dnd'){toggleDnd();return}
+  if(target==='settingsGrid'&&id==='overlay'){toggleOverlaySetting(!settingState.overlay);return}
+  if(target==='settingsGrid'&&id==='immersive'){toggleImmersiveSetting(!settingState.immersive);return}
+  state[id]=!state[id];
+  if(target==='settingsGrid'){persistSettings();if(id==='animations'){applyMotionSettings();renderMotionSettings()}}
+  else persistToolState();
+  renderSettings(target,items);toast('Configuração atualizada');
+ }));
+}
+function renderMotionSettings(){
+ const host=$('motionSettingsGrid');if(!host)return;
+ const disabled=!settingState.animations;
+ host.innerHTML=motionOptions.map(item=>`<div class="motion-option ${settingState[item.id]?'enabled':''}"><div><strong>${item.title}</strong><small>${item.desc}</small></div><button type="button" class="switch ${settingState[item.id]?'on':''}" data-motion-setting="${item.id}" aria-label="Alternar ${item.title}" aria-pressed="${settingState[item.id]?'true':'false'}" ${disabled?'disabled':''}></button></div>`).join('');
+ host.querySelectorAll('[data-motion-setting]').forEach(button=>button.addEventListener('click',()=>{
+  if(!settingState.animations)return;
+  const id=button.dataset.motionSetting;settingState[id]=!settingState[id];persistSettings();applyMotionSettings();renderMotionSettings();toast('Efeito visual atualizado');
+ }));
+}
+function applyMotionSettings(){
+ const active=settingState.animations!==false;
+ const speed=Math.max(70,Math.min(140,Number(settingState.motionSpeed)||100));
+ const factor=speed/100;
+ document.body.classList.toggle('reduce-motion',!active);
+ document.body.classList.toggle('no-ambient-motion',!active||!settingState.ambientMotion);
+ document.body.classList.toggle('no-card-motion',!active||!settingState.cardMotion);
+ document.body.classList.toggle('no-icon-spin',!active||!settingState.iconSpin);
+ document.body.classList.toggle('no-glow-effects',!active||!settingState.glowEffects);
+ const root=document.documentElement;
+ root.style.setProperty('--tile-duration',(0.34/factor).toFixed(3)+'s');
+ root.style.setProperty('--icon-duration',(0.62/factor).toFixed(3)+'s');
+ root.style.setProperty('--transition-duration',(0.2/factor).toFixed(3)+'s');
+ root.style.setProperty('--ambient-duration',(5/factor).toFixed(2)+'s');
+ root.style.setProperty('--ring-duration',(38/factor).toFixed(2)+'s');
+ root.style.setProperty('--inner-ring-duration',(25/factor).toFixed(2)+'s');
+ const range=$('motionSpeedRange'),label=$('motionSpeedValue');
+ if(range)range.value=String(speed);
+ if(label)label.textContent=(speed/100).toFixed(2).replace(/0$/,'')+'x';
+ document.querySelectorAll('[data-speed-preset]').forEach(button=>button.classList.toggle('active',Number(button.dataset.speedPreset)===speed));
+}
+function changeMotionSpeed(value){settingState.motionSpeed=Math.max(70,Math.min(140,Number(value)||100));applyMotionSettings();persistSettings()}
+function resetMotionSettings(){settingState.animations=true;settingState.ambientMotion=true;settingState.cardMotion=true;settingState.iconSpin=true;settingState.glowEffects=true;settingState.motionSpeed=100;persistSettings();applyMotionSettings();renderSettings('settingsGrid',settingOptions);renderMotionSettings();toast('Animações restauradas ao padrão')}
+function toggleImmersiveSetting(next){
+ const b=bridge();
+ if(!b||typeof b.setImmersiveMode!=='function'){toast('A tela imersiva está disponível na versão APK Android.');return}
+ try{const ok=b.setImmersiveMode(!!next);if(ok){settingState.immersive=!!next;persistSettings();renderSettings('settingsGrid',settingOptions);toast(next?'Tela imersiva ativada. Deslize da borda para mostrar as barras.':'Barras do sistema restauradas.')}else toast('O Android não permitiu alterar a tela imersiva.')}catch(_){toast('Não foi possível alterar a tela imersiva.')}
+}
+function updateClock(){const d=new Date();$('clock').textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+function openQuick(){setView('tools')}function closeQuick(){setView('home')}
+function refreshDeviceStats(){
+ const b=bridge();if(!b||typeof b.getDeviceStats!=='function')return;
+ try{
+  const info=JSON.parse(b.getDeviceStats()||'{}');
+  if(Number.isFinite(Number(info.batteryLevel))&&Number(info.batteryLevel)>=0){
+   $('batteryValue').innerHTML=Number(info.batteryLevel)+'<span class="stat-unit">%</span>';
+   $('batteryState').textContent=info.charging?'Carregando':'Na bateria';
+   $('batteryBar').style.width=Math.max(0,Math.min(100,Number(info.batteryLevel)))+'%';
+  }
+  const ramOk=info.ramAvailable!==false&&Number.isFinite(Number(info.ramPercent))&&Number(info.ramPercent)>=0;
+  if(ramOk){
+   const percent=Math.max(0,Math.min(100,Number(info.ramPercent)));
+   $('ramValue').innerHTML=percent+'<span class="stat-unit">%</span>';
+   $('ramState').textContent=`${Number(info.ramUsedMB)||0} / ${Number(info.ramTotalMB)||0} MB`;
+   $('ramBar').style.width=percent+'%';
+   $('ramValue').title=`${info.ramAvailableMB??'--'} MB disponíveis • origem: ${info.ramDataSource||'Android'}`;
+  }else{
+   $('ramValue').innerHTML='--<span class="stat-unit">%</span>';
+   $('ramState').textContent=info.ramError?'Falha na leitura':'RAM indisponível';
+   $('ramBar').style.width='0%';
+  }
+  if(Number.isFinite(Number(info.batteryTempC))&&Number(info.batteryTempC)>=0){
+   $('temperatureValue').innerHTML=Number(info.batteryTempC).toFixed(1)+'<span class="stat-unit">°C</span>';
+   $('temperatureState').textContent='Sensor da bateria';
+   $('temperatureBar').style.width=Math.min(100,Math.max(0,Number(info.batteryTempC)*2))+'%';
+  }else{
+   $('temperatureValue').innerHTML='--<span class="stat-unit">°C</span>';
+   $('temperatureState').textContent='Sensor indisponível';
+  }
+  const el=$('nativeBridgeStatus');if(el&&info.error)el.title='Falha nas estatísticas: '+info.error;
+ }catch(e){const el=$('nativeBridgeStatus');if(el){el.title='Erro na leitura dos sensores: '+String(e);}}
+}
+function refreshNativeState(){
+ updateNativeBridgeStatus();const b=bridge();if(!b)return;
+ try{if(typeof b.isGameDndEnabled==='function')toolState.dnd=b.isGameDndEnabled()}catch(_){}
+ try{if(typeof b.isOverlayEnabled==='function')settingState.overlay=b.isOverlayEnabled()}catch(_){}
+ try{if(typeof b.isImmersiveModeEnabled==='function')settingState.immersive=b.isImmersiveModeEnabled()}catch(_){}
+ try{if(typeof b.isScreenRecording==='function')screenRecording=b.isScreenRecording()}catch(_){}
+ try{if(typeof b.getMode==='function'){const nativeMode=b.getMode();if(modeConfig[nativeMode])setMode(nativeMode,false)}}catch(_){}
+ renderTools();if(currentView==='tools')renderSettings('toolsSettings',toolSettings);if(currentView==='settings')renderSettings('settingsGrid',settingOptions);
+ refreshDeviceStats();refreshShizukuUI();
+}
+window.refreshNativeState=refreshNativeState;
+window.refreshInstalledGames=function(){if(bridge())scanInstalledGames(false,false)};
+window.handleAndroidBack=function(){if($('diabloConsole')&&$('diabloConsole').classList.contains('open')){closeDiabloConsole();return true}if(currentView!=='home'){setView('home');return true}return false};
+function initBattery(){refreshDeviceStats();if(!bridge()&&!navigator.getBattery){$('batteryState').textContent='Leitura não disponível nesta prévia';return}if(!bridge()&&navigator.getBattery){navigator.getBattery().then(b=>{const render=()=>{$('batteryValue').innerHTML=Math.round(b.level*100)+'<span class="stat-unit">%</span>';$('batteryState').textContent=b.charging?'Carregando':'Bateria';$('batteryBar').style.width=(b.level*100)+'%'};render();b.addEventListener('levelchange',render);b.addEventListener('chargingchange',render)}).catch(()=>{})}}
+// Events
+ document.addEventListener('click',e=>{if(settingState.feedback&&e.target.closest('button')&&bridge()){try{bridge().vibrate()}catch(_){}}},true);
+ document.querySelectorAll('.rail-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+ document.querySelectorAll('.mode-btn').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+ $('scanGamesBtn').addEventListener('click',()=>scanInstalledGames(true));$('libraryScan').addEventListener('click',()=>scanInstalledGames(true));
+ $('addGameBtn').addEventListener('click',openAdd);$('libraryAdd').addEventListener('click',openAdd);$('railAdd').addEventListener('click',openAdd);$('closeDialog').addEventListener('click',closeAdd);$('cancelDialog').addEventListener('click',closeAdd);$('gameForm').addEventListener('submit',addGame);$('gameDialog').addEventListener('click',e=>{if(e.target===$('gameDialog'))closeAdd()});$('pickInstalledBtn').addEventListener('click',()=>openInstalledDialog(true));
+ $('closeInstalled').addEventListener('click',closeInstalledDialog);$('closeInstalled2').addEventListener('click',closeInstalledDialog);$('installedDialog').addEventListener('click',e=>{if(e.target===$('installedDialog'))closeInstalledDialog()});$('installedSearch').addEventListener('input',renderInstalledApps);$('rescanInstalled').addEventListener('click',()=>scanInstalledGames(true));
+ $('closeBrightness').addEventListener('click',()=>$('brightnessDialog').classList.remove('open'));$('cancelBrightness').addEventListener('click',()=>$('brightnessDialog').classList.remove('open'));$('applyBrightness').addEventListener('click',applyBrightness);$('systemBrightnessRange').addEventListener('input',updateBrightnessValue);$('brightnessDialog').addEventListener('click',e=>{if(e.target===$('brightnessDialog'))$('brightnessDialog').classList.remove('open')});$('motionSpeedRange').addEventListener('input',e=>changeMotionSpeed(e.target.value));document.querySelectorAll('[data-speed-preset]').forEach(b=>b.addEventListener('click',()=>changeMotionSpeed(b.dataset.speedPreset)));$('resetMotionButton').addEventListener('click',resetMotionSettings);$('previewMotionButton').addEventListener('click',()=>{if(!settingState.animations){toast('Ative as animações gerais para testar os efeitos.');return}const preview=$('motionPreview'),button=$('previewMotionButton'),playing=!preview.classList.contains('is-playing');preview.classList.toggle('is-playing',playing);button.textContent=playing?'PARAR PRÉVIA':'TESTAR EFEITOS'});
+ $('diabloBack').addEventListener('click',closeDiabloConsole);$('diabloLaunch').addEventListener('click',()=>{closeDiabloConsole();launchGame()});$('diabloBoost').addEventListener('click',()=>{const log=$('diabloLog');log.textContent='BOOST solicitado. A confirmação aparecerá aqui quando o Android retornar o resultado.';boostNow()});$('diabloProbe').addEventListener('click',runDiabloProbe);$('diabloReport').addEventListener('click',showDiabloReport);$('launchSelectedBtn').addEventListener('click',launchGame);$('viewAllGames').addEventListener('click',()=>setView('library'));$('homeBoostBtn').addEventListener('click',boostNow);$('ramCleanButton').addEventListener('click',()=>runNativeAction('ram'));$('closeAppsButton').addEventListener('click',()=>runNativeAction('close'));$('priorityButton').addEventListener('click',()=>runNativeAction('priority'));$('boostButton').addEventListener('click',()=>runNativeAction('boost'));$('shizukuSettingsConnect').addEventListener('click',connectShizuku);$('shizukuOpenApp').addEventListener('click',()=>{const b=bridge();if(b&&typeof b.openShizukuApp==='function')b.openShizukuApp();else toast('Disponível no APK Android.')});$('compatButton').addEventListener('click',()=>{const b=bridge();if(!b||typeof b.runAction!=='function'){toast('Disponível no APK Android atualizado.');return}toast('Lendo compatibilidade...');b.runAction('compat')});$('shizukuRecheck').addEventListener('click',()=>{refreshShizukuUI();toast('Estado do Shizuku atualizado.')});$('shizukuChip').addEventListener('click',()=>setView('settings'));$('shizukuConnectButton').addEventListener('click',connectShizuku);$('kernelInspectButton').addEventListener('click',inspectKernelNow);$('profileReportButton').addEventListener('click',showProfileReport);$('closeInfo').addEventListener('click',()=>$('infoDialog').classList.remove('open'));$('okInfo').addEventListener('click',()=>$('infoDialog').classList.remove('open'));$('infoDialog').addEventListener('click',e=>{if(e.target===$('infoDialog'))$('infoDialog').classList.remove('open')});$('diagAppSettings').addEventListener('click',()=>{const b=bridge();if(b&&typeof b.openAppSettings==='function')b.openAppSettings()});$('diagAppsPermission').addEventListener('click',()=>{const b=bridge();if(b&&typeof b.requestInstalledAppsPermission==='function'){b.requestInstalledAppsPermission();setTimeout(()=>{if(typeof b.getInstalledApps==='function')scanInstalledGames(false,false)},700)}});$('diagNotifications').addEventListener('click',()=>{const b=bridge();if(b&&typeof b.requestPostNotificationsPermission==='function')b.requestPostNotificationsPermission()});$('openSettings').addEventListener('click',()=>setView('settings'));$('openQuick').addEventListener('click',()=>setView('tools'));$('timerStart').addEventListener('click',timerAction);$('timerReset').addEventListener('click',timerReset);$('timerPause').addEventListener('click',timerPause);
+ // A alça sobre os jogos é criada pelo serviço Android nativo, não por um elemento da WebView.
+ // Initial state
+ $('nativeBridgeStatus').addEventListener('click',showBridgeDiagnostics);$('nativeBridgeStatus').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showBridgeDiagnostics()}});
+ updateNativeBridgeStatus();
+ if(!games.some(g=>g.id===selectedId))selectedId=games[0]?.id||null;renderStrip();if(selectedId)selectGame(selectedId);setMode(mode,false,false);renderTools();renderSettings('settingsGrid',settingOptions);renderSettings('toolsSettings',toolSettings);renderMotionSettings();applyMotionSettings();setView('home');updateClock();setInterval(updateClock,15000);const appStartedAt=Date.now();setInterval(()=>{sessionSeconds=Math.floor((Date.now()-appStartedAt)/1000);$('sessionValue').innerHTML=String(Math.floor(sessionSeconds/60)).padStart(2,'0')+'<span class="stat-unit"> min</span>';$('sessionBar').style.width=Math.min(100,sessionSeconds/3600*100)+'%'},1000);initBattery();setInterval(refreshDeviceStats,5000);setInterval(refreshShizukuUI,3000);refreshShizukuUI();updateTimerUIForInit();function updateTimerUIForInit(){ $('timerReadout').textContent=formatTime(timerSeconds);$('timerStart').textContent=timerRunning?'EM ANDAMENTO':'INICIAR';$('timerMeter').style.transform='scaleX(0)'}
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&timerRunning)timerTick()});if(settingState.animations===false)document.body.classList.add('reduce-motion');if(bridge()){refreshNativeState();scanInstalledGames(false,false)}
+})();
+
+/* ===== carrossel de jogos ===== */
+(function(){
+  const baseRender=renderStrip;
+  renderStrip=function(){
+    const g=$('gameGrid');const prev=g?g.scrollLeft:0;
+    baseRender();
+    if(!g)return;
+    g.scrollLeft=prev;
+    const sel=g.querySelector('.game-card.selected');
+    if(sel){const target=sel.offsetLeft-(g.clientWidth-sel.clientWidth)/2;if(Math.abs(g.scrollLeft-target)>4)g.scrollTo({left:Math.max(0,target),behavior:'smooth'})}
+  };
+  let timer=null;
+  document.addEventListener('scroll',e=>{
+    const g=$('gameGrid');if(!g||e.target!==g)return;
+    clearTimeout(timer);
+    timer=setTimeout(()=>{
+      const cards=[...g.querySelectorAll('.game-card[data-select]')];if(!cards.length)return;
+      const mid=g.scrollLeft+g.clientWidth/2;let best=null,dist=1e9;
+      cards.forEach(c=>{const d=Math.abs(c.offsetLeft+c.clientWidth/2-mid);if(d<dist){dist=d;best=c}});
+      if(best&&best.dataset.select!==selectedId)selectGame(best.dataset.select);
+    },160);
+  },true);
+})();
+</script>
+<script>
+// Abertura original em três fases. O som é sintetizado localmente e só toca após interação do usuário.
+(function(){
+  const intro=document.getElementById('gtIntro');
+  const soundButton=document.getElementById('introSound');
+  const skipButton=document.getElementById('introSkip');
+  const phaseLabel=document.getElementById('introPhase');
+  const progressFill=document.getElementById('introProgressFill');
+  if(!intro||!soundButton||!skipButton)return;
+  let dismissed=false,sequenceTimers=[],closeTimer=null,audioContext=null,soundPlayed=false;
+  const reducedMotion=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  function clearSequence(){sequenceTimers.forEach(clearTimeout);sequenceTimers=[];clearTimeout(closeTimer);closeTimer=null;}
+  function setPhase(name,label,progress){intro.dataset.phase=name;if(phaseLabel)phaseLabel.textContent=label;if(progressFill)progressFill.style.width=progress+'%';}
+  function closeIntro(){if(dismissed)return;dismissed=true;clearSequence();if(audioContext&&audioContext.state!=='closed')audioContext.close().catch(()=>{});audioContext=null;intro.classList.add('dismiss');setTimeout(()=>{if(intro.isConnected)intro.remove();},720);}
+  function runSequence(){
+    if(dismissed)return;
+    clearSequence();
+    setPhase('boot','SISTEMA EM REPOUSO',8);
+    sequenceTimers.push(setTimeout(()=>setPhase('ignite','ENERGIA EM ATIVAÇÃO',42),720));
+    sequenceTimers.push(setTimeout(()=>setPhase('online','GAMER TURBO  /  ONLINE',100),1580));
+    closeTimer=setTimeout(closeIntro,reducedMotion?1900:3550);
+  }
+  function scheduleGain(gain,t,peak,release,level){
+    gain.gain.setValueAtTime(0.0001,t);
+    gain.gain.exponentialRampToValueAtTime(level,t+peak);
+    gain.gain.exponentialRampToValueAtTime(0.0001,t+release);
+  }
+  async function playOpeningSound(){
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx){soundButton.textContent='SOM NÃO SUPORTADO';soundButton.disabled=true;return false;}
+    try{
+      const ctx=new AudioCtx();audioContext=ctx;
+      if(ctx.state==='suspended')await ctx.resume();
+      const t=ctx.currentTime;
+      const master=ctx.createGain();master.gain.setValueAtTime(0.0001,t);master.gain.exponentialRampToValueAtTime(0.52,t+0.12);master.gain.setValueAtTime(0.52,t+1.45);master.gain.exponentialRampToValueAtTime(0.0001,t+2.95);master.connect(ctx.destination);
+      // Subgrave: impacto macio da liberação do mecanismo.
+      const sub=ctx.createOscillator(),subGain=ctx.createGain();sub.type='sine';sub.frequency.setValueAtTime(48,t);sub.frequency.exponentialRampToValueAtTime(86,t+0.28);sub.frequency.exponentialRampToValueAtTime(42,t+1.05);scheduleGain(subGain,t,0.07,1.28,0.24);sub.connect(subGain);subGain.connect(master);sub.start(t);sub.stop(t+1.32);
+      // Motor elétrico ascendente: duas camadas filtradas para evitar aspereza.
+      const motorFilter=ctx.createBiquadFilter();motorFilter.type='lowpass';motorFilter.frequency.setValueAtTime(420,t);motorFilter.frequency.exponentialRampToValueAtTime(1450,t+1.05);motorFilter.frequency.exponentialRampToValueAtTime(620,t+2.35);motorFilter.Q.value=0.7;motorFilter.connect(master);
+      [0,1].forEach((index)=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type=index?'triangle':'sawtooth';osc.frequency.setValueAtTime(index?132:88,t+0.12);osc.frequency.exponentialRampToValueAtTime(index?392:286,t+1.45);osc.frequency.exponentialRampToValueAtTime(index?196:146,t+2.45);scheduleGain(gain,t+0.1,0.42,2.52,index?0.045:0.032);osc.connect(gain);gain.connect(motorFilter);osc.start(t+0.1);osc.stop(t+2.58);});
+      // Whoosh mecânico curto, gerado localmente e filtrado.
+      const length=Math.floor(ctx.sampleRate*1.25),buffer=ctx.createBuffer(1,length,ctx.sampleRate),data=buffer.getChannelData(0);
+      for(let i=0;i<length;i++){const fade=1-i/length;data[i]=(Math.random()*2-1)*fade;}
+      const noise=ctx.createBufferSource(),noiseFilter=ctx.createBiquadFilter(),noiseGain=ctx.createGain();noise.buffer=buffer;noiseFilter.type='bandpass';noiseFilter.frequency.setValueAtTime(1150,t+0.18);noiseFilter.frequency.exponentialRampToValueAtTime(390,t+1.2);noiseFilter.Q.value=0.65;scheduleGain(noiseGain,t+0.16,0.18,1.38,0.075);noise.connect(noiseFilter);noiseFilter.connect(noiseGain);noiseGain.connect(master);noise.start(t+0.16);noise.stop(t+1.45);
+      // Sinal metálico cristalino que marca a conclusão da ignição.
+      [523.25,659.25,783.99].forEach((freq,index)=>{const at=t+1.55+index*0.075,osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,at);osc.frequency.exponentialRampToValueAtTime(freq*0.985,at+0.72);scheduleGain(gain,at,0.055,0.88,0.035/(index+1));osc.connect(gain);gain.connect(master);osc.start(at);osc.stop(at+0.92);});
+      setTimeout(()=>{if(ctx.state!=='closed')ctx.close().catch(()=>{});if(audioContext===ctx)audioContext=null;},3300);
+      return true;
+    }catch(error){if(audioContext&&audioContext.state!=='closed')audioContext.close().catch(()=>{});audioContext=null;return false;}
+  }
+  soundButton.addEventListener('click',async()=>{
+    if(soundPlayed||dismissed)return;
+    soundButton.disabled=true;soundButton.textContent='SISTEMA DE ÁUDIO...';
+    const ok=await playOpeningSound();
+    if(ok){soundPlayed=true;soundButton.textContent='♫ SOM ATIVADO';soundButton.classList.add('sound-active');runSequence();}
+    else{soundButton.disabled=false;soundButton.textContent='SOM INDISPONÍVEL · CONTINUAR';}
+  });
+  skipButton.addEventListener('click',closeIntro);
+  runSequence();
+})();
+</script>
+</body>
+</html>
