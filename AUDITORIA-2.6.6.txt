@@ -1,0 +1,11 @@
+GAMER TURBO 2.6.6 — REVISAO DE FLUIDEZ E BIBLIOTECA
+
+Alteracoes:
+- Painel nativo: leituras visuais/metrics em ciclo de 500 ms.
+- FPS SurfaceFlinger: leitura pesada separada, intervalo minimo de 20 segundos, com pedido imediato na abertura.
+- Selecao da biblioteca: atualiza classes de selecao sem reconstruir todos os cards e recarregar icones.
+- Cards: layout compacto horizontal; animações em cascata, rotacao de icones e filtros removidos.
+- DIABLO: entrada simplificada, sem blur/filter durante sequencia.
+
+Verificacoes estaticas: HTML/CSS/JS estrutural revisado; identificador de versao alterado para 2.6.6.
+Limite: nao houve compilacao APK nem teste de desempenho em dispositivo real neste ambiente.

@@ -1,0 +1,5 @@
+Gamer Turbo 2.6.7 - revisão aplicada
+- FPS polling sem intervalo artificial de 20 s; requestFpsUpdate roda no ciclo de 500 ms, fpsBusy impede sobreposição.
+- Biblioteca de jogos em cartões horizontais compactos e sem rotação 3D/cascade.
+- CSS compact-polish aplicado.
+- Verificação estática realizada; não compilado/testado em dispositivo Android.

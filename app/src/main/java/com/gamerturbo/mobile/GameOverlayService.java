@@ -63,6 +63,7 @@ public class GameOverlayService extends Service {
     private volatile boolean recording = false;
     private volatile boolean busy = false;
     private volatile boolean fpsBusy = false;
+    private volatile long lastFpsRequestAt = 0L;
     private volatile int lastFps = -1;
     private volatile int lastCpuFrequencyMhz = -1;
     private volatile boolean cpuFrequencyBusy = false;
@@ -85,8 +86,8 @@ public class GameOverlayService extends Service {
         @Override public void run() {
             if (panelOpen) {
                 updateMetrics();
-                requestFpsUpdate();
-                handler.postDelayed(this, 1500);
+                requestFpsUpdate(); // coleta contínua; fpsBusy evita sobreposição de comandos
+                handler.postDelayed(this, 500);
             }
         }
     };
@@ -618,7 +619,7 @@ public class GameOverlayService extends Service {
             updateMetrics();
             requestFpsUpdate();
             handler.removeCallbacks(refreshTask);
-            handler.postDelayed(refreshTask, 1500);
+            handler.postDelayed(refreshTask, 500);
         } catch (Exception e) {
             panelView = null;
             panelOpen = false;
@@ -922,6 +923,7 @@ public class GameOverlayService extends Service {
             return;
         }
         fpsBusy = true;
+        lastFpsRequestAt = System.currentTimeMillis();
         new Thread(() -> {
             int measured = -1;
             try {

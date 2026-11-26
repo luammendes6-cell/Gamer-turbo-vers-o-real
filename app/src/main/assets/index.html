@@ -82,16 +82,16 @@ body:after{display:none}
 .section-meta{font-size:8px;color:#78808d;letter-spacing:.12em;margin-top:4px}
 .section-action{border:0;background:none;color:#cbd0d8;font-size:10px;font-weight:750;letter-spacing:.06em;padding:7px}
 .section-action em{font-style:normal;color:var(--accent);font-size:18px;vertical-align:-1px;margin-left:5px}
-.game-grid{min-height:0;flex:1;overflow:auto;display:grid;grid-template-columns:repeat(4,minmax(80px,1fr));grid-auto-rows:minmax(116px,1fr);gap:9px;align-content:start;padding:3px 2px 8px;scrollbar-width:thin;scrollbar-color:#343943 transparent}
-.game-card{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 7px 7px;border:1px solid #282c35;border-radius:13px;background:linear-gradient(155deg,#1c2029 0%,#12151b 78%);color:#f5f6f8;cursor:pointer;overflow:hidden;animation:tileReveal .34s both;animation-delay:calc(var(--tile-index,0) * 24ms);transition:border-color .2s,background .2s,transform .2s,box-shadow .2s}
+.game-grid{min-height:0;flex:1;overflow:auto;display:grid;grid-template-columns:repeat(4,minmax(80px,1fr));grid-auto-rows:minmax(82px,auto);gap:7px;align-content:start;padding:3px 2px 8px;scrollbar-width:thin;scrollbar-color:#343943 transparent}
+.game-card{position:relative;min-width:0;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:9px;padding:8px 10px;border:1px solid #282c35;border-radius:13px;background:linear-gradient(155deg,#1c2029 0%,#12151b 78%);color:#f5f6f8;cursor:pointer;overflow:hidden;animation:tileReveal .16s ease-out both;animation-delay:0ms;transition:border-color .2s,background .2s,transform .2s,box-shadow .2s}
 .game-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 18%,rgba(var(--accent-rgb),.13),transparent 58%);opacity:0;transition:opacity .2s;pointer-events:none}
 .game-card:active{transform:scale(.965)}
 .game-card.selected{background:linear-gradient(155deg,#25191e,#15161d 78%);border-color:rgba(var(--accent-rgb),.72);box-shadow:inset 0 -2px var(--accent),0 0 18px rgba(var(--accent-rgb),.09)}
 .game-card.selected::before{opacity:1}
-.game-icon{height:65px;width:65px;flex:0 0 65px;border-radius:17px;background:linear-gradient(145deg,#303644,#1d222c);display:grid;place-items:center;overflow:hidden;font-size:29px;font-weight:800;color:#f5f5f6;box-shadow:0 5px 16px #0009;border:1px solid #ffffff12;position:relative;z-index:1}
+.game-icon{height:42px;width:42px;flex:0 0 42px;border-radius:17px;background:linear-gradient(145deg,#303644,#1d222c);display:grid;place-items:center;overflow:hidden;font-size:19px;font-weight:800;color:#f5f5f6;box-shadow:0 5px 16px #0009;border:1px solid #ffffff12;position:relative;z-index:1}
 .game-icon img{width:100%;height:100%;object-fit:cover}
-.game-card.selected .game-icon{animation:appIconSpin .62s cubic-bezier(.18,.78,.25,1) both;box-shadow:0 0 0 2px rgba(var(--accent-rgb),.3),0 7px 20px #000a}
-.game-name{max-width:100%;font-size:10px;line-height:1.2;color:#eef0f4;font-weight:800;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;position:relative;z-index:1}
+.game-card.selected .game-icon{animation:none;box-shadow:0 0 0 2px rgba(var(--accent-rgb),.3),0 7px 20px #000a}
+.game-name{max-width:100%;font-size:11px;line-height:1.2;color:#eef0f4;font-weight:800;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;position:relative;z-index:1}
 .game-footer{width:100%;display:flex;align-items:center;justify-content:space-between;gap:5px;position:relative;z-index:1}
 .game-sub{font-size:6px;letter-spacing:.09em;color:#747d8b;text-transform:uppercase;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .game-open{width:24px;height:21px;flex:0 0 24px;border:1px solid rgba(var(--accent-rgb),.35);border-radius:7px;background:rgba(var(--accent-rgb),.14);color:var(--accent);display:grid;place-items:center;padding:0;transition:transform .18s,background .18s}
@@ -99,7 +99,7 @@ body:after{display:none}
 .game-open:active{transform:scale(.86)}
 .game-card:focus-visible,.game-open:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @keyframes tileReveal{from{opacity:0;transform:translateY(9px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes appIconSpin{0%{transform:perspective(260px) rotateY(-360deg) scale(.78);filter:brightness(1.5)}100%{transform:perspective(260px) rotateY(0) scale(1);filter:brightness(1)}}
+@keyframes appIconSpin{from{opacity:.9}to{opacity:1}}
 @media(hover:hover){.game-card:hover{transform:translateY(-3px);border-color:rgba(var(--accent-rgb),.48);box-shadow:0 9px 22px #0006}.game-card:hover::before{opacity:.75}}
 @media(prefers-reduced-motion:reduce){.game-card,.game-card.selected .game-icon{animation:none!important;transition:none!important}}
 .game-empty{grid-column:1/-1;min-height:170px;border:1px dashed #343944;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#a7afbc;padding:18px;gap:9px}
@@ -582,6 +582,26 @@ body.reduce-motion .motion-preview.is-playing .preview-orbit,body.reduce-motion 
 body.reduce-motion .gt-intro *,body.reduce-motion .diablo-screen.diablo-boot *{animation:none!important;transition:none!important;filter:none!important}
 @media(max-width:760px){.intro-core{width:92px;height:92px}.intro-name{font-size:20px}.intro-overline{margin-bottom:15px}.intro-phase{margin-top:17px}}
 </style>
+
+<style id="gt-266-performance-polish">
+/* 2.6.6: eliminate costly filters/staggered motion; keep animations on compositor-friendly transforms. */
+.game-card,.library-card,.game-card.selected .game-icon{animation:none!important;transition:transform .12s ease,border-color .12s ease,background-color .12s ease,box-shadow .12s ease!important}
+.game-card.selected .game-icon{filter:none!important}
+.diablo-screen.diablo-boot .diablo-top,.diablo-screen.diablo-boot .diablo-left,.diablo-screen.diablo-boot .diablo-right,.diablo-screen.diablo-boot .diablo-readout,.diablo-screen.diablo-boot .diablo-action-row,.diablo-screen.diablo-boot .diablo-feature{animation:none!important;filter:none!important}
+.diablo-screen.diablo-boot .diablo-core{animation:diabloCore266 .55s cubic-bezier(.2,.8,.2,1) both!important;filter:none!important}
+@keyframes diabloCore266{from{transform:scale(.86)}55%{transform:scale(1.035)}to{transform:scale(1)}}
+#homeView .game-library{min-height:0;align-content:start}
+#homeView .game-grid{display:flex!important;flex-wrap:wrap!important;align-content:flex-start!important;align-items:flex-start!important;gap:7px!important;grid-auto-rows:auto!important;min-height:0!important;padding:3px!important}
+#homeView .game-card{flex:0 0 150px!important;width:150px!important;height:56px!important;min-height:56px!important;max-height:56px!important;flex-direction:row!important;justify-content:flex-start!important;gap:8px!important;padding:6px 8px!important;animation:none!important;transform:none!important}
+#homeView .game-icon{width:36px!important;height:36px!important;flex-basis:36px!important;min-width:36px!important;border-radius:8px!important;font-size:18px!important}
+#homeView .game-name{flex:1!important;min-width:0!important;text-align:left!important;font-size:9px!important;line-height:1.2!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
+#homeView .game-footer{margin-left:auto!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:2px!important}
+#homeView .game-sub{display:none!important}
+#homeView .game-open{width:21px!important;height:21px!important;flex-basis:21px!important}
+@media(max-width:700px){#homeView .game-card{flex-basis:128px!important;width:128px!important}}
+@media(prefers-reduced-motion:reduce){.diablo-screen.diablo-boot *,.game-card,.library-card{animation:none!important;transition:none!important}}
+</style>
+
 </head>
 <body>
 <div id="gtIntro" class="gt-intro" data-phase="boot" role="dialog" aria-label="Abertura Gamer Turbo">
@@ -828,7 +848,7 @@ function setView(view){currentView=view;document.querySelectorAll('.rail-btn[dat
 function ptCount(n,singular,plural){return String(n)+' '+(Number(n)===1?singular:plural)}
 function gameEmoji(name){const n=String(name).toLowerCase();if(/free fire|garena/.test(n))return '🔥';if(/pubg|battle/.test(n))return '🎯';if(/call of duty|cod mobile/.test(n))return '⚔️';if(/roblox/.test(n))return '🧱';if(/minecraft/.test(n))return '⛏️';if(/racing|asphalt|carx|need for speed/.test(n))return '🏎️';if(/football|futebol|efootball|fc mobile|fifa/.test(n))return '⚽';if(/clash|brawl/.test(n))return '💥';if(/genshin|honkai/.test(n))return '✨';return '🎮'}
 function renderStrip(){const grid=$('gameGrid');if(!grid)return;if(!games.length){grid.innerHTML='<div class="game-empty"><strong>Nenhum jogo na biblioteca</strong><span>O Gamer Turbo procura jogos instalados automaticamente. Também pode adicionar um aplicativo na lista manual.</span><button type="button" id="emptyDetect">DETECTAR JOGOS</button></div>';const emptyDetect=$('emptyDetect');if(emptyDetect)emptyDetect.addEventListener('click',()=>scanInstalledGames(true));}else{grid.innerHTML=games.map((g,i)=>`<article class="game-card ${g.id===selectedId?'selected':''}" data-select="${esc(g.id)}" tabindex="0" role="button" aria-label="Selecionar ${esc(g.name)}" style="--tile-index:${i}"><div class="game-icon">${g.iconData?`<img src="${g.iconData}" alt="Ícone de ${esc(g.name)}" loading="lazy">`:esc(g.emoji||'🎮')}</div><div class="game-name">${esc(g.name)}</div><div class="game-footer"><span class="game-sub">${g.source==='device'?'DETECTADO':g.pkg?'INSTALADO':'ATALHO'}</span>${g.pkg?`<button class="game-open" type="button" data-play="${esc(g.id)}" aria-label="Abrir ${esc(g.name)}" title="Jogar">${icon('play')}</button>`:''}</div></article>`).join('');grid.querySelectorAll('[data-select]').forEach(card=>{card.addEventListener('click',e=>{if(e.target.closest('[data-play]'))return;selectGame(card.dataset.select)});card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectGame(card.dataset.select)}})});grid.querySelectorAll('[data-play]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();launchGameById(b.dataset.play)}));}const rail=$('railGames');rail.innerHTML=games.slice(0,4).map(g=>`<button class="rail-game ${g.id===selectedId?'active':''}" data-railgame="${esc(g.id)}" title="${esc(g.name)}">${g.iconData?`<img src="${g.iconData}" style="width:100%;height:100%;object-fit:cover;border-radius:9px">`:esc(g.emoji||'🎮')}</button>`).join('');rail.querySelectorAll('[data-railgame]').forEach(b=>b.addEventListener('click',()=>selectGame(b.dataset.railgame)));}
-function selectGame(id){selectedId=id;const g=games.find(x=>x.id===id);if(!g)return;$('selectedGameName').textContent=g.name;$('selectedGameMeta').textContent=g.pkg?'Aplicativo instalado • '+g.pkg:'Atalho local • pacote Android necessário';$('launchSelectedBtn').disabled=!g.pkg;renderStrip();if(currentView==='library')renderLibrary()}
+function selectGame(id){const previous=selectedId;selectedId=id;const g=games.find(x=>x.id===id);if(!g)return;$('selectedGameName').textContent=g.name;$('selectedGameMeta').textContent=g.pkg?'Aplicativo instalado • '+g.pkg:'Atalho local • pacote Android necessário';$('launchSelectedBtn').disabled=!g.pkg;const grid=$('gameGrid');if(grid){grid.querySelectorAll('[data-select]').forEach(card=>card.classList.toggle('selected',card.dataset.select===id));}const rail=$('railGames');if(rail)rail.querySelectorAll('[data-railgame]').forEach(card=>card.classList.toggle('active',card.dataset.railgame===id));if(currentView==='library'&&previous!==id)renderLibrary()}
 function renderLibrary(){const grid=$('libraryGrid');if(!games.length){grid.innerHTML='<div class="empty-state"><div><strong>Sua biblioteca está vazia</strong><span>Detecte os jogos instalados ou adicione um atalho.</span></div></div>';return}grid.innerHTML=games.map(g=>`<article class="library-card ${g.id===selectedId?'selected':''}" data-card="${esc(g.id)}"><div class="card-actions"><button class="mini-icon" data-delete="${esc(g.id)}" title="Remover" aria-label="Remover ${esc(g.name)}">×</button></div><div class="library-emoji">${g.iconData?`<img src="${g.iconData}" alt="Ícone de ${esc(g.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`:esc(g.emoji||'🎮')}</div><div class="library-details"><div class="library-name">${esc(g.name)}</div><div class="library-footer"><div class="library-package">${esc(g.pkg||'ATALHO LOCAL')}</div>${g.pkg?`<button class="library-play" data-library-play="${esc(g.id)}">ABRIR ${icon('play')}</button>`:''}</div></div></article>`).join('');grid.querySelectorAll('[data-card]').forEach(card=>card.addEventListener('click',e=>{if(e.target.closest('[data-delete]')||e.target.closest('[data-library-play]'))return;selectGame(card.dataset.card)}));grid.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();removeGame(b.dataset.delete)}));grid.querySelectorAll('[data-library-play]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();launchGameById(b.dataset.libraryPlay)}))}
 function openAdd(){ $('gameDialog').classList.add('open');$('gameName').focus() }
 function closeAdd(){ $('gameDialog').classList.remove('open') }
@@ -1096,3 +1116,7 @@ function initBattery(){refreshDeviceStats();if(!bridge()&&!navigator.getBattery)
 </script>
 </body>
 </html>
+
+<style id="gt-266-compact-polish">
+.game-grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr));grid-auto-rows:minmax(76px,auto);gap:7px}.game-card{min-height:76px;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;padding:8px 10px!important;animation:none!important;transition:border-color .12s,background .12s,box-shadow .12s!important}.game-icon{width:42px!important;height:42px!important;flex-basis:42px!important;border-radius:11px!important}.game-card.selected .game-icon{animation:none!important}.game-name{text-align:left!important;font-size:11px!important}.game-card::before{display:none}.gt-intro,.diablo-screen{will-change:opacity,transform;filter:none!important}.diablo-header,.diablo-card{filter:none!important;animation-duration:.22s!important}
+</style>
