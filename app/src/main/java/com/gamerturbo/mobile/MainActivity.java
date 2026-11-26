@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
     private static final int REQUEST_SCREEN_CAPTURE = 7401;
     private static final int REQUEST_SHIZUKU = 7410;
     private static final String PREFS = "gamer_turbo_native";
-    private static final String APP_VERSION = "2.3.5";
+    private static final String APP_VERSION = "2.6.0";
     private static final String KEY_PENDING_OVERLAY = "pending_overlay_permission";
     private static final int REQUEST_INSTALLED_APPS = 7420;
     private static final int REQUEST_NOTIFICATIONS = 7421;
@@ -210,8 +210,14 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         android.content.SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
-        boolean shouldRestoreGameProfile = gameLaunchedInThisTask || prefs.getBoolean("gt_profile_active", false);
+        boolean returnedFromGame = gameLaunchedInThisTask;
+        boolean shouldRestoreGameProfile = returnedFromGame || prefs.getBoolean("gt_profile_active", false);
         gameLaunchedInThisTask = false;
+        if (returnedFromGame) {
+            // The game has left the foreground: remove every floating window, but keep
+            // the user's overlay preference enabled so it can start on the next game.
+            stopService(new Intent(this, GameOverlayService.class));
+        }
         if (shouldRestoreGameProfile) {
             new Thread(() -> {
                 String result = GameOptimizer.restore(MainActivity.this);
@@ -342,7 +348,7 @@ public class MainActivity extends Activity {
         /** Identifies the native API contract expected by the bundled WebView UI. */
         @JavascriptInterface
         public String getBridgeVersion() {
-            return "2.3.5";
+            return "2.6.0";
         }
 
         @JavascriptInterface
@@ -796,6 +802,18 @@ public class MainActivity extends Activity {
                             + (memoryError.getMessage() == null ? "falha de leitura" : memoryError.getMessage()));
                 }
 
+                // CPU global: amostra de /proc/stat e clock público do nó cpufreq, quando legível.
+                try {
+                    DeviceMonitor.CpuSnapshot cpu = DeviceMonitor.readCpu();
+                    result.put("cpuPercent", cpu.usagePercent);
+                    result.put("cpuFrequencyMhz", cpu.frequencyMhz);
+                    result.put("cpuDataSource", "/proc/stat + cpufreq (somente leitura)");
+                } catch (Throwable cpuError) {
+                    result.put("cpuPercent", -1);
+                    result.put("cpuFrequencyMhz", -1);
+                    result.put("cpuError", cpuError.getClass().getSimpleName());
+                }
+
                 // Estado térmico público do Android (API 29+), sem Shizuku.
                 try {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -1165,6 +1183,17 @@ public class MainActivity extends Activity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onStop() {
+        // Leaving the Game Turbo home screen without starting a game should not leave
+        // its floating handle/panel over unrelated apps. When a game was launched,
+        // gameLaunchedInThisTask stays true until onResume after the game exits.
+        if (!gameLaunchedInThisTask && !isChangingConfigurations()) {
+            stopService(new Intent(this, GameOverlayService.class));
+        }
+        super.onStop();
     }
 
     @Override

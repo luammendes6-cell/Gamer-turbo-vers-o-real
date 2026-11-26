@@ -1,18 +1,33 @@
-GAMER TURBO ANDROID — VERSÃO 2.3.4
+GAMER TURBO ANDROID — VERSÃO 2.6.0
 
-Correção de permissões, estatísticas de RAM e detecção de jogos.
+Projeto Android nativo com interface HTML/JS local, serviços Java e integração opcional com Shizuku.
 
-O que mudou:
-- A leitura de RAM é feita pela API pública ActivityManager.MemoryInfo e não depende de permissão runtime.
-- O painel de diagnóstico agora mostra estatísticas reais e o estado dos acessos do Android.
-- A solicitação de permissões executáveis é feita após a WebView carregar.
-- A lista de apps tem fontes adicionais via LauncherApps e uma heurística ampliada para classificar jogos.
-- Apps não reconhecidos automaticamente continuam disponíveis para inclusão manual.
+Novidades da 2.6.0:
+- Painel flutuante mais estreito e com limite de altura, organizado como toolbox.
+- CPU global e frequência média atual em GHz, com leitura por cluster e fallback via Shizuku quando necessário.
+- Painel CPU com controles de pico mínimo/máximo dentro dos limites de fábrica expostos pelo kernel; snapshots e restauração dos valores originais.
+- Hibernação automática de apps de terceiros no modo DIABLO, preservando sistema, jogo, launcher, teclado, Shizuku, Gamer Turbo e exceções. A ação usa force-stop conferido, não congelamento nativo de processo.
+- FPS estimado a partir das amostras do SurfaceFlinger para o pacote do jogo; exige Shizuku autorizado e suporte do sistema.
+- Biblioteca de jogos na tela inicial redesenhada com cartões compactos.
+- Temporizador flutuante, exceções de memória, atalhos de Armazenamento e Cast.
+- Os apps colocados em Exceções são preservados pelas ações de limpeza/fechamento/boost/hibernação.
 
-Atenção:
-- QUERY_ALL_PACKAGES é declarado no Manifest; não é uma caixa de permissão runtime tradicional.
-- Sobreposição, brilho e Não Perturbe exigem acessos especiais concedidos nas configurações do Android.
-- CPU/GPU dependem do Shizuku, do kernel e das interfaces disponíveis; nada promete overclock.
+COMO COMPILAR
+1. Abra a pasta no Android Studio ou AndroidIDE, com Android SDK instalado.
+2. Use Gradle 8.9 e Android Gradle Plugin 8.7.3 (resolvido pelo projeto).
+3. Compile app > Tasks > build > assembleDebug.
+4. O APK debug será gerado em app/build/outputs/apk/debug/.
 
-Abra a pasta GamerTurbo-Android no Android Studio/AndroidIDE e gere um APK debug.
-Este ZIP é código-fonte e não um APK pronto. A validação física deve ser feita no aparelho de destino.
+PERMISSÕES / CONFIGURAÇÃO
+- Sobreposição: necessária para a barra e o painel flutuante.
+- Shizuku: necessário para FPS via SurfaceFlinger, alguns modos, fechar apps, prioridade, captura e gravação por shell.
+- Acesso Não Perturbe: necessário para o botão FOCO.
+- Modificar configurações do sistema: necessário para alterar brilho.
+
+IMPORTANTE
+- FPS pode aparecer como -- em ROMs que não expõem SurfaceFlinger --latency. O app não usa taxa de atualização (Hz) como se fosse FPS.
+- CPU é uso global aproximado, não medição isolada do jogo. A frequência exibida é uma média ponderada dos clusters/CPUs que o kernel expõe, não uma frequência fixa de todos os núcleos.
+- Funções de hardware da Xiaomi/HyperOS que dependem de driver, HAL ou integração privilegiada não podem ser replicadas fielmente em qualquer Android. Veja AUDITORIA-2.6.0.txt.
+- Os controles de frequência só alteram scaling_min_freq/scaling_max_freq quando o Shizuku consegue gravar os nós CPUFreq. O limite máximo nunca ultrapassa cpuinfo_max_freq; não há overclock. Se o kernel bloquear escrita, a CPU segue sob controle automático.
+- Ao sair da partida ou deixar a tela inicial sem iniciar um jogo, o serviço remove as janelas flutuantes; a preferência de sobreposição permanece habilitada para a próxima partida.
+- Este ZIP contém código-fonte; não é APK pronto.

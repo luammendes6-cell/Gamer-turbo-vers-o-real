@@ -1,0 +1,37 @@
+GAMER TURBO 2.5.0 — AJUSTES E NOVOS RECURSOS
+
+PAINEL FLUTUANTE
+- Cartão limitado a 320 dp de largura em retrato e altura máxima de 470 dp (respeitando a área disponível da tela).
+- Conteúdo reorganizado em monitoramento, modos, otimização e ferramentas; o painel deixa de usar quase toda a largura/altura do jogo.
+- Nova barra lateral permanece fina e arrastável.
+
+MONITORAMENTO
+- CPU total: calcula a ocupação global comparando amostras de /proc/stat.
+- Frequência da CPU: lê scaling_cur_freq quando o kernel disponibiliza esse nó.
+- FPS: tenta medir quadros apresentados pelo SurfaceFlinger para a camada do pacote do jogo. A consulta é feita com Shizuku e não confunde taxa de atualização da tela (Hz) com FPS.
+- Bateria, RAM livre, temperatura da bateria e estado térmico continuam no painel.
+
+FERRAMENTAS ADICIONADAS AO PAINEL
+- Temporizador de partida (1 a 120 minutos), com aviso ao terminar.
+- Exceções de memória: os aplicativos marcados são protegidos das ações LIMPAR RAM e FECHAR APPS/BOOST.
+- Armazenamento: abre a página de armazenamento/gerenciamento do Android; não promete limpeza profunda automática.
+- Cast: tenta abrir a página de transmissão do Android; depende da ROM/dispositivo.
+- Permanecem: captura, gravação, Não Perturbe (FOCO), brilho, Wi-Fi, modos ECO/BALANCE/RISE/DIABLO, LIMPAR RAM, FECHAR APPS, PRIORIDADE e BOOST.
+
+TELA INICIAL
+- Biblioteca de jogos redesenhada com cartões compactos, ícones uniformes, rolagem horizontal e identificação do jogo selecionado.
+- Acesso VER TODOS voltou a ficar visível.
+- Cartões de estatística e modos receberam espaçamento e hierarquia mais consistentes.
+
+LIMITES REAIS DO ANDROID
+- FPS depende de o sistema expor camadas e estatísticas SurfaceFlinger e de o Shizuku estar conectado/autorizado. Quando não houver amostras, o app mostra --; não substitui FPS por Hz.
+- CPU mostra uso global aproximado do aparelho, não o consumo isolado do processo do jogo.
+- Frequência da CPU pode ficar indisponível se o kernel bloquear a leitura de cpufreq.
+- Recursos exclusivos da integração Xiaomi/HyperOS — ajuste de parâmetros de toque do driver, interpolação Smart Frame Rate, perfis de GPU/anti-aliasing por jogo, aprimoramento de áudio, Gyroboost, voice changer e desligamento físico da tela com jogo ativo — não são liberados por uma API Android genérica. Não foram simulados com botões falsos.
+- Wi-Fi e Cast abrem os controles oficiais do Android; não alteram firmware, potência do rádio ou roteador.
+- Limpar RAM não garante aumento de FPS; o Android pode reabrir processos e usar RAM livre como cache.
+
+VALIDAÇÃO
+- Código e recursos estáticos revisados nesta sessão.
+- Este ambiente não contém Android SDK, Android Gradle Plugin instalado nem o JAR do Gradle Wrapper. Portanto, não foi possível gerar ou executar um APK aqui.
+- O primeiro teste final ainda precisa ser feito no aparelho: conferir permissão de sobreposição, Shizuku em execução/autorizado, disponibilidade SurfaceFlinger --latency, permissões do DND e gravação.

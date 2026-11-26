@@ -1,0 +1,37 @@
+GAMER TURBO ANDROID 2.6.0 — AUDITORIA DE ALTERAÇÕES
+
+FREQUÊNCIA DA CPU
+- O cartão CPU / GHZ exibe a frequência média ponderada dos clusters/policies CPUFreq visíveis.
+- A leitura direta procura cpuinfo_avg_freq, cpuinfo_cur_freq e scaling_cur_freq.
+- Se o UID do app não conseguir ler sysfs, o painel tenta leitura pelo UserService do Shizuku.
+- O percentual de CPU continua sendo uma estimativa global derivada de /proc/stat.
+
+CONTROLE MANUAL DA CPU
+- Novo painel com dois controles: pico mínimo e pico máximo.
+- Os valores são percentuais do intervalo cpuinfo_min_freq até cpuinfo_max_freq em cada policy CPUFreq encontrada.
+- Antes da primeira alteração, salva os limites scaling_min_freq/scaling_max_freq originais de cada policy gravável.
+- As escritas verificam permissão, respeitam min <= max, leem de volta o resultado e nunca solicitam frequência acima do máximo reportado pelo hardware.
+- A restauração é executada ao voltar da partida, ao parar o serviço ou quando o perfil BALANCE é aplicado.
+- Se o kernel negar escrita, o app informa que o controle não foi aplicado e mantém a frequência sob controle automático.
+- Isto é ajuste de limites CPUFreq, não overclock. Não altera tensão, PLL, firmware ou tabelas de frequência.
+
+MODO DIABLO / HIBERNAÇÃO
+- O DIABLO agora tenta encerrar processos em segundo plano de aplicativos de terceiros com amostragem de processos via Shizuku e force-stop.
+- São preservados os apps de sistema, launcher, teclado, Shizuku, Gamer Turbo, o jogo selecionado e os pacotes da lista de exceções.
+- O botão HIBERNAR APPS executa a mesma ação manualmente.
+- Não é congelamento nativo do Android; force-stop pode interromper notificações, sincronizações, alarmes e tarefas dos apps. Marque mensageiros e apps importantes nas Exceções.
+
+PAINEL FLUTUANTE
+- O cartão CPU prioriza o valor em GHz e exibe o uso global como metadado.
+- O painel ganhou acesso ao controle CPU e à hibernação de apps.
+- O serviço monitora a Activity em primeiro plano com Shizuku como salvaguarda, encerrando a sessão depois que o jogo sai de foco.
+- MainActivity também encerra o serviço ao retornar da partida ou sair da tela inicial sem iniciar jogo.
+- A preferência overlay_enabled é mantida quando o painel é fechado automaticamente; só é desligada quando o usuário usa Desativar.
+- Ao encerrar o serviço, os limites reversíveis de CPU e do perfil são restaurados quando Shizuku continua autorizado.
+
+LIMITAÇÕES / VALIDAÇÃO
+- Cada aparelho e kernel pode expor policies CPUFreq diferentes. Alguns não expõem os nós; outros permitem leitura, mas bloqueiam escrita para UID shell.
+- Em vários Androids, alterações em sysfs exigem root ou kernel configurado para permitir escrita. Shizuku por ADB não equivale a root.
+- A frequência mostrada é uma média ponderada dos clusters disponíveis, e não uma leitura individual garantida de cada núcleo.
+- A hibernação usa force-stop, não API de congelamento de processos.
+- APK não foi compilado nem testado em aparelho nesta sessão. O ambiente não tem Android SDK/Gradle Wrapper JAR nem distribuição Gradle disponível para build offline. É necessário compilar e testar no dispositivo.

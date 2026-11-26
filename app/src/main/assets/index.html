@@ -284,7 +284,7 @@ body.reduce-motion .motion-preview.is-playing .preview-orbit,body.reduce-motion 
           <div class="footnote">ECO, RISE e DIABLO são aplicados ao tocar em JOGAR (exigem Shizuku) e restaurados ao voltar. BALANCE mantém o padrão do sistema. O app só altera o que o Android aceita e confere cada ajuste; CPU/GPU travadas pelo kernel e overclock dependem do aparelho.</div></div><div class="settings-grid" id="toolsSettings"></div></section>
       <section class="content-view" id="timerView"><div class="view-intro"><div><div class="eyebrow">SESSION CONTROL / 04</div><div class="view-h">CRONÔMETRO DE SESSÃO</div><div class="view-p">Controle o tempo da sua partida sem sair do painel.</div></div></div><div class="timer-view"><div class="kicker">TEMPO DE SESSÃO</div><div class="timer-readout" id="timerReadout">00:00:00</div><div class="meter"><span id="timerMeter"></span></div><div class="timer-controls"><input class="timer-input" id="timerMinutes" type="number" min="1" max="999" value="30" aria-label="Minutos da sessão"><button class="primary-small" id="timerStart">INICIAR</button><button class="secondary-small" id="timerPause">PAUSAR</button><button class="secondary-small" id="timerReset">ZERAR</button></div><div class="view-p" style="margin-top:15px">Defina a duração em minutos e inicie seu contador. O tempo segue pelo relógio do aparelho, mesmo se você sair para o jogo, desde que o Android mantenha o app aberto.</div></div></section>
       <section class="content-view" id="settingsView">
-        <div class="view-intro"><div><div class="eyebrow">PERSONALIZATION / 05</div><div class="view-h">CONFIGURAÇÕES</div><div class="view-p">Personalize a aparência, os efeitos e o comportamento do Gamer Turbo.</div></div><div class="settings-version">GAMER TURBO <span>V 2.4.0</span></div></div>
+        <div class="view-intro"><div><div class="eyebrow">PERSONALIZATION / 05</div><div class="view-h">CONFIGURAÇÕES</div><div class="view-p">Personalize a aparência, os efeitos e o comportamento do Gamer Turbo.</div></div><div class="settings-version">GAMER TURBO <span>V 2.6.0</span></div></div>
         <section class="shz-card" id="shizukuSettingsCard"><div class="shz-head"><div><div class="motion-kicker">GT / SHIZUKU</div><div class="motion-title">CONEXÃO COM O SHIZUKU</div></div><div class="shz-badge" id="shizukuBadge" data-state="OFF"><i></i><span>VERIFICANDO</span></div></div><p class="view-p" id="shizukuSettingsText">Verificando o estado do Shizuku...</p><ol class="shz-steps"><li>Instale o app <b>Shizuku</b>.</li><li>Nas opções do desenvolvedor, ative a <b>depuração sem fio</b> e inicie o Shizuku.</li><li>Toque em <b>CONECTAR / AUTORIZAR</b> e aceite o pedido do Gamer Turbo.</li></ol><div class="shz-actions"><button class="primary-small" id="shizukuSettingsConnect">CONECTAR / AUTORIZAR</button><button class="secondary-small" id="shizukuOpenApp">ABRIR SHIZUKU</button><button class="secondary-small" id="shizukuRecheck">VERIFICAR AGORA</button><button class="secondary-small" id="compatButton">COMPATIBILIDADE</button></div><div class="view-p" style="margin-top:10px">Sem o Shizuku o app só lê dados e limpa RAM de forma básica. ECO, RISE, DIABLO, fechar apps e prioridade exigem o Shizuku.</div></section>
         <div class="settings-grid" id="settingsGrid"></div>
         <section class="motion-studio" aria-label="Personalização das animações">
@@ -710,4 +710,49 @@ function initBattery(){refreshDeviceStats();if(!bridge()&&!navigator.getBattery)
 .tools-hub .footnote{opacity:.75}
 #homeView ~ .content-view{min-height:0}
 #infoDialog .dialog p{white-space:pre-wrap;max-height:60vh;overflow:auto}
+
+/* ===== v2.5 / biblioteca compacta ===== */
+#homeView .game-library{padding:12px 14px 9px!important;gap:0!important;border-radius:16px!important;background:linear-gradient(145deg,rgba(23,27,36,.98),rgba(11,13,18,.98))!important;border-color:rgba(255,255,255,.11)!important}
+#homeView .section-head{justify-content:space-between!important;text-align:left!important;margin-bottom:9px!important}
+#homeView .section-title{font-size:13px!important;letter-spacing:.02em}
+#homeView .section-meta{font-size:7px!important;letter-spacing:.13em!important}
+#homeView #viewAllGames{display:inline-flex!important;align-items:center;color:#aeb7c5!important;font-size:8px!important;padding:5px 7px!important}
+#homeView #viewAllGames em{color:var(--accent)!important}
+#homeView .game-grid{display:flex!important;flex:1 1 auto!important;flex-wrap:nowrap!important;align-items:stretch!important;justify-content:flex-start!important;gap:9px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x proximity!important;padding:3px 2px 8px!important;scrollbar-width:thin!important;scrollbar-color:#39404d transparent!important;min-height:0!important}
+#homeView .game-card{position:relative!important;flex:0 0 102px!important;width:102px!important;height:100%!important;min-height:102px!important;max-height:132px!important;opacity:1!important;transform:none!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;padding:9px 7px 7px!important;border-radius:12px!important;background:linear-gradient(155deg,#202530,#141820)!important;border:1px solid rgba(255,255,255,.09)!important;box-shadow:none!important;scroll-snap-align:start!important;animation:none!important}
+#homeView .game-card.selected{transform:translateY(-2px)!important;background:linear-gradient(155deg,rgba(var(--accent-rgb),.18),#151820 75%)!important;border-color:rgba(var(--accent-rgb),.9)!important;box-shadow:inset 0 -2px var(--accent),0 5px 17px rgba(var(--accent-rgb),.13)!important}
+#homeView .game-card.selected .game-icon{animation:none!important;box-shadow:0 0 0 1px rgba(var(--accent-rgb),.3),0 5px 13px #0008!important}
+#homeView .game-icon{width:49px!important;height:49px!important;flex:0 0 49px!important;border-radius:12px!important;font-size:22px!important}
+#homeView .game-name{font-size:9px!important;line-height:1.15!important;max-width:100%!important}
+#homeView .game-footer{justify-content:center!important}
+#homeView .game-sub{display:none!important}
+#homeView .game-open{width:20px!important;height:18px!important;flex-basis:20px!important;border-radius:6px!important}
+#homeView .selected-bar{min-height:44px!important;justify-content:space-between!important;gap:10px!important;padding:8px 2px 0!important;margin-top:5px!important;border-top:1px solid rgba(255,255,255,.09)!important}
+#homeView .selected-copy{text-align:left!important;max-width:none!important;min-width:0!important}
+#homeView .selected-copy strong{font-size:12px!important}
+#homeView .selected-copy span{font-size:7px!important;opacity:.72!important}
+#homeView .launch-wrap{gap:7px!important;flex-shrink:0!important}
+#homeView .selected-launch{min-width:88px!important;height:33px!important;padding:0 11px!important;font-size:8px!important}
+#homeView .home-side{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;grid-template-rows:none!important;gap:9px!important;overflow:visible!important;align-items:stretch!important}
+#homeView .home-side .panel-head{display:flex!important;align-items:center!important;margin-bottom:7px!important}
+#homeView .home-side .panel-meta{display:none!important}
+#homeView .home-side .panel-card{padding:9px 10px!important;border-radius:13px!important;background:linear-gradient(145deg,#171b23,#101319)!important;box-shadow:none!important}
+#homeView .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+#homeView .stat{padding:6px 5px!important;text-align:center!important;background:#1b2029!important;border-color:rgba(255,255,255,.06)!important}
+#homeView .stat-label{font-size:6px!important;letter-spacing:.07em!important}
+#homeView .stat-value{font-size:14px!important;margin-top:5px!important}
+#homeView .stat-foot,#homeView .stat-bar{display:none!important}
+#homeView .mode-card .mode-list{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+#homeView .mode-btn{min-height:39px!important;padding:5px 2px!important;gap:3px!important}
+#homeView .mode-btn svg{width:13px!important;height:13px!important}
+#homeView .mode-btn span{font-size:7px!important}
+#homeView .mode-note{margin-top:6px!important;font-size:7px!important;line-height:1.25!important;max-height:2.6em!important;overflow:hidden!important}
+@media(max-width:760px){
+ #homeView .game-card{flex-basis:90px!important;width:90px!important;min-height:92px!important}
+ #homeView .game-icon{width:44px!important;height:44px!important;flex-basis:44px!important}
+ #homeView .home-side{gap:6px!important}
+ #homeView .home-side .panel-card{padding:7px!important}
+ #homeView .stat-value{font-size:12px!important}
+ #homeView .selected-launch{min-width:72px!important}
+}
 </style>

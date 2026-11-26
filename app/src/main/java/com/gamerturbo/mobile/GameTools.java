@@ -47,6 +47,14 @@ public final class GameTools {
         keep.add("com.android.systemui");
         keep.add(SHIZUKU_PACKAGE);
         if (validPackage(gamePackage)) keep.add(gamePackage);
+        // Exceções escolhidas pelo usuário: nunca encerrar esses apps na limpeza/boost.
+        try {
+            java.util.Set<String> whitelist = context.getSharedPreferences("gamer_turbo_native", Context.MODE_PRIVATE)
+                    .getStringSet("memory_whitelist", java.util.Collections.emptySet());
+            if (whitelist != null) {
+                for (String pkg : whitelist) if (validPackage(pkg)) keep.add(pkg);
+            }
+        } catch (Throwable ignored) { }
         try {
             Intent home = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
             List<ResolveInfo> launchers = context.getPackageManager().queryIntentActivities(home, 0);

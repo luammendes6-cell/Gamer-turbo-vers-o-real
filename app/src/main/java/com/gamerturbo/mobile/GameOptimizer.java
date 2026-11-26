@@ -198,11 +198,28 @@ public final class GameOptimizer {
                 report.append("• Temperatura elevada: taxa mínima e governador CPU/GPU NÃO foram forçados\n");
             }
             if (hasGame) report.append(boostBucket(context, pkg));
+            // Hiberna somente aplicativos de terceiros; GameTools mantém sistema, launcher,
+            // teclado, Shizuku, Gamer Turbo, jogo e exceções do usuário fora da lista.
+            String hibernate = GameTools.closeApps(context, pkg);
+            report.append("• Hibernação de apps de terceiros (force-stop conferido):\n");
+            for (String line : hibernate.split("\\n")) {
+                if (line.startsWith("• Fechados e conferidos") || line.startsWith("• Mantidos:")
+                        || line.startsWith("• Não fecharam:") || line.startsWith("• Nenhum app")
+                        || line.startsWith("• RAM livre")) report.append(line).append('\n');
+            }
             String clean = GameTools.cleanRam(context, pkg, 700);
             for (String line : clean.split("\\n")) {
                 if (line.startsWith("• Apps com processo") || line.startsWith("• RAM livre")) report.append(line).append('\n');
             }
-            report.append("• Overclock: indisponível sem root/kernel liberado; o app não altera tensão nem proteção térmica\n");
+            if (prefs.getBoolean("cpu_custom_enabled", false) && thermalSafeForGovernor) {
+                int cpuMin = prefs.getInt("cpu_min_percent", 0);
+                int cpuMax = prefs.getInt("cpu_max_percent", 100);
+                String cpuReport = CpuController.applyRange(context, cpuMin, cpuMax);
+                report.append("• Controle de frequência da CPU: ").append(cpuReport.contains("APLICADO") ? "limites personalizados ativos ✔" : "mantido pelo kernel/automático").append('\n');
+            } else if (!thermalSafeForGovernor) {
+                report.append("• Controle manual da CPU adiado por segurança térmica.\n");
+            }
+            report.append("• Overclock acima do limite de fábrica não é aplicado; esta função regula apenas a faixa CPUFreq permitida pelo kernel.\n");
         }
 
         prefs.edit().putBoolean(GAME_MODE_CHANGED, gameModeMayHaveChanged || customOverrideApplied)
@@ -221,12 +238,14 @@ public final class GameOptimizer {
 
     public static synchronized String restore(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String cpuRestore = CpuController.restore(context);
         if (!prefs.getBoolean(SNAPSHOT, false)) {
             prefs.edit().putBoolean(ACTIVE, false).remove(PACKAGE).remove("gt_profile_mode").apply();
-            return "Nenhum ajuste de sessão precisa ser restaurado.";
+            if (cpuRestore.startsWith("• Nenhum limite")) return "Nenhum ajuste de sessão precisa ser restaurado.";
+            return "RESTAURAÇÃO DA SESSÃO\n" + cpuRestore;
         }
         if (!ShizukuShell.isAuthorized()) {
-            return "Shizuku não está autorizado. As configurações anteriores continuam salvas para restauração quando reconectar.";
+            return "Shizuku não está autorizado. As configurações anteriores continuam salvas para restauração quando reconectar.\n" + cpuRestore;
         }
         String packageName = prefs.getString(PACKAGE, "");
         StringBuilder report = new StringBuilder("RESTAURAÇÃO DA SESSÃO\n");
@@ -257,7 +276,10 @@ public final class GameOptimizer {
         boolean governorsRestored = restoredGovernors >= expectedGovernors;
         report.append(restoredGovernors > 0 ? "• " + restoredGovernors + " governador(es) de CPU/GPU restaurado(s)\n"
                 : "• Nenhum governador de CPU/GPU gravável precisou ser restaurado\n");
-        boolean complete = lowRestored && peakRestored && minRestored && governorsRestored && gameModeRestored;
+        report.append(cpuRestore).append('\n');
+        boolean cpuRestored = !cpuRestore.contains("pendente") && !cpuRestore.contains("parcial")
+                && !cpuRestore.contains("reconecte");
+        boolean complete = lowRestored && peakRestored && minRestored && governorsRestored && gameModeRestored && cpuRestored;
         if (complete) {
             prefs.edit().putBoolean(ACTIVE, false).putBoolean(SNAPSHOT, false)
                     .remove(PACKAGE).remove(PREV_LOW_POWER).remove(PREV_PEAK).remove(PREV_MIN).remove(PREV_GOVERNORS)

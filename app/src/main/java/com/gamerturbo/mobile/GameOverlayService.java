@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -28,6 +29,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -35,6 +37,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.concurrent.Callable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Painel flutuante estilo Game Turbo: uma barra fina na lateral que cresce ao toque.
@@ -49,23 +57,97 @@ public class GameOverlayService extends Service {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private WindowManager windowManager;
-    private View bubbleView, scrimView, panelView, brightnessPanelView, dotView;
+    private View bubbleView, scrimView, panelView, brightnessPanelView, dotView, timerPanelView, whitelistPanelView, cpuPanelView;
     private WindowManager.LayoutParams bubbleParams, panelParams;
     private boolean panelOpen = false;
     private volatile boolean recording = false;
     private volatile boolean busy = false;
-    private TextView batteryValue, ramValue, tempValue, thermalValue, infoLine, resultView, shizukuPill, modeDesc;
+    private volatile boolean fpsBusy = false;
+    private volatile int lastFps = -1;
+    private volatile int lastCpuFrequencyMhz = -1;
+    private volatile boolean cpuFrequencyBusy = false;
+    private volatile long timerEndAt = 0L;
+    private volatile boolean foregroundCheckBusy = false;
+    private boolean gameSeenForeground = false;
+    private int foregroundMisses = 0;
+    private boolean userRequestedStop = false;
+    private volatile boolean finishingSession = false;
+    private volatile boolean serviceDestroyed = false;
+    private TextView batteryValue, ramValue, cpuValue, cpuMetaValue, fpsValue, fpsMetaValue;
+    private TextView tempValue, thermalValue, infoLine, resultView, shizukuPill, modeDesc;
     private final TextView[] modeButtons = new TextView[4];
     private String lastResult = "Escolha um modo ou toque em uma ação. O resultado real aparece aqui.";
 
     private final Runnable refreshTask = new Runnable() {
         @Override public void run() {
-            if (panelOpen) { updateMetrics(); handler.postDelayed(this, 2000); }
+            if (panelOpen) {
+                updateMetrics();
+                requestFpsUpdate();
+                handler.postDelayed(this, 1500);
+            }
+        }
+    };
+    private final Runnable timerTask = new Runnable() {
+        @Override public void run() {
+            if (timerEndAt <= 0L) return;
+            long left = timerEndAt - System.currentTimeMillis();
+            if (left <= 0L) {
+                timerEndAt = 0L;
+                prefs().edit().remove("floating_timer_end").apply();
+                Toast.makeText(GameOverlayService.this, "Tempo de partida encerrado.", Toast.LENGTH_LONG).show();
+                return;
+            }
+            handler.postDelayed(this, Math.min(1000L, left));
         }
     };
     private final Runnable barTask = new Runnable() {
         @Override public void run() {
             if (bubbleView != null) { refreshDot(); handler.postDelayed(this, 3000); }
+        }
+    };
+    private final Runnable foregroundWatchTask = new Runnable() {
+        @Override public void run() {
+            if (userRequestedStop || serviceDestroyed || finishingSession) return;
+            String game = currentGame();
+            if (!GameTools.validPackage(game) || !ShizukuShell.isAuthorized() || foregroundCheckBusy) {
+                handler.postDelayed(this, 2500);
+                return;
+            }
+            foregroundCheckBusy = true;
+            new Thread(() -> {
+                String output = "";
+                try {
+                    ShizukuShell.Result result = ShizukuShell.execute(GameOverlayService.this,
+                            "dump=$(dumpsys activity activities 2>/dev/null); "
+                                    + "line=$(printf '%s\n' \"$dump\" | grep -m 1 'topResumedActivity='); "
+                                    + "[ -n \"$line\" ] || line=$(printf '%s\n' \"$dump\" | grep -m 1 -E 'mResumedActivity:|ResumedActivity:'); "
+                                    + "printf '%s\n' \"$line\"");
+                    if (result.output != null) output = result.output;
+                } catch (Throwable ignored) { }
+                String topPackage = extractForegroundPackage(output);
+                handler.post(() -> {
+                    foregroundCheckBusy = false;
+                    if (serviceDestroyed || finishingSession) return;
+                    if (game.equals(currentGame())) {
+                        if (game.equals(topPackage)) {
+                            gameSeenForeground = true;
+                            foregroundMisses = 0;
+                        } else if (gameSeenForeground && GameTools.validPackage(topPackage)
+                                && !"com.android.systemui".equals(topPackage)
+                                && !"com.android.permissioncontroller".equals(topPackage)
+                                && !"com.google.android.permissioncontroller".equals(topPackage)
+                                && !GameTools.SHIZUKU_PACKAGE.equals(topPackage)) {
+                            foregroundMisses++;
+                            if (foregroundMisses >= 3) {
+                                handler.removeCallbacks(this);
+                                finishGameSession();
+                                return;
+                            }
+                        }
+                    }
+                    handler.postDelayed(this, 2500);
+                });
+            }, "GamerTurbo-ForegroundWatch").start();
         }
     };
 
@@ -80,12 +162,48 @@ public class GameOverlayService extends Service {
         if (getSharedPreferences(PREFS, MODE_PRIVATE).getLong("game_session_started", 0L) == 0L) {
             getSharedPreferences(PREFS, MODE_PRIVATE).edit().putLong("game_session_started", System.currentTimeMillis()).apply();
         }
+        timerEndAt = prefs().getLong("floating_timer_end", 0L);
+        if (timerEndAt > System.currentTimeMillis()) handler.post(timerTask);
+        handler.postDelayed(foregroundWatchTask, 2500);
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && "STOP_OVERLAY".equals(intent.getAction())) { stopSelf(); return START_NOT_STICKY; }
+        String action = intent == null ? null : intent.getAction();
+        if ("STOP_OVERLAY".equals(action)) {
+            userRequestedStop = true;
+            prefs().edit().putBoolean("overlay_enabled", false).apply();
+            finishGameSession();
+            return START_NOT_STICKY;
+        }
+        if ("STOP_GAME_SESSION".equals(action) || "STOP_APP_EXIT".equals(action)) {
+            finishGameSession();
+            return START_NOT_STICKY;
+        }
         if (bubbleView == null && !panelOpen) showBubble();
-        return START_STICKY;
+        return START_NOT_STICKY;
+    }
+
+    private static String extractForegroundPackage(String output) {
+        if (output == null || output.isEmpty()) return "";
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("([A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+)/")
+                .matcher(output);
+        return matcher.find() ? matcher.group(1) : "";
+    }
+
+    private void finishGameSession() {
+        if (finishingSession) return;
+        finishingSession = true;
+        handler.removeCallbacks(foregroundWatchTask);
+        handler.removeCallbacks(refreshTask);
+        handler.removeCallbacks(barTask);
+        new Thread(() -> {
+            try { GameOptimizer.restore(GameOverlayService.this); } catch (Throwable ignored) { }
+            handler.post(() -> {
+                prefs().edit().remove("active_game_package").apply();
+                stopSelf();
+            });
+        }, "GamerTurbo-SessionRestore").start();
     }
 
     private void createNotificationChannel() {
@@ -310,13 +428,22 @@ public class GameOverlayService extends Service {
 
     // ------------------------------------------------------------------ painel expandido
 
-    private LinearLayout metricCard(String label, TextView[] output, int accentColor) {
-        LinearLayout card = column(); card.setPadding(dp(8), dp(7), dp(6), dp(6));
+    private LinearLayout metricCard(String label, TextView[] valueOut, TextView[] metaOut, int accentColor) {
+        LinearLayout card = column();
+        card.setPadding(dp(7), dp(6), dp(6), dp(5));
         card.setBackground(shape(0xFF141923, alpha(accentColor, 0x55), 1, 9));
         card.addView(text(label, 7, 0xFF8F9AAC, true));
-        TextView value = text("--", 14, Color.WHITE, true);
-        LinearLayout.LayoutParams v = new LinearLayout.LayoutParams(-1, -2); v.topMargin = dp(4); card.addView(value, v);
-        output[0] = value; return card;
+        TextView value = text("--", 13, Color.WHITE, true);
+        LinearLayout.LayoutParams valueLp = new LinearLayout.LayoutParams(-1, -2);
+        valueLp.topMargin = dp(3);
+        card.addView(value, valueLp);
+        TextView meta = text("", 7, 0xFF8F9AAC, false);
+        LinearLayout.LayoutParams metaLp = new LinearLayout.LayoutParams(-1, -2);
+        metaLp.topMargin = dp(1);
+        card.addView(meta, metaLp);
+        valueOut[0] = value;
+        metaOut[0] = meta;
+        return card;
     }
 
     private void showPanel() {
@@ -327,111 +454,153 @@ public class GameOverlayService extends Service {
         String mode = currentMode();
         int accent = accent(mode);
 
-        // fundo transparente que fecha o painel ao tocar fora (o Android 12+ não entrega "toque fora" a overlays)
+        // A área fora do cartão apenas fecha o painel; ela não é o painel em si.
         View scrim = new View(this);
-        scrim.setBackgroundColor(0x44000000);
+        scrim.setBackgroundColor(0x33000000);
         scrim.setOnClickListener(v -> collapsePanel());
-        try { windowManager.addView(scrim, newParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT)); scrimView = scrim; }
-        catch (Exception ignored) { scrimView = null; }
+        try {
+            windowManager.addView(scrim, newParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
+            scrimView = scrim;
+        } catch (Exception ignored) { scrimView = null; }
 
         LinearLayout root = column();
-        root.setPadding(dp(12), dp(10), dp(12), dp(12));
-        GradientDrawable bg = new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{0xF4141926, 0xF40A0C12});
-        bg.setCornerRadius(dp(16)); bg.setStroke(dp(2), alpha(accent, 0xCC));
+        root.setPadding(dp(10), dp(9), dp(10), dp(10));
+        GradientDrawable bg = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{0xF41A202B, 0xF40B0E14});
+        bg.setCornerRadius(dp(17));
+        bg.setStroke(dp(1), alpha(accent, 0xDD));
         root.setBackground(bg);
 
-        // cabeçalho
         LinearLayout head = row();
         LinearLayout titles = column();
-        titles.addView(text("GAMER TURBO", 14, Color.WHITE, true));
-        titles.addView(text("PAINEL DE PARTIDA", 8, accent, true));
-        head.addView(titles, new LinearLayout.LayoutParams(0, -2, 1));
-        shizukuPill = text("", 8, Color.WHITE, true);
-        shizukuPill.setPadding(dp(9), dp(6), dp(9), dp(6));
+        titles.addView(text("GAMER TURBO", 13, Color.WHITE, true));
+        titles.addView(text("GAME TOOLBOX", 7, 0xFF9AA5B6, true));
+        head.addView(titles, new LinearLayout.LayoutParams(0, -2, 1f));
+        shizukuPill = text("", 7, Color.WHITE, true);
+        shizukuPill.setPadding(dp(8), dp(6), dp(8), dp(6));
         shizukuPill.setOnClickListener(v -> onShizukuPillClick());
         head.addView(shizukuPill, new LinearLayout.LayoutParams(-2, -2));
         TextView close = button("×", 0xFF8A93A3, this::collapsePanel);
-        LinearLayout.LayoutParams closeLp = new LinearLayout.LayoutParams(dp(32), dp(30)); closeLp.leftMargin = dp(8);
+        LinearLayout.LayoutParams closeLp = new LinearLayout.LayoutParams(dp(28), dp(28));
+        closeLp.leftMargin = dp(7);
         head.addView(close, closeLp);
         root.addView(head);
 
-        // coluna esquerda: estatísticas + modos
-        LinearLayout left = column();
-        left.addView(sectionLabel("ESTATÍSTICAS AO VIVO", 0xFF8F9AAC));
-        LinearLayout metrics = row();
-        TextView[] a = new TextView[1], b = new TextView[1], c = new TextView[1], d = new TextView[1];
-        addWeighted(metrics, metricCard("BATERIA", a, accent), 52); addWeighted(metrics, metricCard("RAM LIVRE", b, accent), 52);
-        addWeighted(metrics, metricCard("TEMP.", c, accent), 52); addWeighted(metrics, metricCard("TÉRMICO", d, accent), 52);
-        left.addView(metrics);
-        batteryValue = a[0]; ramValue = b[0]; tempValue = c[0]; thermalValue = d[0];
-        infoLine = text("", 8, 0xFF9AA5B6, true); infoLine.setPadding(dp(3), dp(7), 0, 0); left.addView(infoLine);
+        root.addView(sectionLabel("MONITORAMENTO EM TEMPO REAL", 0xFF8F9AAC));
+        TextView[][] values = new TextView[6][1];
+        TextView[][] meta = new TextView[6][1];
+        String[] labels = {"BATERIA", "RAM LIVRE", "CPU / GHZ", "FPS DO JOGO", "TEMP. BAT.", "TÉRMICO"};
+        if (wide) {
+            LinearLayout metrics = row();
+            for (int i = 0; i < labels.length; i++) addWeighted(metrics, metricCard(labels[i], values[i], meta[i], accent), 57);
+            root.addView(metrics);
+        } else {
+            for (int base = 0; base < labels.length; base += 3) {
+                LinearLayout metrics = row();
+                for (int i = base; i < Math.min(base + 3, labels.length); i++)
+                    addWeighted(metrics, metricCard(labels[i], values[i], meta[i], accent), 57);
+                root.addView(metrics);
+                if (base == 0) gap(root, 5);
+            }
+        }
+        batteryValue = values[0][0]; ramValue = values[1][0]; cpuValue = values[2][0];
+        fpsValue = values[3][0]; tempValue = values[4][0]; thermalValue = values[5][0];
+        cpuMetaValue = meta[2][0]; fpsMetaValue = meta[3][0];
 
+        infoLine = text("", 7, 0xFF9AA5B6, true);
+        infoLine.setPadding(dp(3), dp(6), 0, dp(1));
+        root.addView(infoLine);
+
+        LinearLayout controls = row();
+        controls.setGravity(Gravity.TOP);
+        LinearLayout left = column();
         left.addView(sectionLabel("MODO DE JOGO", 0xFF8F9AAC));
         LinearLayout modes = row();
         for (int i = 0; i < MODES.length; i++) {
             final String m = MODES[i];
-            TextView mb = text(modeName(m), 9, Color.WHITE, true); mb.setGravity(Gravity.CENTER);
+            TextView mb = text(modeName(m), 8, Color.WHITE, true);
+            mb.setGravity(Gravity.CENTER);
             mb.setOnClickListener(v -> selectMode(m));
             modeButtons[i] = mb;
-            addWeighted(modes, mb, 40);
+            addWeighted(modes, mb, 36);
         }
         left.addView(modes);
-        modeDesc = text("", 8, 0xFFB5BFCE, false); modeDesc.setPadding(dp(3), dp(7), dp(3), 0); left.addView(modeDesc);
+        modeDesc = text("", 7, 0xFFB5BFCE, false);
+        modeDesc.setPadding(dp(3), dp(6), dp(3), 0);
+        left.addView(modeDesc);
         styleModeButtons();
 
-        // coluna direita: ações + ferramentas
         LinearLayout right = column();
-        right.addView(sectionLabel("OTIMIZAÇÃO REAL", 0xFF8F9AAC));
+        right.addView(sectionLabel("OTIMIZAÇÃO", 0xFF8F9AAC));
         LinearLayout act1 = row();
-        addWeighted(act1, button("LIMPAR RAM", 0xFF3E9BFF, this::actRam), 40);
-        addWeighted(act1, button("FECHAR APPS", 0xFFFF9F1C, this::actClose), 40);
-        right.addView(act1); gap(right, 6);
+        addWeighted(act1, button("LIMPAR RAM", 0xFF3E9BFF, this::actRam), 34);
+        addWeighted(act1, button("FECHAR APPS", 0xFFFF9F1C, this::actClose), 34);
+        right.addView(act1);
+        gap(right, 5);
         LinearLayout act2 = row();
-        addWeighted(act2, button("PRIORIDADE", 0xFF3DDC84, this::actPriority), 40);
+        addWeighted(act2, button("PRIORIDADE", 0xFF3DDC84, this::actPriority), 34);
         TextView boost = button("⚡ BOOST", 0xFFFF2D43, this::actBoost);
         boost.setBackground(shape(0xFF3A1019, 0xFFFF2D43, 1, 9));
-        addWeighted(act2, boost, 40);
+        addWeighted(act2, boost, 34);
         right.addView(act2);
 
-        right.addView(sectionLabel("FERRAMENTAS", 0xFF8F9AAC));
+        right.addView(sectionLabel("FERRAMENTAS DO JOGO", 0xFF8F9AAC));
         LinearLayout tools1 = row();
-        addWeighted(tools1, button("CAPTURA", 0xFF8A93A3, this::takeScreenshot), 36);
-        addWeighted(tools1, button(recording ? "PARAR REC" : "GRAVAR", 0xFF8A93A3, this::toggleRecording), 36);
-        addWeighted(tools1, button("FOCO", 0xFF8A93A3, this::toggleDnd), 36);
-        right.addView(tools1); gap(right, 6);
+        addWeighted(tools1, button("CAPTURA", 0xFF8A93A3, this::takeScreenshot), 31);
+        addWeighted(tools1, button(recording ? "PARAR REC" : "GRAVAR", 0xFF8A93A3, this::toggleRecording), 31);
+        addWeighted(tools1, button("FOCO", 0xFF8A93A3, this::toggleDnd), 31);
+        right.addView(tools1);
+        gap(right, 5);
         LinearLayout tools2 = row();
-        addWeighted(tools2, button("BRILHO", 0xFF8A93A3, this::showBrightnessPanel), 36);
-        addWeighted(tools2, button("WI-FI", 0xFF8A93A3, this::openWifiPanel), 36);
-        addWeighted(tools2, button("CENTRAL", 0xFF8A93A3, this::openMain), 36);
+        addWeighted(tools2, button("BRILHO", 0xFF8A93A3, this::showBrightnessPanel), 31);
+        addWeighted(tools2, button("WI-FI", 0xFF8A93A3, this::openWifiPanel), 31);
+        addWeighted(tools2, button("TIMER", 0xFF8A93A3, this::showTimerPanel), 31);
         right.addView(tools2);
+        gap(right, 5);
+        LinearLayout tools3 = row();
+        addWeighted(tools3, button("ARMAZENAR", 0xFF8A93A3, this::openStoragePanel), 31);
+        addWeighted(tools3, button("CAST", 0xFF8A93A3, this::openCastPanel), 31);
+        addWeighted(tools3, button("EXCEÇÕES", 0xFF8A93A3, this::showWhitelistPanel), 31);
+        right.addView(tools3);
+        gap(right, 5);
+        LinearLayout tools4 = row();
+        addWeighted(tools4, button("CPU / GHZ", 0xFF3E9BFF, this::showCpuControlPanel), 31);
+        addWeighted(tools4, button("HIBERNAR APPS", 0xFFFF9F1C, this::actHibernate), 31);
+        addWeighted(tools4, button("FECHAR PAINEL", 0xFF8A93A3, this::collapsePanel), 31);
+        right.addView(tools4);
 
         if (wide) {
-            LinearLayout body = row();
-            body.setGravity(Gravity.TOP);
-            LinearLayout.LayoutParams l = new LinearLayout.LayoutParams(0, -2, 1f); l.rightMargin = dp(8);
-            LinearLayout.LayoutParams r = new LinearLayout.LayoutParams(0, -2, 1f);
-            body.addView(left, l); body.addView(right, r);
-            root.addView(body);
+            LinearLayout.LayoutParams l = new LinearLayout.LayoutParams(0, -2, 0.78f);
+            l.rightMargin = dp(8);
+            LinearLayout.LayoutParams r = new LinearLayout.LayoutParams(0, -2, 1.22f);
+            controls.addView(left, l);
+            controls.addView(right, r);
+            root.addView(controls);
         } else {
-            root.addView(left); root.addView(right);
+            root.addView(left);
+            root.addView(right);
         }
 
-        // resultado (prova de que algo mudou)
-        root.addView(sectionLabel("RESULTADO REAL", accent));
-        resultView = text(lastResult, 9, 0xFFDDE3EC, false);
-        resultView.setPadding(dp(10), dp(8), dp(10), dp(8));
-        resultView.setBackground(shape(0xFF0E1118, alpha(accent, 0x66), 1, 9));
+        root.addView(sectionLabel("ÚLTIMA AÇÃO", accent));
+        resultView = text(lastResult, 8, 0xFFDDE3EC, false);
+        resultView.setMaxLines(3);
+        resultView.setPadding(dp(8), dp(6), dp(8), dp(6));
+        resultView.setBackground(shape(0xFF0E1118, alpha(accent, 0x66), 1, 8));
         root.addView(resultView, new LinearLayout.LayoutParams(-1, -2));
 
         ScrollView scroller = new ScrollView(this);
+        scroller.setFillViewport(false);
         scroller.setVerticalScrollBarEnabled(false);
         scroller.addView(root, new ScrollView.LayoutParams(-1, -2));
         panelView = scroller;
 
-        int width = wide ? Math.min(dp(620), dm.widthPixels - dp(28)) : Math.min(dp(344), dm.widthPixels - dp(16));
-        panelParams = newParams(width, WindowManager.LayoutParams.WRAP_CONTENT);
+        int width = wide ? Math.min(dp(720), dm.widthPixels - dp(32))
+                : Math.min(dp(320), dm.widthPixels - dp(24));
+        int maxHeight = Math.max(dp(260), dm.heightPixels - dp(96));
+        panelParams = newParams(width, Math.min(dp(470), maxHeight));
         panelParams.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
-        panelParams.x = dp(8); panelParams.y = 0;
+        panelParams.x = dp(8);
+        panelParams.y = 0;
         panelView.setAlpha(0f);
         try {
             windowManager.addView(panelView, panelParams);
@@ -440,13 +609,18 @@ public class GameOverlayService extends Service {
                 if (panelView == null) return;
                 panelView.setPivotX(panelView.getWidth());
                 panelView.setPivotY(panelView.getHeight() / 2f);
-                panelView.setScaleX(0.25f);
-                panelView.animate().scaleX(1f).alpha(1f).setDuration(180).start();
+                panelView.setScaleX(0.96f);
+                panelView.animate().scaleX(1f).alpha(1f).setDuration(150).start();
             });
             updateMetrics();
-            handler.removeCallbacks(refreshTask); handler.postDelayed(refreshTask, 2000);
+            requestFpsUpdate();
+            handler.removeCallbacks(refreshTask);
+            handler.postDelayed(refreshTask, 1500);
         } catch (Exception e) {
-            panelView = null; panelOpen = false; removeScrim(); showBubble();
+            panelView = null;
+            panelOpen = false;
+            removeScrim();
+            showBubble();
         }
     }
 
@@ -570,6 +744,18 @@ public class GameOverlayService extends Service {
                 float freeMb = mi.availMem / 1048576f;
                 ramValue.setText(freeMb >= 1024 ? String.format(java.util.Locale.US, "%.1f GB", freeMb / 1024f) : Math.round(freeMb) + " MB");
             }
+            DeviceMonitor.CpuSnapshot cpu = DeviceMonitor.readCpu();
+            if (cpu.frequencyMhz > 0) lastCpuFrequencyMhz = cpu.frequencyMhz;
+            else requestCpuFrequencyFallback();
+            if (cpuValue != null) cpuValue.setText(lastCpuFrequencyMhz > 0
+                    ? String.format(java.util.Locale.US, "%.2f GHz", lastCpuFrequencyMhz / 1000f) : "-- GHz");
+            if (cpuMetaValue != null) cpuMetaValue.setText(cpu.usagePercent >= 0 ? "média • uso " + cpu.usagePercent + "%" : "média • uso --");
+            if (fpsValue != null) fpsValue.setText(lastFps >= 0 ? String.valueOf(lastFps) : "--");
+            if (fpsMetaValue != null && lastFps < 0 && !fpsBusy) {
+                String hint = !ShizukuShell.isAuthorized() ? "Shizuku necessário"
+                        : currentGame().isEmpty() ? "selecione um jogo" : "SurfaceFlinger indisponível";
+                fpsMetaValue.setText(hint);
+            }
             if (thermalValue != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 PowerManager power = (PowerManager) getSystemService(POWER_SERVICE);
                 if (power != null) thermalValue.setText(thermalLabel(power.getCurrentThermalStatus()));
@@ -589,6 +775,121 @@ public class GameOverlayService extends Service {
                 shizukuPill.setBackground(shape(alpha(color, 0x26), alpha(color, 0xAA), 1, 14));
             }
         } catch (Exception ignored) { }
+    }
+
+    private void requestCpuFrequencyFallback() {
+        if (cpuFrequencyBusy || !ShizukuShell.isAuthorized()) return;
+        cpuFrequencyBusy = true;
+        new Thread(() -> {
+            int frequencyMhz = -1;
+            try {
+                String command = "for d in /sys/devices/system/cpu/cpufreq/policy[0-9]*; do [ -d \"$d\" ] || continue; "
+                        + "f=\"$d/cpuinfo_avg_freq\"; [ -r \"$f\" ] || f=\"$d/scaling_cur_freq\"; "
+                        + "v=$(cat \"$f\" 2>/dev/null); c=$(cat \"$d/affected_cpus\" 2>/dev/null); "
+                        + "case \"$v\" in *[!0-9]*|'') continue;; esac; printf 'GTCPUFREQ|%s|%s\\n' \"$v\" \"$c\"; done";
+                ShizukuShell.Result result = ShizukuShell.execute(GameOverlayService.this, command);
+                if (result.output != null) {
+                    long weighted = 0L;
+                    int cores = 0;
+                    for (String line : result.output.split("\\r?\\n")) {
+                        String[] fields = line.trim().split("\\|", -1);
+                        if (fields.length != 3 || !"GTCPUFREQ".equals(fields[0]) || !fields[1].matches("[0-9]+")) continue;
+                        long khz;
+                        try { khz = Long.parseLong(fields[1]); } catch (NumberFormatException ignored) { continue; }
+                        int count = countCpuIds(fields[2]);
+                        if (count <= 0) count = 1;
+                        weighted += khz * count;
+                        cores += count;
+                    }
+                    if (cores > 0) frequencyMhz = (int) ((weighted / cores) / 1000L);
+                }
+            } catch (Throwable ignored) { }
+            final int measured = frequencyMhz;
+            handler.post(() -> {
+                cpuFrequencyBusy = false;
+                if (measured > 0) {
+                    lastCpuFrequencyMhz = measured;
+                    if (cpuValue != null) cpuValue.setText(String.format(java.util.Locale.US, "%.2f GHz", measured / 1000f));
+                }
+            });
+        }, "GamerTurbo-CPU-Frequency").start();
+    }
+
+    private static int countCpuIds(String value) {
+        if (value == null || value.trim().isEmpty()) return 0;
+        int count = 0;
+        for (String part : value.trim().split("[,\\s]+")) {
+            if (part.matches("[0-9]+-[0-9]+")) {
+                String[] bounds = part.split("-");
+                try { count += Math.max(0, Integer.parseInt(bounds[1]) - Integer.parseInt(bounds[0]) + 1); }
+                catch (NumberFormatException ignored) { }
+            } else if (part.matches("[0-9]+")) count++;
+        }
+        return count;
+    }
+
+    private void requestFpsUpdate() {
+        if (!panelOpen || fpsBusy) return;
+        final String pkg = currentGame();
+        if (!ShizukuShell.isAuthorized() || !GameTools.validPackage(pkg)) {
+            lastFps = -1;
+            if (fpsMetaValue != null) fpsMetaValue.setText(!ShizukuShell.isAuthorized()
+                    ? "Shizuku necessário" : "selecione um jogo");
+            if (fpsValue != null) fpsValue.setText("--");
+            return;
+        }
+        fpsBusy = true;
+        new Thread(() -> {
+            int measured = -1;
+            try {
+                String command = "PKG='" + pkg + "'; L=$(dumpsys SurfaceFlinger --list 2>/dev/null | grep -F \"$PKG\" | grep -E 'SurfaceView|BLAST|BufferQueue' | head -n 1); "
+                        + "[ -n \"$L\" ] || L=$(dumpsys SurfaceFlinger --list 2>/dev/null | grep -F \"$PKG\" | head -n 1); "
+                        + "if [ -n \"$L\" ]; then echo GT_LAYER_FOUND; "
+                        + "dumpsys SurfaceFlinger --latency \"$L\" 2>/dev/null | tail -n 65; "
+                        + "else echo GT_NO_LAYER; fi";
+                ShizukuShell.Result result = ShizukuShell.execute(GameOverlayService.this, command);
+                if (result.success && result.output != null) measured = parseFps(result.output);
+            } catch (Throwable ignored) { }
+            final int fps = measured;
+            handler.post(() -> {
+                lastFps = fps;
+                fpsBusy = false;
+                if (fpsValue != null) fpsValue.setText(fps >= 0 ? String.valueOf(fps) : "--");
+                if (fpsMetaValue != null) fpsMetaValue.setText(fps >= 0 ? "SurfaceFlinger" : "sem amostras do jogo");
+            });
+        }, "GamerTurbo-FPS").start();
+    }
+
+    private int parseFps(String output) {
+        if (output == null || output.contains("GT_NO_LAYER")) return -1;
+        List<Long> stamps = new ArrayList<>();
+        for (String line : output.split("\\r?\\n")) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty() || trimmed.startsWith("GT_")) continue;
+            String[] columns = trimmed.split("\\s+");
+            if (columns.length < 3) continue;
+            try {
+                long desired = Long.parseLong(columns[0]);
+                long actual = Long.parseLong(columns[1]);
+                long ready = Long.parseLong(columns[2]);
+                long present = actual > 0L ? actual : (ready > 0L ? ready : desired);
+                if (present > 1_000_000_000L) stamps.add(present);
+            } catch (NumberFormatException ignored) { }
+        }
+        if (stamps.size() < 3) return -1;
+        Collections.sort(stamps);
+        long end = stamps.get(stamps.size() - 1);
+        long start = end;
+        int frames = 1;
+        for (int i = stamps.size() - 2; i >= 0; i--) {
+            long stamp = stamps.get(i);
+            if (end - stamp > 2_000_000_000L) break;
+            if (stamp < start) { start = stamp; frames++; }
+        }
+        long span = end - start;
+        if (span <= 0L || frames < 3) return -1;
+        int fps = Math.round((frames - 1) * 1_000_000_000f / span);
+        return fps >= 1 && fps <= 240 ? fps : -1;
     }
 
     private String thermalLabel(int status) {
@@ -646,7 +947,172 @@ public class GameOverlayService extends Service {
 
     private void removeBrightnessPanel() { if (brightnessPanelView != null && windowManager != null) { try { windowManager.removeView(brightnessPanelView); } catch (Exception ignored) { } brightnessPanelView = null; } }
 
+    private void showTimerPanel() {
+        collapsePanel();
+        removeTimerPanel();
+        int accent = accent(currentMode());
+        LinearLayout box = column();
+        box.setPadding(dp(14), dp(12), dp(14), dp(12));
+        box.setBackground(shape(0xF40D1016, accent, 1, 13));
+        box.addView(text("TEMPORIZADOR DE PARTIDA", 10, Color.WHITE, true));
+        TextView value = text("15 minutos", 15, accent, true);
+        LinearLayout.LayoutParams valueLp = new LinearLayout.LayoutParams(-1, -2);
+        valueLp.topMargin = dp(8);
+        box.addView(value, valueLp);
+        SeekBar seek = new SeekBar(this);
+        seek.setMax(119);
+        seek.setProgress(14);
+        seek.setProgressTintList(android.content.res.ColorStateList.valueOf(accent));
+        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
+                value.setText((progress + 1) + " minuto(s)");
+            }
+            @Override public void onStartTrackingTouch(SeekBar bar) { }
+            @Override public void onStopTrackingTouch(SeekBar bar) { }
+        });
+        box.addView(seek, new LinearLayout.LayoutParams(-1, dp(38)));
+        LinearLayout actions = row();
+        addWeighted(actions, button("INICIAR", accent, () -> {
+            int minutes = seek.getProgress() + 1;
+            timerEndAt = System.currentTimeMillis() + minutes * 60_000L;
+            prefs().edit().putLong("floating_timer_end", timerEndAt).apply();
+            handler.removeCallbacks(timerTask);
+            handler.post(timerTask);
+            removeTimerPanel();
+            Toast.makeText(this, "Temporizador iniciado: " + minutes + " min.", Toast.LENGTH_SHORT).show();
+        }), 36);
+        addWeighted(actions, button("CANCELAR", 0xFF8A93A3, this::removeTimerPanel), 36);
+        LinearLayout.LayoutParams actionsLp = new LinearLayout.LayoutParams(-1, -2);
+        actionsLp.topMargin = dp(8);
+        box.addView(actions, actionsLp);
+        timerPanelView = box;
+        WindowManager.LayoutParams lp = newParams(dp(270), WindowManager.LayoutParams.WRAP_CONTENT);
+        lp.gravity = Gravity.CENTER;
+        try { windowManager.addView(timerPanelView, lp); }
+        catch (Exception e) { timerPanelView = null; Toast.makeText(this, "Não foi possível abrir o temporizador.", Toast.LENGTH_SHORT).show(); }
+    }
+
+    private void removeTimerPanel() {
+        if (timerPanelView != null && windowManager != null) {
+            try { windowManager.removeView(timerPanelView); } catch (Exception ignored) { }
+            timerPanelView = null;
+        }
+    }
+
+    private void openStoragePanel() {
+        collapsePanel();
+        try {
+            Intent intent = new Intent("android.settings.INTERNAL_STORAGE_SETTINGS");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (intent.resolveActivity(getPackageManager()) == null)
+                intent = new Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, "As configurações de armazenamento não estão disponíveis.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void openCastPanel() {
+        collapsePanel();
+        try {
+            Intent intent = new Intent("android.settings.CAST_SETTINGS");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (intent.resolveActivity(getPackageManager()) == null)
+                intent = new Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, "O menu de transmissão depende do sistema do aparelho.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showWhitelistPanel() {
+        collapsePanel();
+        removeWhitelistPanel();
+        int accent = accent(currentMode());
+        LinearLayout root = column();
+        root.setPadding(dp(12), dp(10), dp(12), dp(10));
+        root.setBackground(shape(0xF40D1016, accent, 1, 14));
+        root.addView(text("EXCEÇÕES DE MEMÓRIA", 11, Color.WHITE, true));
+        TextView hint = text("Os apps marcados serão preservados ao limpar RAM ou usar BOOST.", 8, 0xFF9AA5B6, false);
+        hint.setPadding(0, dp(5), 0, dp(7));
+        root.addView(hint);
+
+        Set<String> saved = new HashSet<>();
+        Set<String> existing = prefs().getStringSet("memory_whitelist", Collections.emptySet());
+        if (existing != null) saved.addAll(existing);
+        List<ApplicationInfo> apps = new ArrayList<>();
+        try {
+            for (ApplicationInfo app : getPackageManager().getInstalledApplications(0)) {
+                if (app == null || !GameTools.validPackage(app.packageName)) continue;
+                if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                        && (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0) continue;
+                if (app.packageName.equals(getPackageName()) || app.packageName.equals(GameTools.SHIZUKU_PACKAGE)) continue;
+                apps.add(app);
+            }
+        } catch (Throwable ignored) { }
+        apps.sort(Comparator.comparing(app -> {
+            try { return String.valueOf(getPackageManager().getApplicationLabel(app)).toLowerCase(java.util.Locale.ROOT); }
+            catch (Throwable ignored) { return app.packageName; }
+        }));
+
+        LinearLayout list = column();
+        List<CheckBox> checks = new ArrayList<>();
+        int shown = Math.min(apps.size(), 60);
+        for (int i = 0; i < shown; i++) {
+            ApplicationInfo app = apps.get(i);
+            CheckBox check = new CheckBox(this);
+            String label;
+            try { label = String.valueOf(getPackageManager().getApplicationLabel(app)); }
+            catch (Throwable ignored) { label = app.packageName; }
+            check.setText(label + "  ·  " + app.packageName);
+            check.setTextColor(0xFFE2E6ED);
+            check.setTextSize(8);
+            check.setPadding(dp(2), dp(1), dp(2), dp(1));
+            check.setButtonTintList(android.content.res.ColorStateList.valueOf(accent));
+            check.setChecked(saved.contains(app.packageName));
+            check.setTag(app.packageName);
+            checks.add(check);
+            list.addView(check, new LinearLayout.LayoutParams(-1, dp(38)));
+        }
+        if (shown == 0) list.addView(text("Nenhum app compatível foi encontrado.", 9, 0xFF9AA5B6, false));
+        ScrollView scroll = new ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.addView(list, new ScrollView.LayoutParams(-1, -2));
+        root.addView(scroll, new LinearLayout.LayoutParams(-1, dp(270)));
+
+        LinearLayout actions = row();
+        addWeighted(actions, button("SALVAR", accent, () -> {
+            Set<String> selected = new HashSet<>();
+            for (CheckBox check : checks) if (check.isChecked() && check.getTag() instanceof String)
+                selected.add((String) check.getTag());
+            prefs().edit().putStringSet("memory_whitelist", selected).apply();
+            removeWhitelistPanel();
+            lastResult = "EXCEÇÕES SALVAS\n• " + selected.size() + " app(s) serão preservados na limpeza de memória.";
+            Toast.makeText(this, "Lista de exceções atualizada.", Toast.LENGTH_SHORT).show();
+        }), 36);
+        addWeighted(actions, button("FECHAR", 0xFF8A93A3, this::removeWhitelistPanel), 36);
+        LinearLayout.LayoutParams actionLp = new LinearLayout.LayoutParams(-1, -2);
+        actionLp.topMargin = dp(8);
+        root.addView(actions, actionLp);
+
+        whitelistPanelView = root;
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        WindowManager.LayoutParams lp = newParams(Math.min(dp(320), dm.widthPixels - dp(24)),
+                Math.min(dp(420), Math.max(dp(260), dm.heightPixels - dp(100))));
+        lp.gravity = Gravity.CENTER;
+        try { windowManager.addView(whitelistPanelView, lp); }
+        catch (Exception e) { whitelistPanelView = null; Toast.makeText(this, "Não foi possível abrir as exceções.", Toast.LENGTH_SHORT).show(); }
+    }
+
+    private void removeWhitelistPanel() {
+        if (whitelistPanelView != null && windowManager != null) {
+            try { windowManager.removeView(whitelistPanelView); } catch (Exception ignored) { }
+            whitelistPanelView = null;
+        }
+    }
+
     private void openWifiPanel() {
+        collapsePanel();
         try {
             Intent intent;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) intent = new Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY);
@@ -688,6 +1154,152 @@ public class GameOverlayService extends Service {
         Toast.makeText(this, "Autorize o Gamer Turbo no Shizuku.", Toast.LENGTH_LONG).show();
     }
 
+    private void actHibernate() {
+        if (!requireShizuku("HIBERNAR APPS")) return;
+        final String game = currentGame();
+        runAsync("Hibernação de apps de terceiros", () -> GameTools.closeApps(GameOverlayService.this, game));
+    }
+
+    private void showCpuControlPanel() {
+        collapsePanel();
+        removeCpuPanel();
+        LinearLayout loading = column();
+        loading.setPadding(dp(14), dp(12), dp(14), dp(12));
+        loading.setBackground(shape(0xF40D1016, accent(currentMode()), 1, 14));
+        loading.addView(text("CONTROLE DA CPU", 12, Color.WHITE, true));
+        loading.addView(text("Lendo os limites expostos pelo kernel via Shizuku...", 9, 0xFF9AA5B6, false));
+        cpuPanelView = loading;
+        addCpuPanelWindow();
+        new Thread(() -> {
+            List<CpuController.Policy> policies = CpuController.inspect(GameOverlayService.this);
+            handler.post(() -> {
+                if (serviceDestroyed || finishingSession) return;
+                removeCpuPanel();
+                renderCpuControlPanel(policies);
+            });
+        }, "GamerTurbo-CPU-Inspect").start();
+    }
+
+    private void renderCpuControlPanel(List<CpuController.Policy> policies) {
+        LinearLayout root = column();
+        root.setPadding(dp(14), dp(12), dp(14), dp(12));
+        int color = accent(currentMode());
+        root.setBackground(shape(0xF40D1016, color, 1, 14));
+        root.addView(text("CONTROLE DA CPU", 12, Color.WHITE, true));
+        root.addView(text("Ajuste o piso e o teto de frequência em cada cluster.", 8, 0xFF9AA5B6, false));
+
+        boolean anyWritable = false;
+        for (CpuController.Policy policy : policies) if (policy.writable) anyWritable = true;
+        if (policies == null || policies.isEmpty()) {
+            TextView unavailable = text(!ShizukuShell.isAuthorized()
+                    ? "Shizuku não está conectado/autorizado. Conecte e abra novamente."
+                    : "Este kernel não expõe interfaces CPUFreq compatíveis para o Gamer Turbo.", 9, 0xFFFFB020, false);
+            unavailable.setPadding(0, dp(10), 0, dp(8));
+            root.addView(unavailable);
+            root.addView(button("FECHAR", 0xFF8A93A3, this::removeCpuPanel), new LinearLayout.LayoutParams(-1, dp(38)));
+            cpuPanelView = root;
+            addCpuPanelWindow();
+            return;
+        }
+
+        int savedMin = prefs().getInt("cpu_min_percent", CpuController.defaultMinPercent(policies));
+        int savedMax = prefs().getInt("cpu_max_percent", CpuController.defaultMaxPercent(policies));
+        final TextView minText = text("PICO MÍNIMO · " + savedMin + "% · " + CpuController.describePercent(policies, savedMin), 9, Color.WHITE, true);
+        final TextView maxText = text("PICO MÁXIMO · " + savedMax + "% · " + CpuController.describePercent(policies, savedMax), 9, Color.WHITE, true);
+        root.addView(sectionLabel("FREQUÊNCIA MÍNIMA", color));
+        root.addView(minText);
+        SeekBar minSeek = new SeekBar(this);
+        minSeek.setMax(100);
+        minSeek.setProgress(savedMin);
+        minSeek.setProgressTintList(android.content.res.ColorStateList.valueOf(color));
+        minSeek.setThumbTintList(android.content.res.ColorStateList.valueOf(color));
+        root.addView(minSeek, new LinearLayout.LayoutParams(-1, dp(34)));
+        root.addView(sectionLabel("FREQUÊNCIA MÁXIMA", color));
+        root.addView(maxText);
+        SeekBar maxSeek = new SeekBar(this);
+        maxSeek.setMax(100);
+        maxSeek.setProgress(Math.max(savedMin, savedMax));
+        maxSeek.setProgressTintList(android.content.res.ColorStateList.valueOf(color));
+        maxSeek.setThumbTintList(android.content.res.ColorStateList.valueOf(color));
+        root.addView(maxSeek, new LinearLayout.LayoutParams(-1, dp(34)));
+
+        Runnable updateLabels = () -> {
+            int min = minSeek.getProgress();
+            int max = maxSeek.getProgress();
+            minText.setText("PICO MÍNIMO · " + min + "% · " + CpuController.describePercent(policies, min));
+            maxText.setText("PICO MÁXIMO · " + max + "% · " + CpuController.describePercent(policies, max));
+        };
+        minSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (progress > maxSeek.getProgress()) maxSeek.setProgress(progress);
+                updateLabels.run();
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) { }
+            @Override public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+        maxSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (progress < minSeek.getProgress()) minSeek.setProgress(progress);
+                updateLabels.run();
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) { }
+            @Override public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+
+        TextView hardware = text(CpuController.summarize(policies), 7, 0xFF9AA5B6, false);
+        hardware.setPadding(0, dp(5), 0, dp(5));
+        root.addView(hardware);
+        TextView warning = text("Controle dentro dos limites de fábrica. Não é overclock. Se o kernel bloquear escrita, o controle permanece automático.",
+                7, 0xFFFFC36B, false);
+        warning.setPadding(0, dp(3), 0, dp(7));
+        root.addView(warning);
+        if (!anyWritable) {
+            TextView readonly = text("O Shizuku consegue ler os clusters, mas não tem permissão para alterar seus limites neste aparelho.", 8, 0xFFFFB020, false);
+            root.addView(readonly);
+            minSeek.setEnabled(false);
+            maxSeek.setEnabled(false);
+        }
+
+        LinearLayout actions = row();
+        addWeighted(actions, button("APLICAR", color, () -> {
+            int min = minSeek.getProgress();
+            int max = maxSeek.getProgress();
+            removeCpuPanel();
+            if (!thermalSafe()) {
+                setResult("Proteção térmica ativa: espere o aparelho esfriar antes de elevar ou fixar limites da CPU.");
+                return;
+            }
+            runAsync("Aplicando limites da CPU", () -> CpuController.applyRange(GameOverlayService.this, min, max));
+        }), 38);
+        addWeighted(actions, button("RESTAURAR", 0xFF8A93A3, () -> {
+            removeCpuPanel();
+            runAsync("Restaurando CPU", () -> CpuController.restore(GameOverlayService.this));
+        }), 38);
+        root.addView(actions, new LinearLayout.LayoutParams(-1, -2));
+        LinearLayout.LayoutParams closeLp = new LinearLayout.LayoutParams(-1, dp(34));
+        closeLp.topMargin = dp(7);
+        root.addView(button("FECHAR", 0xFF8A93A3, this::removeCpuPanel), closeLp);
+        cpuPanelView = root;
+        addCpuPanelWindow();
+    }
+
+    private void addCpuPanelWindow() {
+        if (cpuPanelView == null || windowManager == null) return;
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        WindowManager.LayoutParams lp = newParams(Math.min(dp(330), dm.widthPixels - dp(24)),
+                WindowManager.LayoutParams.WRAP_CONTENT);
+        lp.gravity = Gravity.CENTER;
+        try { windowManager.addView(cpuPanelView, lp); }
+        catch (Exception error) { cpuPanelView = null; Toast.makeText(this, "Não foi possível abrir o controle da CPU.", Toast.LENGTH_SHORT).show(); }
+    }
+
+    private void removeCpuPanel() {
+        if (cpuPanelView != null && windowManager != null) {
+            try { windowManager.removeView(cpuPanelView); } catch (Exception ignored) { }
+            cpuPanelView = null;
+        }
+    }
+
     private void toggleDnd() {
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE); if (manager == null) return;
         if (!manager.isNotificationPolicyAccessGranted()) {
@@ -718,9 +1330,16 @@ public class GameOverlayService extends Service {
     private void removeScrim() { if (scrimView != null && windowManager != null) { try { windowManager.removeView(scrimView); } catch (Exception ignored) { } scrimView = null; } }
 
     @Override public void onDestroy() {
+        serviceDestroyed = true;
         handler.removeCallbacksAndMessages(null);
-        removeBrightnessPanel(); removeBubble(); removePanel(); removeScrim();
-        getSharedPreferences(PREFS, MODE_PRIVATE).edit().putBoolean("overlay_enabled", false).apply();
+        removeBrightnessPanel(); removeTimerPanel(); removeWhitelistPanel(); removeCpuPanel(); removeBubble(); removePanel(); removeScrim();
+        if (userRequestedStop) prefs().edit().putBoolean("overlay_enabled", false).apply();
+        else if (prefs().getBoolean("gt_profile_active", false)
+                || prefs().getBoolean("gt_cpu_limits_snapshot_active", false)) {
+            // Safety net: restore reversible CPU/system tuning if Android or the user
+            // removes the overlay service before the normal game-return callback.
+            new Thread(() -> GameOptimizer.restore(GameOverlayService.this), "GamerTurbo-DestroyRestore").start();
+        }
         if (Build.VERSION.SDK_INT >= 24) stopForeground(STOP_FOREGROUND_REMOVE); else stopForeground(true);
         super.onDestroy();
     }
